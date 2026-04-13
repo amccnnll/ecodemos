@@ -2,15 +2,15 @@
 
 ## Animal SVG icons (`assets/animals/`)
 
-| File | Source | Collection | Author / Uploader | Licence |
-|---|---|---|---|---|
-| `leopard.svg` | [SVGRepo](https://www.svgrepo.com/svg/400419/leopardside) | Fxemoji Emojis | Mozilla | Apache 2.0 |
-| `snake.svg` | [SVGRepo](https://www.svgrepo.com/svg/400742/snake) | Fxemoji Emojis | Mozilla | Apache 2.0 |
-| `crocodile.svg` | [SVGRepo](https://www.svgrepo.com/svg/396227/crocodile) | Noto Emojis | Google Fonts | Apache 2.0 |
-| `eagle.svg` | [SVGRepo](https://www.svgrepo.com/svg/396340/eagle) | Noto Emojis | Google Fonts | Apache 2.0 |
-| `t-rex.svg` | [SVGRepo](https://www.svgrepo.com/svg/407646/t-rex) | Twemoji Emojis | Twitter | MIT |
-| `lobster.svg` | [SVGRepo](https://www.svgrepo.com/svg/16923/lobster) | Sea Life Collection | SVG Repo | CC0 |
-| `dolphin.svg` | [SVGRepo](https://www.svgrepo.com/svg/107019/dolphin) | Sea Life Collection | SVG Repo | CC0 |
+| File            | Source                                                    | Collection          | Author / Uploader | Licence    |
+| --------------- | --------------------------------------------------------- | ------------------- | ----------------- | ---------- |
+| `leopard.svg`   | [SVGRepo](https://www.svgrepo.com/svg/400419/leopardside) | Fxemoji Emojis      | Mozilla           | Apache 2.0 |
+| `snake.svg`     | [SVGRepo](https://www.svgrepo.com/svg/400742/snake)       | Fxemoji Emojis      | Mozilla           | Apache 2.0 |
+| `crocodile.svg` | [SVGRepo](https://www.svgrepo.com/svg/396227/crocodile)   | Noto Emojis         | Google Fonts      | Apache 2.0 |
+| `eagle.svg`     | [SVGRepo](https://www.svgrepo.com/svg/396340/eagle)       | Noto Emojis         | Google Fonts      | Apache 2.0 |
+| `t-rex.svg`     | [SVGRepo](https://www.svgrepo.com/svg/407646/t-rex)       | Twemoji Emojis      | Twitter           | MIT        |
+| `lobster.svg`   | [SVGRepo](https://www.svgrepo.com/svg/16923/lobster)      | Sea Life Collection | SVG Repo          | CC0        |
+| `dolphin.svg`   | [SVGRepo](https://www.svgrepo.com/svg/107019/dolphin)     | Sea Life Collection | SVG Repo          | CC0        |
 
 ### Apache License 2.0 notice
 
