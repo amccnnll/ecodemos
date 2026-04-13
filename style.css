@@ -1,0 +1,65 @@
+/* =============================================
+   ecodemos — shared styles
+   Used by all pages (landing + modules)
+   ============================================= */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background: #f9f9f9;
+  color: #1a1a1a;
+}
+
+/* --- Nav bar --- */
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.nav-title {
+  font-weight: 600;
+  margin-right: auto;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: #1a1a1a;
+  font-size: 0.9rem;
+}
+
+.navbar a:hover {
+  text-decoration: underline;
+}
+
+.nav-disabled {
+  color: #999 !important;
+  pointer-events: none;
+}
+
+/* --- Module layout --- */
+.module-layout {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr 320px;
+  grid-template-areas:
+    "sim     controls"
+    "analytics analytics";
+  height: calc(100vh - 48px); /* full height minus navbar */
+  gap: 1px;
+  background: #e0e0e0; /* gap colour */
+}
+
+.pane-sim        { grid-area: sim;       background: #fff; overflow: hidden; }
+.pane-controls   { grid-area: controls;  background: #fff; overflow-y: auto; padding: 1rem; }
+.pane-analytics  { grid-area: analytics; background: #fff; overflow-y: auto; padding: 1rem; }
+
+/* TODO: typography, controls, chart styles go here as we build */

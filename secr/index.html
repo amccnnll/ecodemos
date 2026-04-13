@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SECR — Ecology Demos</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <span class="nav-title">Ecology Demos</span>
+    <a href="/ecodemos/">Home</a>
+    <a href="/ecodemos/ds/">Distance Sampling</a>
+    <a href="/ecodemos/secr/">SECR</a>
+  </nav>
+
+  <div class="module-layout">
+    <div class="pane-sim" id="sim-container">
+      <!-- p5.js canvas renders here -->
+    </div>
+
+    <div class="pane-controls">
+      <!-- TODO: playback controls, sliders, toggles, presets, seed -->
+      <p>Controls go here.</p>
+    </div>
+
+    <div class="pane-analytics">
+      <!-- TODO: detection surface heatmap, capture history matrix, N-hat/D-hat -->
+      <p>Analytics go here.</p>
+    </div>
+  </div>
+
+  <!-- Libraries (globals) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
+
+  <!-- Engine + sketch (ES modules so they can import from each other) -->
+  <script type="module" src="../src/rng.js"></script>
+  <script type="module" src="../src/stats.js"></script>
+  <script type="module" src="../src/spatial.js"></script>
+  <script type="module" src="../src/secr-engine.js"></script>
+  <script type="module" src="sketch.js"></script>
+
+</body>
+</html>
