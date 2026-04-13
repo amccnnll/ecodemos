@@ -17,10 +17,43 @@
 
   <div class="module-layout module-layout--secr">
 
+    <!-- ── Simulation canvas ──────────────────────────────────────────────── -->
     <div class="pane-sim" id="sim-container">
       <!-- p5.js canvas renders here -->
     </div>
 
+    <!-- ── Detection surface heatmap ─────────────────────────────────────── -->
+    <div class="pane-surface">
+      <h3 class="panel-title">Detection surface</h3>
+      <p class="panel-subtitle">p(x,y) — probability of capture in one occasion if home range centre is at (x,y)</p>
+      <div class="chart-area" id="chart-detection-surface"></div>
+    </div>
+
+    <!-- ── Running estimates ──────────────────────────────────────────────── -->
+    <div class="pane-secr-estimates">
+      <h3 class="panel-title">Estimates</h3>
+      <dl class="estimates-list">
+        <dt>Occasion (k)</dt>
+        <dd id="est-secr-k">—</dd>
+
+        <dt>Individuals (M)</dt>
+        <dd id="est-secr-m">—</dd>
+
+        <dt>Captures</dt>
+        <dd id="est-secr-caps">—</dd>
+
+        <dt>ESA</dt>
+        <dd id="est-secr-esa">—</dd>
+
+        <dt class="estimate-row">D̂</dt>
+        <dd id="est-secr-dhat" class="estimate-row">—</dd>
+
+        <dt class="true-row">True D</dt>
+        <dd id="est-secr-trued" class="true-row">—</dd>
+      </dl>
+    </div>
+
+    <!-- ── Controls pane ─────────────────────────────────────────────────── -->
     <div class="pane-controls">
 
       <!-- Playback controls -->
@@ -91,12 +124,20 @@
             <span class="slider-value" id="val-k">10</span>
           </div>
 
+          <div class="slider-row">
+            <span class="control-label slider-label">Mobility (τ)</span>
+            <input type="range" id="slider-tau" class="param-slider"
+                   min="0.5" max="20" step="0.5" value="2"
+                   aria-label="Home range crossing time τ (occasions): low = fast, high = slow" />
+            <span class="slider-value" id="val-tau">2.0 occ</span>
+          </div>
+
           <div class="select-row">
             <span class="control-label">Movement</span>
             <select id="select-movement" class="fn-select">
-              <option value="brownian">Brownian + home range</option>
-              <option value="levy">Lévy + home range</option>
-              <option value="randomWalk">Random walk</option>
+              <option value="brownian">Brownian motion</option>
+              <option value="levy">Lévy walk</option>
+              <option value="randomWalk">Unrestricted random walk</option>
             </select>
           </div>
 
@@ -112,12 +153,17 @@
           <div class="slider-row" id="row-grid-n">
             <span class="control-label slider-label">Grid size</span>
             <input type="range" id="slider-grid-n" class="param-slider"
-                   min="3" max="7" step="1" value="5"
+                   min="3" max="7" step="1" value="4"
                    aria-label="Detector grid dimension (N×N)" />
-            <span class="slider-value" id="val-grid-n">5×5</span>
+            <span class="slider-value" id="val-grid-n">4×4</span>
           </div>
 
-          <p class="seed-hint">g₀ and σ update live. All other parameters take effect on Reset.</p>
+          <div id="row-remove-all" style="display:none">
+            <button id="btn-remove-all-detectors" class="btn-secondary btn-reset-defaults">✕ Remove all detectors</button>
+          </div>
+
+          <p class="seed-hint">g₀ and σ update live. All other parameters take effect on Reset. τ takes effect immediately.</p>
+          <p class="seed-hint">τ = occasions to cross home range radius. Low τ → restless; high τ → sedentary.</p>
 
           <button id="btn-reset-defaults" class="btn-secondary btn-reset-defaults">↺ Reset to defaults</button>
 
@@ -126,31 +172,18 @@
 
     </div>
 
-    <div class="pane-analytics">
-      <div class="analytics-panels">
+    <!-- ── Capture history ────────────────────────────────────────────────── -->
+    <div class="pane-captures">
+      <h3 class="panel-title">Capture history</h3>
+      <p class="panel-subtitle">Rows: individuals &middot; Columns: occasions &middot; Cell: detector index</p>
+      <div class="chart-area" id="chart-capture-history"></div>
+    </div>
 
-        <!-- 1. Detection probability surface -->
-        <div class="analytics-panel panel-detection-fn">
-          <h3 class="panel-title">Detection surface</h3>
-          <p class="panel-subtitle">p(x,y) — probability of capture in one occasion if home range centre is at (x,y)</p>
-          <div class="chart-area" id="chart-detection-surface"></div>
-        </div>
-
-        <!-- 2. Capture history -->
-        <div class="analytics-panel panel-estimates">
-          <h3 class="panel-title">Capture history</h3>
-          <p class="panel-subtitle">Rows: individuals &middot; Columns: occasions &middot; Cell: detector index</p>
-          <div class="chart-area" id="chart-capture-history"></div>
-        </div>
-
-        <!-- 3. Density estimate convergence -->
-        <div class="analytics-panel panel-dhat">
-          <h3 class="panel-title">D̂ convergence</h3>
-          <p class="panel-subtitle">Running D̂ = M / ESA &middot; Red dashed: true D</p>
-          <div class="chart-area" id="chart-dhat"></div>
-        </div>
-
-      </div>
+    <!-- ── D̂ convergence ──────────────────────────────────────────────────── -->
+    <div class="pane-dhat">
+      <h3 class="panel-title">D̂ convergence</h3>
+      <p class="panel-subtitle">Running D̂ = M / ESA &middot; Red dashed: true D</p>
+      <div class="chart-area" id="chart-dhat"></div>
     </div>
 
   </div>

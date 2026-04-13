@@ -34,9 +34,9 @@ const SIGMA_DEFAULT    = 0.15;        // km
 const N_DEFAULT        = 5;
 const K_DEFAULT        = 10;
 const GRID_N_DEFAULT   = 4;           // 4×4 = 16 detectors
-const STEP_SIZE        = 0.020;       // km per animation frame
-const SPRING_STRENGTH  = 0.009;       // home range pull (fraction per frame)
+const TAU_DEFAULT      = 2.0;         // home range crossing time (occasions)
 const FLASH_FRAMES     = 45;          // detection flash duration
+const TRAIL_LENGTH     = 60;          // frames of trail history per animal
 
 const FRAMES_PER_OCC = { slow: 240, normal: 120, fast: 30 };
 
@@ -64,6 +64,7 @@ let iconIndex     = Math.floor(Math.random() * ANIMAL_FILES.length);
 // Complications params — read from DOM; module-level so listeners can update them
 let g0            = G0_DEFAULT;
 let sigma         = SIGMA_DEFAULT;
+let tau           = TAU_DEFAULT;
 let N             = N_DEFAULT;
 let K             = K_DEFAULT;
 let gridN         = GRID_N_DEFAULT;
@@ -85,6 +86,7 @@ new p5(function (p) {
   let animals     = [];
   let detectors   = [];
   let flashes     = [];     // [{ x, y, col, frame }]
+  let trails      = new Map();  // animalId → [{x, y}], capped at TRAIL_LENGTH
   let phase       = 'idle'; // 'idle' | 'running' | 'paused' | 'complete'
   let currentK    = 0;
   let targetK     = K_DEFAULT; // occasions to run before stopping (extends on Run again)
@@ -128,19 +130,33 @@ new p5(function (p) {
     drawArena();
     drawDetectors();
     drawFlashes();
+    drawTrails();
     drawAnimals();
     drawHUD();
 
     if (phase === 'running') {
+      const fpk = FRAMES_PER_OCC[speed] ?? 120;
+
+      // Compute per-frame movement params from τ (OU model: σ_eq ≈ sigma stays constant)
+      const springStr = 1 / (tau * fpk);
+      const stepSz    = sigma * Math.sqrt(2 * springStr);
+
+      // Record current positions into trail before stepping
+      for (const animal of animals) {
+        let trail = trails.get(animal.id);
+        if (!trail) { trail = []; trails.set(animal.id, trail); }
+        trail.push({ x: animal.x, y: animal.y });
+        if (trail.length > TRAIL_LENGTH) trail.shift();
+      }
+
       // Move all animals one step
       animals = animals.map(a =>
-        stepAnimal(a, ARENA_KM, ARENA_KM, movementRng, movementType, STEP_SIZE, SPRING_STRENGTH)
+        stepAnimal(a, ARENA_KM, ARENA_KM, movementRng, movementType, stepSz, springStr)
       );
       updatePositions(animals);
 
       // Tick toward next occasion
       framesSinceOcc++;
-      const fpk = FRAMES_PER_OCC[speed] ?? 120;
       if (framesSinceOcc >= fpk) {
         framesSinceOcc = 0;
         runOccasion();
@@ -168,6 +184,7 @@ new p5(function (p) {
     targetK      = K;
     framesSinceOcc = 0;
     flashes      = [];
+    trails       = new Map();
     recentCaptures.clear();
 
     const innerX0 = BUFFER_KM;
@@ -197,6 +214,7 @@ new p5(function (p) {
   function readParams() {
     g0             = parseFloat(document.getElementById('slider-g0')?.value)          || G0_DEFAULT;
     sigma          = parseFloat(document.getElementById('slider-sigma')?.value)        || SIGMA_DEFAULT;
+    tau            = parseFloat(document.getElementById('slider-tau')?.value)          || TAU_DEFAULT;
     N              = parseInt(document.getElementById('slider-n')?.value, 10)          || N_DEFAULT;
     K              = parseInt(document.getElementById('slider-k')?.value, 10)          || K_DEFAULT;
     gridN          = parseInt(document.getElementById('slider-grid-n')?.value, 10)     || GRID_N_DEFAULT;
@@ -322,6 +340,25 @@ new p5(function (p) {
       p.strokeWeight(2);
       p.circle(px, py, radius * 2);
     }
+  }
+
+  // Draw each animal's recent movement trail as a fading coloured line
+  function drawTrails() {
+    for (const animal of animals) {
+      const trail = trails.get(animal.id);
+      if (!trail || trail.length < 2) continue;
+      const col = ANIMAL_COLOURS[animal.id % ANIMAL_COLOURS.length];
+      for (let i = 1; i < trail.length; i++) {
+        // t runs from 0 (oldest segment) to 1 (most recent segment)
+        const t = i / trail.length;
+        p.stroke(col[0], col[1], col[2], t * 180);
+        p.strokeWeight(1.5);
+        const { px: x1, py: y1 } = worldToPx(trail[i - 1].x, trail[i - 1].y);
+        const { px: x2, py: y2 } = worldToPx(trail[i].x,     trail[i].y);
+        p.line(x1, y1, x2, y2);
+      }
+    }
+    p.noStroke();
   }
 
   function drawHUD() {
@@ -478,6 +515,11 @@ document.getElementById('slider-grid-n').addEventListener('input', e => {
   document.getElementById('val-grid-n').textContent = `${e.target.value}×${e.target.value}`;
 });
 
+document.getElementById('slider-tau').addEventListener('input', e => {
+  tau = parseFloat(e.target.value);
+  document.getElementById('val-tau').textContent = tau.toFixed(1) + ' occ';
+});
+
 document.getElementById('select-movement').addEventListener('change', e => {
   movementType = e.target.value;
   updateParams({ movementType });
@@ -487,6 +529,8 @@ function syncDetectorSliders() {
   const show = detectorLayout === 'grid';
   const row  = document.getElementById('row-grid-n');
   if (row) row.style.display = show ? 'flex' : 'none';
+  const removeRow = document.getElementById('row-remove-all');
+  if (removeRow) removeRow.style.display = detectorLayout === 'custom' ? 'block' : 'none';
 }
 
 document.getElementById('select-detector-layout').addEventListener('change', e => {
@@ -498,12 +542,17 @@ document.getElementById('select-detector-layout').addEventListener('change', e =
   }
 });
 
+document.getElementById('btn-remove-all-detectors').addEventListener('click', () => {
+  if (clearDetectorsFn) clearDetectorsFn();
+});
+
 document.getElementById('btn-reset-defaults').addEventListener('click', () => {
   document.getElementById('slider-g0').value    = G0_DEFAULT;
   document.getElementById('slider-sigma').value = SIGMA_DEFAULT;
   document.getElementById('slider-n').value     = N_DEFAULT;
   document.getElementById('slider-k').value     = K_DEFAULT;
   document.getElementById('slider-grid-n').value = GRID_N_DEFAULT;
+  document.getElementById('slider-tau').value   = TAU_DEFAULT;
   document.getElementById('select-movement').value         = 'brownian';
   document.getElementById('select-detector-layout').value  = 'grid';
   document.getElementById('val-g0').textContent    = G0_DEFAULT.toFixed(2);
@@ -511,8 +560,10 @@ document.getElementById('btn-reset-defaults').addEventListener('click', () => {
   document.getElementById('val-n').textContent     = N_DEFAULT;
   document.getElementById('val-k').textContent     = K_DEFAULT;
   document.getElementById('val-grid-n').textContent = `${GRID_N_DEFAULT}×${GRID_N_DEFAULT}`;
+  document.getElementById('val-tau').textContent   = TAU_DEFAULT.toFixed(1) + ' occ';
   g0           = G0_DEFAULT;
   sigma        = SIGMA_DEFAULT;
+  tau          = TAU_DEFAULT;
   N            = N_DEFAULT;
   K            = K_DEFAULT;
   gridN        = GRID_N_DEFAULT;

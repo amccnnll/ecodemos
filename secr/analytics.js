@@ -30,6 +30,7 @@ function render(s) {
   updateSurface(s);
   updateCaptureHistory(s);
   updateDhat(s);
+  updateSecrEstimates(s);
 }
 
 // ─── 1. Detection surface heatmap ─────────────────────────────────────────────
@@ -330,4 +331,34 @@ function updateDhat(s) {
       .attr('stroke-width', 1.2)
       .attr('stroke-dasharray', '5 3');
   }
+}
+
+// ─── 4. Running estimates strip ───────────────────────────────────────────────
+
+function updateSecrEstimates(s) {
+  const fmt1 = d3.format('.1f');
+  const fmt2 = d3.format('.2f');
+
+  const M    = new Set(s.captures.map(c => c.animalId)).size;
+  const caps = s.captures.length;
+  const k    = s.k ?? 0;
+  const K    = s.K ?? '—';
+
+  const hasDetectors = s.detectors && s.detectors.length > 0;
+  const esa  = hasDetectors && s.arenaW
+    ? computeESA(s.detectors, s.g0, s.sigma, s.arenaW, s.arenaH)
+    : 0;
+  const dhat = esa > 0 && M > 0 ? M / esa : null;
+
+  _setText('est-secr-k',     k > 0 ? `${k} / ${K}` : '—');
+  _setText('est-secr-m',     M > 0 ? String(M)       : '—');
+  _setText('est-secr-caps',  caps > 0 ? String(caps)  : '—');
+  _setText('est-secr-esa',   esa > 0 ? fmt2(esa) + ' km²' : '—');
+  _setText('est-secr-dhat',  dhat != null ? fmt1(dhat) : '—');
+  _setText('est-secr-trued', s.trueD != null ? fmt1(s.trueD) : '—');
+}
+
+function _setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
 }
