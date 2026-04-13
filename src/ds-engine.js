@@ -26,8 +26,10 @@ export function tryDetect(animal, boatX, boatSpeed, transectY, sigma, W, rng) {
   if (animal.detected) return false;                      // already detected
   const perpDist = Math.abs(animal.y - transectY);       // perpendicular distance
   if (perpDist > W) return false;                         // beyond truncation distance
-  const atBeam = Math.abs(boatX - animal.x) <= boatSpeed;
-  if (!atBeam) return false;                              // not yet abeam the boat
+  // Fire exactly once: the frame in which the boat first draws level with the animal.
+  // boatX - animal.x in [0, boatSpeed) means the boat just crossed this animal's x position.
+  const atBeam = boatX - animal.x >= 0 && boatX - animal.x < boatSpeed;
+  if (!atBeam) return false;
   const p = halfNormal(perpDist, sigma);                  // g(0) = 1 by construction
   return rng() < p;
 }

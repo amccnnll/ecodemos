@@ -91,19 +91,24 @@ function initDetectionFnChart(containerId) {
     // Histogram (only once we have enough data)
     if (distances.length < 3) { barsG.selectAll('rect').remove(); return; }
 
+    const n        = distances.length;
+    const binWidth = W / 10;
+    const esw      = computeESW(sigma, W);
+    // DS-correct normalization: bar height estimates g(x) directly.
+    // E[count_i] = n * g(x_i) * binWidth / ESW  →  g_hat(x_i) = count_i * ESW / (n * binWidth)
+    const scale = n * binWidth / esw;
+
     const bins = d3.histogram()
       .domain([0, W])
-      .thresholds(d3.range(W / 10, W, W / 10))(distances); // start at W/10, not 0, so first bin is [0, W/10)
-
-    const maxCount = d3.max(bins, b => b.length) || 1;
+      .thresholds(d3.range(W / 10, W, W / 10))(distances);
 
     barsG.selectAll('rect')
       .data(bins)
       .join('rect')
       .attr('x',      b => xScale(b.x0) + 1)
       .attr('width',  b => Math.max(0, xScale(b.x1) - xScale(b.x0) - 2))
-      .attr('y',      b => yScale(b.length / maxCount))
-      .attr('height', b => iH - yScale(b.length / maxCount))
+      .attr('y',      b => yScale(Math.min(1, b.length / scale)))
+      .attr('height', b => iH - yScale(Math.min(1, b.length / scale)))
       .attr('fill', '#7aaee8').attr('opacity', 0.55);
   }
 
