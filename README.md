@@ -1,2 +1,5 @@
-# Statistical Ecology Demos
- Animations and apps to demonstrate principles of statistical ecology.
+# ecodemos
+
+Interactive, animated demonstrations of quantitative ecology methods for teaching.
+
+> Work in progress — check back soon.
