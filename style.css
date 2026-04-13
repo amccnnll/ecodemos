@@ -48,7 +48,7 @@ body {
 /* --- Module layout --- */
 .module-layout {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: 40vh 1fr;
   grid-template-columns: 1fr 320px;
   grid-template-areas:
     "sim     controls"
@@ -58,7 +58,7 @@ body {
   background: #e0e0e0; /* gap colour */
 }
 
-.pane-sim        { grid-area: sim;       background: #fff; overflow: hidden; }
+.pane-sim        { grid-area: sim;       background: #fff; overflow: hidden; position: relative; }
 .pane-controls   { grid-area: controls;  background: #fff; overflow-y: auto; padding: 1rem; }
 .pane-analytics  { grid-area: analytics; background: #fff; overflow-y: auto; padding: 1rem; }
 
