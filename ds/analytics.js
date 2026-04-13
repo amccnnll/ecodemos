@@ -93,7 +93,7 @@ function initDetectionFnChart(containerId) {
 
     const bins = d3.histogram()
       .domain([0, W])
-      .thresholds(d3.range(0, W, W / 10))(distances);
+      .thresholds(d3.range(W / 10, W, W / 10))(distances); // start at W/10, not 0, so first bin is [0, W/10)
 
     const maxCount = d3.max(bins, b => b.length) || 1;
 

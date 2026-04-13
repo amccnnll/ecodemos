@@ -52,10 +52,13 @@ new p5(function (p) {
 
   p.draw = function () {
     p.background(255);
+    drawWBoundaries();
     drawTransect();
     drawAnimals();
     drawFlashes();
     drawBoat();
+    drawAxes();
+    drawCounter();
 
     if (running) {
       advanceBoat();
@@ -123,6 +126,52 @@ new p5(function (p) {
     p.fill(50, 100, 200);
     p.noStroke();
     p.rect(px - 8, transectY - 8, 16, 16, 3);
+  }
+
+  // Dashed lines at ±W from transect — makes the truncation boundary explicit
+  function drawWBoundaries() {
+    const wPx = W * PX_PER_KM;
+    p.drawingContext.setLineDash([6, 5]);
+    p.stroke(210);
+    p.strokeWeight(1);
+    p.line(0, transectY - wPx, p.width, transectY - wPx);
+    p.line(0, transectY + wPx, p.width, transectY + wPx);
+    p.drawingContext.setLineDash([]);
+
+    // W label on the right edge
+    p.noStroke();
+    p.fill(180);
+    p.textSize(10);
+    p.textAlign(p.RIGHT, p.CENTER);
+    p.text('W', p.width - 4, transectY - wPx);
+    p.text('W', p.width - 4, transectY + wPx);
+  }
+
+  // Tick marks along the transect line showing km distance
+  function drawAxes() {
+    p.textSize(10);
+    p.textAlign(p.CENTER, p.TOP);
+    p.fill(170);
+    p.noStroke();
+
+    for (let km = 0; km <= ARENA_W_KM; km++) {
+      const px = km * PX_PER_KM;
+      p.stroke(200);
+      p.strokeWeight(1);
+      p.line(px, transectY - 4, px, transectY + 4);
+      p.noStroke();
+      p.text(km + ' km', px, transectY + 7);
+    }
+  }
+
+  // Boat progress counter — top-left corner
+  function drawCounter() {
+    const traveled = Math.min(boatX, ARENA_W_KM).toFixed(2);
+    p.noStroke();
+    p.fill(150);
+    p.textSize(11);
+    p.textAlign(p.LEFT, p.TOP);
+    p.text(`${traveled} / ${ARENA_W_KM.toFixed(1)} km`, 8, 6);
   }
 
   // --- Simulation step ---
