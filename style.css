@@ -79,6 +79,30 @@ body {
 .panel-estimates    { flex: 0 0 150px; }
 .panel-dhat         { flex: 1.2; }
 
+/* ─── SECR module overrides ─────────────────────────────────────────────────── */
+
+/* Bigger sim pane — square arena needs more vertical space */
+.module-layout--secr {
+  grid-template-rows: 60vh 1fr;
+}
+
+/* Detection surface: square SVG sets its own size; don't stretch it */
+.module-layout--secr .panel-detection-fn {
+  flex: 0 0 auto;
+}
+
+/* Capture history: scrollable as occasions accumulate */
+.module-layout--secr .panel-estimates {
+  flex: 2;
+  min-width: 180px;
+  overflow-x: auto;
+}
+
+.module-layout--secr .panel-dhat {
+  flex: 1.5;
+  min-width: 160px;
+}
+
 .panel-title {
   font-size: 0.78rem;
   font-weight: 600;

@@ -15,20 +15,144 @@
     <a href="/ecodemos/secr/">SECR</a>
   </nav>
 
-  <div class="module-layout">
+  <div class="module-layout module-layout--secr">
+
     <div class="pane-sim" id="sim-container">
       <!-- p5.js canvas renders here -->
     </div>
 
     <div class="pane-controls">
-      <!-- TODO: playback controls, sliders, toggles, presets, seed -->
-      <p>Controls go here.</p>
+
+      <!-- Playback controls -->
+      <div class="controls-section">
+        <div class="playback-row">
+          <button id="btn-playpause" class="btn-primary">▶ Run</button>
+          <button id="btn-reset" class="btn-secondary">↺ Reset</button>
+        </div>
+        <div class="speed-row">
+          <span class="control-label">Speed</span>
+          <div class="btn-group">
+            <button class="btn-speed" data-speed="slow">Slow</button>
+            <button class="btn-speed active" data-speed="normal">Normal</button>
+            <button class="btn-speed" data-speed="fast">Fast</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-divider"></div>
+
+      <!-- Seed / population controls -->
+      <div class="controls-section">
+        <div class="seed-row">
+          <span class="control-label">Seed</span>
+          <input type="number" id="seed-input" class="seed-input"
+                 min="0" max="99999" inputmode="numeric" pattern="[0-9]*" />
+          <button id="btn-new-population" class="btn-secondary">🎲 New</button>
+        </div>
+        <p class="seed-hint">Reset = same animals. New = new population &amp; species.</p>
+      </div>
+
+      <div class="controls-divider"></div>
+
+      <!-- Complications (collapsed by default) -->
+      <details class="controls-advanced">
+        <summary class="controls-advanced-summary">Complications</summary>
+        <div class="controls-section controls-advanced-body">
+
+          <div class="slider-row">
+            <span class="control-label slider-label">g₀</span>
+            <input type="range" id="slider-g0" class="param-slider"
+                   min="0.05" max="1.0" step="0.01" value="0.5"
+                   aria-label="Maximum detection probability g₀" />
+            <span class="slider-value" id="val-g0">0.50</span>
+          </div>
+
+          <div class="slider-row">
+            <span class="control-label slider-label">σ</span>
+            <input type="range" id="slider-sigma" class="param-slider"
+                   min="0.05" max="0.50" step="0.01" value="0.15"
+                   aria-label="Home range / detection scale σ (km)" />
+            <span class="slider-value" id="val-sigma">0.15 km</span>
+          </div>
+
+          <div class="slider-row">
+            <span class="control-label slider-label">N</span>
+            <input type="range" id="slider-n" class="param-slider"
+                   min="1" max="10" step="1" value="5"
+                   aria-label="Number of animals" />
+            <span class="slider-value" id="val-n">5</span>
+          </div>
+
+          <div class="slider-row">
+            <span class="control-label slider-label">Occasions</span>
+            <input type="range" id="slider-k" class="param-slider"
+                   min="5" max="30" step="1" value="10"
+                   aria-label="Occasions per run (K)" />
+            <span class="slider-value" id="val-k">10</span>
+          </div>
+
+          <div class="select-row">
+            <span class="control-label">Movement</span>
+            <select id="select-movement" class="fn-select">
+              <option value="brownian">Brownian + home range</option>
+              <option value="levy">Lévy + home range</option>
+              <option value="randomWalk">Random walk</option>
+            </select>
+          </div>
+
+          <div class="select-row">
+            <span class="control-label">Detectors</span>
+            <select id="select-detector-layout" class="fn-select">
+              <option value="grid">Grid</option>
+              <option value="random">Random</option>
+              <option value="custom">Click to place</option>
+            </select>
+          </div>
+
+          <div class="slider-row" id="row-grid-n">
+            <span class="control-label slider-label">Grid size</span>
+            <input type="range" id="slider-grid-n" class="param-slider"
+                   min="3" max="7" step="1" value="5"
+                   aria-label="Detector grid dimension (N×N)" />
+            <span class="slider-value" id="val-grid-n">5×5</span>
+          </div>
+
+          <p class="seed-hint">g₀ and σ update live. All other parameters take effect on Reset.</p>
+
+          <button id="btn-reset-defaults" class="btn-secondary btn-reset-defaults">↺ Reset to defaults</button>
+
+        </div>
+      </details>
+
     </div>
 
     <div class="pane-analytics">
-      <!-- TODO: detection surface heatmap, capture history matrix, N-hat/D-hat -->
-      <p>Analytics go here.</p>
+      <div class="analytics-panels">
+
+        <!-- 1. Detection probability surface -->
+        <div class="analytics-panel panel-detection-fn">
+          <h3 class="panel-title">Detection surface</h3>
+          <p class="panel-subtitle">p(x,y) — probability of capture in one occasion if home range centre is at (x,y)</p>
+          <div class="chart-area" id="chart-detection-surface"></div>
+        </div>
+
+        <!-- 2. Capture history -->
+        <div class="analytics-panel panel-estimates">
+          <h3 class="panel-title">Capture history</h3>
+          <p class="panel-subtitle">Rows: individuals &middot; Columns: occasions &middot; Cell: detector index</p>
+          <div class="chart-area" id="chart-capture-history"></div>
+        </div>
+
+        <!-- 3. Density estimate convergence -->
+        <div class="analytics-panel panel-dhat">
+          <h3 class="panel-title">D̂ convergence</h3>
+          <p class="panel-subtitle">Running D̂ = M / ESA &middot; Red dashed: true D</p>
+          <div class="chart-area" id="chart-dhat"></div>
+        </div>
+
+      </div>
     </div>
+
   </div>
 
   <!-- Libraries (globals) -->
@@ -36,12 +160,12 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
 
-  <!-- Engine + sketch (ES modules so they can import from each other) -->
-  <script type="module" src="../src/rng.js"></script>
-  <script type="module" src="../src/stats.js"></script>
-  <script type="module" src="../src/spatial.js"></script>
-  <script type="module" src="../src/secr-engine.js"></script>
+  <!-- Engine + sketch + analytics (ES modules share the same state singleton) -->
   <script type="module" src="sketch.js"></script>
+  <script type="module">
+    import { initAnalytics } from './analytics.js';
+    initAnalytics();
+  </script>
 
 </body>
 </html>
