@@ -1,8 +1,8 @@
 # ecodemos
 
-Interactive, animated demonstrations of quantitative ecology methods for teaching.
+Interactive, animated simulations of quantitative ecology methods.
 
-> Work in progress — check back soon.
+> Work in progress — pls check back soon.
 
 ---
 
@@ -31,7 +31,7 @@ Simulation logic lives in `src/` as pure JS engines with no UI dependencies. The
 
 ## Running locally
 
-ES modules require a local server — opening `index.html` directly won't work.
+ES modules require a local server — opening `index.html` directly doesn't work.
 
 ```bash
 python3 -m http.server 8000
