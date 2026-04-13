@@ -12,7 +12,7 @@ import { placeAnimals, tryDetect } from '../src/ds-engine.js';
 // --- Config constants ---
 const ARENA_W_KM   = 4;      // transect length (km)
 const W_KM         = 0.4;    // truncation distance (km)
-const SIGMA_KM     = 0.15;   // detection scale parameter (km)
+const SIGMA_KM     = 0.25;   // detection scale parameter (km)
 const DENSITY      = 50;     // animals per km²
 const BOAT_SPEED   = 0.005;  // km per frame
 const FLASH_FRAMES = 35;     // how long detection flash persists (~500ms at 60fps)
