@@ -22,11 +22,28 @@
     </div>
 
     <div class="pane-controls">
-      <!-- TODO: playback controls, sliders, toggles, presets, seed -->
-      <p class="placeholder">Controls coming soon.<br><br>
-        <kbd>Space</kbd> play / pause<br>
-        <kbd>R</kbd> reset
-      </p>
+
+      <!-- Playback controls -->
+      <div class="controls-section">
+        <div class="playback-row">
+          <button id="btn-playpause" class="btn-primary">▶ Play</button>
+          <button id="btn-reset" class="btn-secondary">↺ Reset</button>
+        </div>
+        <div class="speed-row">
+          <span class="control-label">Speed</span>
+          <div class="btn-group">
+            <button class="btn-speed" data-speed="slow">Slow</button>
+            <button class="btn-speed active" data-speed="normal">Normal</button>
+            <button class="btn-speed" data-speed="fast">Fast</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-divider"></div>
+
+      <!-- Placeholder for parameter controls -->
+      <p class="placeholder">Parameter controls coming soon.</p>
+
     </div>
 
     <div class="pane-analytics">
@@ -51,8 +68,11 @@
             <dt>ESW</dt>
             <dd id="est-esw">—</dd>
 
-            <dt>D̂</dt>
-            <dd id="est-dhat">—</dd>
+            <dt class="estimate-row">D̂</dt>
+            <dd id="est-dhat" class="estimate-row">—</dd>
+
+            <dt class="true-row">True D</dt>
+            <dd id="est-trued" class="true-row">—</dd>
           </dl>
         </div>
 

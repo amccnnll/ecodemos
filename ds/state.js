@@ -10,12 +10,13 @@
  */
 
 export const state = {
-  sigma:          0.25,   // km — current detection scale parameter
-  W:              0.4,    // km — truncation distance
-  transectLength: 4,      // km
-  trueD:          null,   // animals/km² — set when sim initialises
-  detectedDistances: [],  // perpendicular distances (km) of each detection
-  dhatHistory:    [],     // D̂ after each successive detection
+  sigma:          0.25,     // km — current detection scale parameter
+  W:              0.4,      // km — truncation distance
+  transectLength: 4,        // km
+  trueD:          null,     // animals/km² — set when sim initialises
+  detectedDistances: [],    // perpendicular distances (km) of each detection
+  dhatHistory:    [],       // D̂ after each successive detection
+  speed:          'normal', // 'slow' | 'normal' | 'fast'
 };
 
 const _listeners = new Set();

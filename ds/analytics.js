@@ -31,7 +31,7 @@ export function initAnalytics() {
     }
 
     updateDetFn(s.detectedDistances, s.sigma, s.W);
-    updateEstimates(n, s.transectLength, esw, dhat);
+    updateEstimates(n, s.transectLength, esw, dhat, s.trueD);
     updateDhat(s.dhatHistory, s.trueD);
   });
 }
@@ -119,14 +119,15 @@ function initDetectionFnChart(containerId) {
 
 // ─── 2. Running estimates strip ───────────────────────────────────────────────
 
-function updateEstimates(n, L, esw, dhat) {
+function updateEstimates(n, L, esw, dhat, trueD) {
   const fmt2 = d3.format('.2f');
   const fmt1 = d3.format('.1f');
 
   setText('est-n',      n);
   setText('est-effort', fmt2(L) + ' km');
   setText('est-esw',    n > 0 ? fmt2(esw) + ' km' : '—');
-  setText('est-dhat',   dhat != null ? fmt1(dhat) : '—');
+  setText('est-dhat',   dhat  != null ? fmt1(dhat)  : '—');
+  setText('est-trued',  trueD != null ? fmt1(trueD) : '—');
 }
 
 function setText(id, val) {
