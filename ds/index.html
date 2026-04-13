@@ -26,7 +26,7 @@
       <!-- Playback controls -->
       <div class="controls-section">
         <div class="playback-row">
-          <button id="btn-playpause" class="btn-primary">▶ Play</button>
+          <button id="btn-playpause" class="btn-primary">▶ Run</button>
           <button id="btn-reset" class="btn-secondary">↺ Reset</button>
         </div>
         <div class="speed-row">
@@ -54,10 +54,26 @@
 
       <div class="controls-divider"></div>
 
-      <!-- Advanced (collapsed by default) -->
+      <!-- Complications (collapsed by default) -->
       <details class="controls-advanced">
-        <summary class="controls-advanced-summary">Advanced</summary>
+        <summary class="controls-advanced-summary">Complications</summary>
         <div class="controls-section controls-advanced-body">
+
+          <div class="select-row">
+            <span class="control-label">Field truth</span>
+            <select id="select-truth-fn" class="fn-select">
+              <option value="halfNormal">Half-normal</option>
+              <option value="hazardRate">Hazard rate</option>
+            </select>
+          </div>
+          <div class="select-row">
+            <span class="control-label">Model</span>
+            <select id="select-model-fn" class="fn-select">
+              <option value="halfNormal">Half-normal</option>
+              <option value="hazardRate">Hazard rate</option>
+            </select>
+          </div>
+          <p id="mismatch-warning" class="mismatch-warning" style="display:none">⚠ Model mismatch — D̂ may be biased</p>
 
           <div class="slider-row">
             <span class="control-label slider-label">σ</span>
@@ -73,6 +89,14 @@
                    min="0.10" max="0.60" step="0.01" value="0.40"
                    aria-label="Truncation distance W (km)" />
             <span class="slider-value" id="val-w">0.40 km</span>
+          </div>
+
+          <div class="slider-row" id="row-b" style="display:none">
+            <span class="control-label slider-label">Shape (b)</span>
+            <input type="range" id="slider-b" class="param-slider"
+                   min="1" max="10" step="0.1" value="2.5"
+                   aria-label="Hazard-rate shape parameter b" />
+            <span class="slider-value" id="val-b">2.5</span>
           </div>
 
           <div class="slider-row">
@@ -91,7 +115,42 @@
             <span class="slider-value" id="val-transect">4.0 km</span>
           </div>
 
-          <p class="seed-hint">σ and W update live. Density and length take effect on Reset.</p>
+          <div class="select-row">
+            <span class="control-label">Distribution</span>
+            <select id="select-distribution" class="fn-select">
+              <option value="uniform">Uniform</option>
+              <option value="clustered">Clustered</option>
+              <option value="regular">Regular</option>
+            </select>
+          </div>
+
+          <div class="slider-row" id="row-clump-scale" style="display:none">
+            <span class="control-label slider-label">Clump scale</span>
+            <input type="range" id="slider-clump-scale" class="param-slider"
+                   min="0.02" max="0.30" step="0.01" value="0.10"
+                   aria-label="Cluster spread as fraction of transect length" />
+            <span class="slider-value" id="val-clump-scale">0.10</span>
+          </div>
+
+          <div class="slider-row" id="row-regularity" style="display:none">
+            <span class="control-label slider-label">Regularity</span>
+            <input type="range" id="slider-regularity" class="param-slider"
+                   min="0" max="1" step="0.05" value="0.5"
+                   aria-label="Grid jitter: 0 = perfect grid, 1 = Poisson" />
+            <span class="slider-value" id="val-regularity">0.50</span>
+          </div>
+
+          <p class="seed-hint">σ, W, detection functions and shape (b) update live. All other parameters take effect on Reset.</p>
+
+          <button id="btn-reset-defaults" class="btn-secondary btn-reset-defaults">↺ Reset to defaults</button>
+
+          <div class="controls-divider"></div>
+
+          <div class="checkbox-row">
+            <input type="checkbox" id="checkbox-keep-runs" />
+            <label for="checkbox-keep-runs" class="control-label">Keep previous runs</label>
+          </div>
+          <button id="btn-clear-ghosts" class="btn-secondary btn-clear-ghosts">Clear runs</button>
 
         </div>
       </details>
@@ -104,7 +163,7 @@
         <!-- 1. Detection function -->
         <div class="analytics-panel panel-detection-fn">
           <h3 class="panel-title">Detection function</h3>
-          <p class="panel-subtitle">Bars: observed estimate &middot; Curve: theoretical g(x)</p>
+          <p class="panel-subtitle">Bars: observed &middot; Solid: theoretical g(x) &middot; Dashed: MLE fit</p>
           <div class="chart-area" id="chart-detection-fn"></div>
         </div>
 
@@ -120,6 +179,12 @@
 
             <dt>ESW</dt>
             <dd id="est-esw">—</dd>
+
+            <dt class="mle-row">σ̂ (MLE)</dt>
+            <dd id="est-sigma-hat" class="mle-row">—</dd>
+
+            <dt class="input-row">True σ</dt>
+            <dd id="est-true-sigma" class="input-row">—</dd>
 
             <dt class="estimate-row">D̂</dt>
             <dd id="est-dhat" class="estimate-row">—</dd>

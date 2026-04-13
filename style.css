@@ -156,6 +156,17 @@ details[open] .controls-advanced-summary::before {
 .estimates-list dt.true-row { color: #b04040; }
 .estimates-list dd.true-row { color: #b04040; font-weight: 500; }
 
+/* Input parameter rows — blue, matches theoretical curve */
+.estimates-list dt.input-row { color: #2255cc; }
+.estimates-list dd.input-row { color: #2255cc; font-weight: 500; }
+
+/* MLE / estimate rows — pink, matches MLE dashed curve */
+.estimates-list dt.mle-row { color: #cc44aa; }
+.estimates-list dd.mle-row { color: #cc44aa; font-weight: 600; }
+
+.estimates-list dt.estimate-row { color: #2a7a2a; }
+.estimates-list dd.estimate-row { color: #2a7a2a; font-weight: 600; }
+
 /* --- Controls pane --- */
 .controls-section {
   display: flex;
@@ -286,6 +297,34 @@ kbd {
   gap: 0.5rem;
 }
 
+/* Detection function selector rows */
+.select-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.fn-select {
+  flex: 1;
+  font-size: 0.82rem;
+  padding: 0.2rem 0.3rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.mismatch-warning {
+  font-size: 0.75rem;
+  color: #b05000;
+  margin: 0.2rem 0 0;
+  padding: 0.25rem 0.4rem;
+  background: #fff8ee;
+  border-left: 3px solid #e08000;
+  border-radius: 0 3px 3px 0;
+}
+
 .slider-label {
   min-width: 44px;
 }
@@ -304,4 +343,23 @@ kbd {
   white-space: nowrap;
   min-width: 52px;
   text-align: right;
+}
+
+/* Reset-to-defaults button — full width, sits at the bottom of the Advanced section */
+.btn-reset-defaults {
+  width: 100%;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-clear-ghosts {
+  width: 100%;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
 }

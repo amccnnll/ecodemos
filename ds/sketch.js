@@ -8,7 +8,7 @@
  */
 
 import { createRng } from '../src/rng.js';
-import { placeAnimals, tryDetect } from '../src/ds-engine.js';
+import { placeAnimals, placeAnimalsClumped, placeAnimalsRegular, tryDetect } from '../src/ds-engine.js';
 import { resetState, recordDetection, updateParams, state } from './state.js';
 
 // --- Config constants ---
@@ -22,9 +22,15 @@ const BOAT_SPEEDS  = { slow: 0.0025, normal: 0.005, fast: 0.015 };
 
 // Each session starts with a fresh random seed; placement is deterministic from it,
 // but detection draws use a separate unseeded RNG so luck varies each replay.
-let seed  = Math.floor(Math.random() * 100000);
-let sigma = SIGMA_KM;
-let W     = W_KM;
+let seed         = Math.floor(Math.random() * 100000);
+let sigma        = SIGMA_KM;
+let W            = W_KM;
+let truthFn      = 'halfNormal';
+let modelFn      = 'halfNormal';
+let b            = 2.5;
+let distribution = 'uniform';
+let clumpScale   = 0.10;
+let regularity   = 0.50;
 
 new p5(function (p) {
 
@@ -72,11 +78,14 @@ new p5(function (p) {
 
   // --- Initialise / reset (same seed = identical animal placement) ---
   function initSim() {
-    // Read current slider values (fall back to defaults if sliders not yet in DOM)
-    arenaWKm = parseFloat(document.getElementById('slider-transect')?.value) || ARENA_W_KM;
-    sigma    = parseFloat(document.getElementById('slider-sigma')?.value)    || SIGMA_KM;
-    W        = parseFloat(document.getElementById('slider-w')?.value)        || W_KM;
-    const density = parseFloat(document.getElementById('slider-density')?.value) || DENSITY;
+    // Read current slider/select values (fall back to defaults if not yet in DOM)
+    arenaWKm     = parseFloat(document.getElementById('slider-transect')?.value)    || ARENA_W_KM;
+    sigma        = parseFloat(document.getElementById('slider-sigma')?.value)       || SIGMA_KM;
+    W            = parseFloat(document.getElementById('slider-w')?.value)           || W_KM;
+    distribution = document.getElementById('select-distribution')?.value            || 'uniform';
+    clumpScale   = parseFloat(document.getElementById('slider-clump-scale')?.value) || 0.10;
+    regularity   = parseFloat(document.getElementById('slider-regularity')?.value)  || 0.50;
+    const density = parseFloat(document.getElementById('slider-density')?.value)    || DENSITY;
 
     // Recalculate scale — depends on transect length
     PX_PER_KM = p.width / arenaWKm;
@@ -91,7 +100,13 @@ new p5(function (p) {
     syncSeedInput();
 
     const areaN = Math.round(density * arenaWKm * arenaH);
-    animals = placeAnimals(areaN, arenaWKm, arenaH, placementRng);
+    if (distribution === 'clustered') {
+      animals = placeAnimalsClumped(areaN, arenaWKm, arenaH, placementRng, clumpScale);
+    } else if (distribution === 'regular') {
+      animals = placeAnimalsRegular(areaN, arenaWKm, arenaH, placementRng, regularity);
+    } else {
+      animals = placeAnimals(areaN, arenaWKm, arenaH, placementRng);
+    }
 
     const trueD = areaN / (arenaWKm * arenaH);
     resetState({ sigma, W, transectLength: arenaWKm, trueD });
@@ -102,7 +117,13 @@ new p5(function (p) {
   // --- Button / input wiring ---
   function wireControls() {
     document.getElementById('btn-playpause').addEventListener('click', () => {
-      if (boatX >= arenaWKm) return; // transect complete — must reset first
+      if (boatX >= arenaWKm) {
+        // Run complete — "Run again" restarts with same seed immediately
+        initSim();
+        running = true;
+        syncPlayBtn();
+        return;
+      }
       running = !running;
       syncPlayBtn();
     });
@@ -153,7 +174,11 @@ new p5(function (p) {
   function syncPlayBtn() {
     const btn = document.getElementById('btn-playpause');
     if (!btn) return;
-    btn.textContent = running ? '⏸ Pause' : '▶ Play';
+    if (boatX >= arenaWKm) {
+      btn.textContent = '↺ Run again';
+    } else {
+      btn.textContent = running ? '⏸ Pause' : '▶ Run';
+    }
   }
 
   // --- Drawing ---
@@ -169,8 +194,9 @@ new p5(function (p) {
     p.fill(180);
     p.textSize(10);
     p.textAlign(p.RIGHT, p.CENTER);
-    p.text('W', p.width - 4, transectY - wPx);
-    p.text('W', p.width - 4, transectY + wPx);
+    const wLabel = 'W=' + W.toFixed(2);
+    p.text(wLabel, p.width - 4, transectY - wPx);
+    p.text(wLabel, p.width - 4, transectY + wPx);
   }
 
   function drawTransect() {
@@ -195,7 +221,7 @@ new p5(function (p) {
       const alpha = (1 - t) * 220;
 
       p.drawingContext.setLineDash([4, 5]);
-      p.stroke(p.color(200, 50, 50, alpha));
+      p.stroke(p.color(255, 130, 0, alpha));
       p.strokeWeight(1.5);
       p.line(flash.animalPx, transectY, flash.animalPx, flash.animalPy);
       p.drawingContext.setLineDash([]);
@@ -247,17 +273,27 @@ new p5(function (p) {
   function drawAxes() {
     p.textSize(10);
     p.fill(170);
+    const lastKm = Math.floor(arenaWKm);
     for (let km = 0; km <= arenaWKm; km++) {
       const px = km * PX_PER_KM;
       p.stroke(200);
       p.strokeWeight(1);
       p.line(px, transectY - 4, px, transectY + 4);
       p.noStroke();
-      // Align end labels to avoid clipping at canvas edges
-      if (km === 0)           p.textAlign(p.LEFT,   p.TOP);
-      else if (km === arenaWKm) p.textAlign(p.RIGHT, p.TOP);
-      else                    p.textAlign(p.CENTER, p.TOP);
+      if (km === 0)       p.textAlign(p.LEFT,   p.TOP);
+      else if (km === lastKm && arenaWKm % 1 === 0) p.textAlign(p.RIGHT, p.TOP);
+      else                p.textAlign(p.CENTER, p.TOP);
       p.text(km + ' km', px, transectY + 7);
+    }
+    // If transect length is non-integer, label the end tick separately
+    if (arenaWKm % 1 !== 0) {
+      const endPx = arenaWKm * PX_PER_KM;
+      p.stroke(200);
+      p.strokeWeight(1);
+      p.line(endPx, transectY - 4, endPx, transectY + 4);
+      p.noStroke();
+      p.textAlign(p.RIGHT, p.TOP);
+      p.text(arenaWKm.toFixed(1) + ' km', endPx, transectY + 7);
     }
   }
 
@@ -285,14 +321,14 @@ new p5(function (p) {
     const speed = BOAT_SPEEDS[state.speed] || BOAT_SPEEDS.normal;
     for (const animal of animals) {
       const perpDist = Math.abs(animal.y - arenaH / 2);
-      if (tryDetect(animal, boatX, speed, arenaH / 2, sigma, W, detectionRng)) {
+      if (tryDetect(animal, boatX, speed, arenaH / 2, sigma, W, detectionRng, truthFn, b)) {
         animal.detected = true;
         flashes.push({
           animalPx: animal.x * PX_PER_KM,
           animalPy: transectY + (animal.y - arenaH / 2) * PX_PER_KM,
           age:      0,
         });
-        recordDetection(perpDist);
+        recordDetection(perpDist, boatX);
       }
     }
   }
@@ -305,9 +341,41 @@ new p5(function (p) {
 
 }, document.getElementById('sim-container'));
 
-// --- Slider listeners at module level ---
+// --- Slider / select listeners at module level ---
 // ES modules execute after DOM is parsed, so all elements are available here.
 // Keeping these outside the p5 closure removes any dependency on p5's async setup() timing.
+
+function syncBSlider() {
+  const show = truthFn === 'hazardRate' || modelFn === 'hazardRate';
+  const row = document.getElementById('row-b');
+  if (row) row.style.display = show ? 'flex' : 'none';
+}
+
+function syncMismatchWarning() {
+  const el = document.getElementById('mismatch-warning');
+  if (el) el.style.display = truthFn !== modelFn ? 'block' : 'none';
+}
+
+function syncDistributionSliders() {
+  const clumpRow = document.getElementById('row-clump-scale');
+  const regRow   = document.getElementById('row-regularity');
+  if (clumpRow) clumpRow.style.display = distribution === 'clustered' ? 'flex' : 'none';
+  if (regRow)   regRow.style.display   = distribution === 'regular'   ? 'flex' : 'none';
+}
+
+// Field truth and model selectors — live update
+document.getElementById('select-truth-fn').addEventListener('change', (e) => {
+  truthFn = e.target.value;
+  syncBSlider();
+  syncMismatchWarning();
+  updateParams({ truthFn });
+});
+document.getElementById('select-model-fn').addEventListener('change', (e) => {
+  modelFn = e.target.value;
+  syncBSlider();
+  syncMismatchWarning();
+  updateParams({ modelFn });
+});
 
 // σ and W — live update: redraw detection curve and W boundaries immediately
 document.getElementById('slider-sigma').addEventListener('input', (e) => {
@@ -321,10 +389,63 @@ document.getElementById('slider-w').addEventListener('input', (e) => {
   updateParams({ sigma, W });
 });
 
+// Shape (b) — live update when hazard rate is active
+document.getElementById('slider-b').addEventListener('input', (e) => {
+  b = parseFloat(e.target.value);
+  document.getElementById('val-b').textContent = b.toFixed(1);
+  updateParams({ b });
+});
+
 // Density and transect length — readout only; values take effect on next Reset
 document.getElementById('slider-density').addEventListener('input', (e) => {
   document.getElementById('val-density').textContent = parseInt(e.target.value, 10) + ' /km²';
 });
 document.getElementById('slider-transect').addEventListener('input', (e) => {
   document.getElementById('val-transect').textContent = parseFloat(e.target.value).toFixed(1) + ' km';
+});
+
+// Distribution type — readout + slider visibility; takes effect on Reset
+document.getElementById('select-distribution').addEventListener('change', (e) => {
+  distribution = e.target.value;
+  syncDistributionSliders();
+});
+document.getElementById('slider-clump-scale').addEventListener('input', (e) => {
+  clumpScale = parseFloat(e.target.value);
+  document.getElementById('val-clump-scale').textContent = clumpScale.toFixed(2);
+});
+document.getElementById('slider-regularity').addEventListener('input', (e) => {
+  regularity = parseFloat(e.target.value);
+  document.getElementById('val-regularity').textContent = regularity.toFixed(2);
+});
+
+// Reset all Complications controls to their default values, then trigger a full Reset
+document.getElementById('btn-reset-defaults').addEventListener('click', () => {
+  document.getElementById('slider-sigma').value       = SIGMA_KM;
+  document.getElementById('slider-w').value           = W_KM;
+  document.getElementById('slider-density').value     = DENSITY;
+  document.getElementById('slider-transect').value    = ARENA_W_KM;
+  document.getElementById('slider-b').value           = 2.5;
+  document.getElementById('select-truth-fn').value    = 'halfNormal';
+  document.getElementById('select-model-fn').value    = 'halfNormal';
+  document.getElementById('select-distribution').value = 'uniform';
+  document.getElementById('slider-clump-scale').value = 0.10;
+  document.getElementById('slider-regularity').value  = 0.50;
+  document.getElementById('val-sigma').textContent       = SIGMA_KM.toFixed(2) + ' km';
+  document.getElementById('val-w').textContent           = W_KM.toFixed(2) + ' km';
+  document.getElementById('val-density').textContent     = DENSITY + ' /km²';
+  document.getElementById('val-transect').textContent    = ARENA_W_KM.toFixed(1) + ' km';
+  document.getElementById('val-b').textContent           = '2.5';
+  document.getElementById('val-clump-scale').textContent = '0.10';
+  document.getElementById('val-regularity').textContent  = '0.50';
+  truthFn      = 'halfNormal';
+  modelFn      = 'halfNormal';
+  b            = 2.5;
+  distribution = 'uniform';
+  clumpScale   = 0.10;
+  regularity   = 0.50;
+  syncBSlider();
+  syncMismatchWarning();
+  syncDistributionSliders();
+  updateParams({ truthFn, modelFn, b });
+  document.getElementById('btn-reset').click();
 });

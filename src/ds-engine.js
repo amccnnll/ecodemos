@@ -9,9 +9,9 @@
  *   tryDetect(animal, boatX, transectY, sigma, W, rng)  → true if detected this frame
  */
 
-import { halfNormal } from './stats.js';
+import { halfNormal, hazardRate } from './stats.js';
 
-// Place n animals uniformly at random across the arena
+// Place n animals uniformly at random across the arena (satisfies DS assumption)
 export function placeAnimals(n, arenaW, arenaH, rng) {
   const animals = [];
   for (let i = 0; i < n; i++) {
@@ -20,16 +20,63 @@ export function placeAnimals(n, arenaW, arenaH, rng) {
   return animals;
 }
 
-// Attempt detection of one animal as the boat passes
-// Returns true if detected this frame, false otherwise
-export function tryDetect(animal, boatX, boatSpeed, transectY, sigma, W, rng) {
-  if (animal.detected) return false;                      // already detected
-  const perpDist = Math.abs(animal.y - transectY);       // perpendicular distance
-  if (perpDist > W) return false;                         // beyond truncation distance
-  // Fire exactly once: the frame in which the boat first draws level with the animal.
-  // boatX - animal.x in [0, boatSpeed) means the boat just crossed this animal's x position.
+// Place n animals in clusters (violates DS uniform-distribution assumption).
+// clumpScale controls cluster spread as a fraction of arenaW (default 0.10).
+// Number of clusters = max(3, round(n/6)) — ~6 animals per cluster on average.
+export function placeAnimalsClumped(n, arenaW, arenaH, rng, clumpScale = 0.10) {
+  const nClusters = Math.max(3, Math.round(n / 6));
+  const centres = Array.from({ length: nClusters }, () => ({
+    x: rng() * arenaW,
+    y: rng() * arenaH,
+  }));
+  const sigma = arenaW * clumpScale;
+  return Array.from({ length: n }, () => {
+    const c  = centres[Math.floor(rng() * nClusters)];
+    // Box-Muller transform for isotropic Gaussian scatter
+    const u1 = Math.max(rng(), 1e-10);
+    const u2 = rng();
+    const r  = Math.sqrt(-2 * Math.log(u1)) * sigma;
+    const θ  = 2 * Math.PI * u2;
+    // Wrap-around keeps density uniform at arena edges
+    const x = ((c.x + r * Math.cos(θ)) % arenaW + arenaW) % arenaW;
+    const y = ((c.y + r * Math.sin(θ)) % arenaH + arenaH) % arenaH;
+    return { x, y, detected: false };
+  });
+}
+
+// Place n animals on a regular grid with random jitter (overdispersed).
+// regularity = 0 → perfect grid; regularity = 1 → Poisson-equivalent jitter.
+export function placeAnimalsRegular(n, arenaW, arenaH, rng, regularity = 0.5) {
+  const aspect = arenaW / arenaH;
+  const nCols  = Math.max(1, Math.round(Math.sqrt(n * aspect)));
+  const nRows  = Math.ceil(n / nCols);
+  const dx     = arenaW / nCols;
+  const dy     = arenaH / nRows;
+  const animals = [];
+  for (let row = 0; row < nRows && animals.length < n; row++) {
+    for (let col = 0; col < nCols && animals.length < n; col++) {
+      animals.push({
+        x: (col + 0.5 + (rng() - 0.5) * regularity) * dx,
+        y: (row + 0.5 + (rng() - 0.5) * regularity) * dy,
+        detected: false,
+      });
+    }
+  }
+  return animals;
+}
+
+// Attempt detection of one animal as the boat passes abeam.
+// detFn: 'halfNormal' | 'hazardRate' — the field-truth detection function.
+// Returns true if detected this frame, false otherwise.
+export function tryDetect(animal, boatX, boatSpeed, transectY, sigma, W, rng, detFn = 'halfNormal', b = 2.5) {
+  if (animal.detected) return false;
+  const perpDist = Math.abs(animal.y - transectY);
+  if (perpDist > W) return false;
+  // Fire exactly once: the frame the boat first draws level with the animal.
   const atBeam = boatX - animal.x >= 0 && boatX - animal.x < boatSpeed;
   if (!atBeam) return false;
-  const p = halfNormal(perpDist, sigma);                  // g(0) = 1 by construction
+  const p = detFn === 'hazardRate'
+    ? hazardRate(perpDist, sigma, b)
+    : halfNormal(perpDist, sigma);
   return rng() < p;
 }
