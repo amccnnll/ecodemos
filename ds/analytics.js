@@ -63,7 +63,7 @@ function initDetectionFnChart(containerId) {
     .attr('text-anchor', 'middle').text('Perpendicular distance (km)');
   g.append('text').attr('class', 'chart-label')
     .attr('transform', 'rotate(-90)').attr('x', -iH / 2).attr('y', -40)
-    .attr('text-anchor', 'middle').text('Detection probability');
+    .attr('text-anchor', 'middle').text('g(x)  (estimated)');
 
   // Histogram bars group (drawn first so curve sits on top)
   const barsG = g.append('g').attr('class', 'hist-bars');
@@ -102,13 +102,18 @@ function initDetectionFnChart(containerId) {
       .domain([0, W])
       .thresholds(d3.range(W / 10, W, W / 10))(distances);
 
+    const barHeights = bins.map(b => b.length / scale);
+    const yMax = Math.max(1.1, d3.max(barHeights) * 1.05);
+    yScale.domain([0, yMax]);
+    yAxis.call(d3.axisLeft(yScale).ticks(4));
+
     barsG.selectAll('rect')
       .data(bins)
       .join('rect')
       .attr('x',      b => xScale(b.x0) + 1)
       .attr('width',  b => Math.max(0, xScale(b.x1) - xScale(b.x0) - 2))
-      .attr('y',      b => yScale(Math.min(1, b.length / scale)))
-      .attr('height', b => iH - yScale(Math.min(1, b.length / scale)))
+      .attr('y',      (b, i) => yScale(barHeights[i]))
+      .attr('height', (b, i) => iH - yScale(barHeights[i]))
       .attr('fill', '#7aaee8').attr('opacity', 0.55);
   }
 
@@ -147,11 +152,15 @@ function initDhatChart(containerId) {
   const svg = d3.select(el).append('svg').attr('width', W).attr('height', H);
   const g   = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
 
-  const xScale = d3.scaleLinear().range([0, iW]);
-  const yScale = d3.scaleLinear().range([iH, 0]);
+  const xScale = d3.scaleLinear().domain([1, 10]).range([0, iW]);
+  const yScale = d3.scaleLinear().domain([0, 100]).range([iH, 0]);
 
   const xAxis = g.append('g').attr('class', 'axis').attr('transform', `translate(0,${iH})`);
   const yAxis = g.append('g').attr('class', 'axis');
+
+  // Draw axes immediately so they're visible before any detections
+  xAxis.call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.format('d')));
+  yAxis.call(d3.axisLeft(yScale).ticks(4).tickFormat(d3.format('.0f')));
 
   g.append('text').attr('class', 'chart-label')
     .attr('x', iW / 2).attr('y', iH + 36)
@@ -174,7 +183,11 @@ function initDhatChart(containerId) {
     .attr('fill', 'none').attr('stroke', '#2255cc').attr('stroke-width', 2);
 
   function update(history, trueD) {
-    if (history.length === 0) return;
+    if (history.length === 0) {
+      dhatPath.attr('d', null);
+      trueDLine.attr('opacity', 0);
+      return;
+    }
 
     const yMin = trueD ? Math.min(d3.min(history), trueD) * 0.6 : d3.min(history) * 0.6;
     const yMax = trueD ? Math.max(d3.max(history), trueD) * 1.4 : d3.max(history) * 1.4;

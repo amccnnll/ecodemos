@@ -38,6 +38,13 @@ export function recordDetection(perpDistKm) {
   _notify();
 }
 
+// Called by sketch.js when σ or W changes live (without a full population reset)
+export function updateParams({ sigma, W }) {
+  state.sigma = sigma;
+  state.W     = W;
+  _notify();
+}
+
 // Called by analytics.js to receive state updates
 export function subscribe(fn) {
   _listeners.add(fn);

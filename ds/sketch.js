@@ -9,7 +9,7 @@
 
 import { createRng } from '../src/rng.js';
 import { placeAnimals, tryDetect } from '../src/ds-engine.js';
-import { resetState, recordDetection, state } from './state.js';
+import { resetState, recordDetection, updateParams, state } from './state.js';
 
 // --- Config constants ---
 const ARENA_W_KM   = 4;      // transect length (km)
@@ -20,7 +20,6 @@ const FLASH_FRAMES = 35;     // detection flash duration (~500ms at 60fps)
 
 const BOAT_SPEEDS  = { slow: 0.0025, normal: 0.005, fast: 0.015 };
 
-// TODO: wire sigma, W, density to controls pane sliders
 // Each session starts with a fresh random seed; placement is deterministic from it,
 // but detection draws use a separate unseeded RNG so luck varies each replay.
 let seed  = Math.floor(Math.random() * 100000);
@@ -36,19 +35,20 @@ new p5(function (p) {
   let boatX    = 0;
   let running  = false;
 
-  // Derived in setup() from canvas dimensions
+  // Derived in setup() / initSim() from canvas dimensions and slider values
   let PX_PER_KM;
   let transectY;
   let arenaH;
+  let arenaWKm;
 
   p.setup = function () {
     const container = document.getElementById('sim-container');
-    const canvas = p.createCanvas(container.clientWidth, container.clientHeight);
+    const cs = getComputedStyle(container);
+    const hPad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const canvas = p.createCanvas(container.clientWidth - hPad, container.clientHeight);
     canvas.parent('sim-container');
 
-    PX_PER_KM = p.width / ARENA_W_KM;
-    transectY  = p.height / 2;
-    arenaH     = p.height / PX_PER_KM;
+    transectY = p.height / 2;  // fixed — depends only on canvas height
 
     initSim();
     wireControls();
@@ -72,6 +72,16 @@ new p5(function (p) {
 
   // --- Initialise / reset (same seed = identical animal placement) ---
   function initSim() {
+    // Read current slider values (fall back to defaults if sliders not yet in DOM)
+    arenaWKm = parseFloat(document.getElementById('slider-transect')?.value) || ARENA_W_KM;
+    sigma    = parseFloat(document.getElementById('slider-sigma')?.value)    || SIGMA_KM;
+    W        = parseFloat(document.getElementById('slider-w')?.value)        || W_KM;
+    const density = parseFloat(document.getElementById('slider-density')?.value) || DENSITY;
+
+    // Recalculate scale — depends on transect length
+    PX_PER_KM = p.width / arenaWKm;
+    arenaH    = p.height / PX_PER_KM;
+
     placementRng = createRng(seed);
     detectionRng = new Math.seedrandom(); // fresh unseeded RNG — different luck each run
     boatX   = 0;
@@ -80,11 +90,11 @@ new p5(function (p) {
 
     syncSeedInput();
 
-    const areaN = Math.round(DENSITY * ARENA_W_KM * arenaH);
-    animals = placeAnimals(areaN, ARENA_W_KM, arenaH, placementRng);
+    const areaN = Math.round(density * arenaWKm * arenaH);
+    animals = placeAnimals(areaN, arenaWKm, arenaH, placementRng);
 
-    const trueD = areaN / (ARENA_W_KM * arenaH);
-    resetState({ sigma, W, transectLength: ARENA_W_KM, trueD });
+    const trueD = areaN / (arenaWKm * arenaH);
+    resetState({ sigma, W, transectLength: arenaWKm, trueD });
 
     syncPlayBtn();
   }
@@ -92,7 +102,7 @@ new p5(function (p) {
   // --- Button / input wiring ---
   function wireControls() {
     document.getElementById('btn-playpause').addEventListener('click', () => {
-      if (boatX >= ARENA_W_KM) return; // transect complete — must reset first
+      if (boatX >= arenaWKm) return; // transect complete — must reset first
       running = !running;
       syncPlayBtn();
     });
@@ -129,8 +139,10 @@ new p5(function (p) {
   }
 
   function parseSeedInput() {
-    const val = parseInt(document.getElementById('seed-input').value, 10);
-    return Number.isFinite(val) && val >= 0 ? val : seed;
+    // Strip anything that isn't a digit, then parse and clamp to valid range
+    const raw = (document.getElementById('seed-input').value || '').replace(/\D/g, '');
+    const val = parseInt(raw, 10);
+    return Number.isFinite(val) && val >= 0 ? Math.min(99999, val) : seed;
   }
 
   function syncSeedInput() {
@@ -234,33 +246,36 @@ new p5(function (p) {
 
   function drawAxes() {
     p.textSize(10);
-    p.textAlign(p.CENTER, p.TOP);
     p.fill(170);
-    for (let km = 0; km <= ARENA_W_KM; km++) {
+    for (let km = 0; km <= arenaWKm; km++) {
       const px = km * PX_PER_KM;
       p.stroke(200);
       p.strokeWeight(1);
       p.line(px, transectY - 4, px, transectY + 4);
       p.noStroke();
+      // Align end labels to avoid clipping at canvas edges
+      if (km === 0)           p.textAlign(p.LEFT,   p.TOP);
+      else if (km === arenaWKm) p.textAlign(p.RIGHT, p.TOP);
+      else                    p.textAlign(p.CENTER, p.TOP);
       p.text(km + ' km', px, transectY + 7);
     }
   }
 
   function drawCounter() {
-    const traveled = Math.min(boatX, ARENA_W_KM).toFixed(2);
+    const traveled = Math.min(boatX, arenaWKm).toFixed(2);
     p.noStroke();
     p.fill(150);
     p.textSize(11);
     p.textAlign(p.LEFT, p.TOP);
-    p.text(`${traveled} / ${ARENA_W_KM.toFixed(1)} km`, 8, 6);
+    p.text(`${traveled} / ${arenaWKm.toFixed(1)} km`, 8, 6);
   }
 
   // --- Simulation step ---
   function advanceBoat() {
     const speed = BOAT_SPEEDS[state.speed] || BOAT_SPEEDS.normal;
     boatX += speed;
-    if (boatX >= ARENA_W_KM) {
-      boatX   = ARENA_W_KM;
+    if (boatX >= arenaWKm) {
+      boatX   = arenaWKm;
       running = false;
       syncPlayBtn();
     }
@@ -289,3 +304,27 @@ new p5(function (p) {
   };
 
 }, document.getElementById('sim-container'));
+
+// --- Slider listeners at module level ---
+// ES modules execute after DOM is parsed, so all elements are available here.
+// Keeping these outside the p5 closure removes any dependency on p5's async setup() timing.
+
+// σ and W — live update: redraw detection curve and W boundaries immediately
+document.getElementById('slider-sigma').addEventListener('input', (e) => {
+  sigma = parseFloat(e.target.value);
+  document.getElementById('val-sigma').textContent = sigma.toFixed(2) + ' km';
+  updateParams({ sigma, W });
+});
+document.getElementById('slider-w').addEventListener('input', (e) => {
+  W = parseFloat(e.target.value);
+  document.getElementById('val-w').textContent = W.toFixed(2) + ' km';
+  updateParams({ sigma, W });
+});
+
+// Density and transect length — readout only; values take effect on next Reset
+document.getElementById('slider-density').addEventListener('input', (e) => {
+  document.getElementById('val-density').textContent = parseInt(e.target.value, 10) + ' /km²';
+});
+document.getElementById('slider-transect').addEventListener('input', (e) => {
+  document.getElementById('val-transect').textContent = parseFloat(e.target.value).toFixed(1) + ' km';
+});

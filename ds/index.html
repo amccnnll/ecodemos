@@ -45,11 +45,56 @@
       <div class="controls-section">
         <div class="seed-row">
           <span class="control-label">Seed</span>
-          <input type="number" id="seed-input" class="seed-input" min="0" max="99999" />
+          <input type="number" id="seed-input" class="seed-input"
+                 min="0" max="99999" inputmode="numeric" pattern="[0-9]*" />
           <button id="btn-new-population" class="btn-secondary">🎲 New</button>
         </div>
         <p class="seed-hint">Reset = same animals. New = random population.</p>
       </div>
+
+      <div class="controls-divider"></div>
+
+      <!-- Advanced (collapsed by default) -->
+      <details class="controls-advanced">
+        <summary class="controls-advanced-summary">Advanced</summary>
+        <div class="controls-section controls-advanced-body">
+
+          <div class="slider-row">
+            <span class="control-label slider-label">σ</span>
+            <input type="range" id="slider-sigma" class="param-slider"
+                   min="0.05" max="0.50" step="0.01" value="0.25"
+                   aria-label="Detection scale σ (km)" />
+            <span class="slider-value" id="val-sigma">0.25 km</span>
+          </div>
+
+          <div class="slider-row">
+            <span class="control-label slider-label">W</span>
+            <input type="range" id="slider-w" class="param-slider"
+                   min="0.10" max="0.60" step="0.01" value="0.40"
+                   aria-label="Truncation distance W (km)" />
+            <span class="slider-value" id="val-w">0.40 km</span>
+          </div>
+
+          <div class="slider-row">
+            <span class="control-label slider-label">Density</span>
+            <input type="range" id="slider-density" class="param-slider"
+                   min="10" max="200" step="5" value="50"
+                   aria-label="Animal density (per km²)" />
+            <span class="slider-value" id="val-density">50 /km²</span>
+          </div>
+
+          <div class="slider-row">
+            <span class="control-label slider-label">Length</span>
+            <input type="range" id="slider-transect" class="param-slider"
+                   min="1" max="8" step="0.5" value="4"
+                   aria-label="Transect length (km)" />
+            <span class="slider-value" id="val-transect">4.0 km</span>
+          </div>
+
+          <p class="seed-hint">σ and W update live. Density and length take effect on Reset.</p>
+
+        </div>
+      </details>
 
     </div>
 
@@ -59,6 +104,7 @@
         <!-- 1. Detection function -->
         <div class="analytics-panel panel-detection-fn">
           <h3 class="panel-title">Detection function</h3>
+          <p class="panel-subtitle">Bars: observed estimate &middot; Curve: theoretical g(x)</p>
           <div class="chart-area" id="chart-detection-fn"></div>
         </div>
 
@@ -86,6 +132,7 @@
         <!-- 3. D̂ convergence -->
         <div class="analytics-panel panel-dhat">
           <h3 class="panel-title">D̂ convergence</h3>
+          <p class="panel-subtitle">Blue: running D̂ &middot; Red dashed: true D</p>
           <div class="chart-area" id="chart-dhat"></div>
         </div>
 
