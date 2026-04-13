@@ -199,6 +199,30 @@ body {
   line-height: 1.9;
 }
 
+/* Seed controls */
+.seed-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.seed-input {
+  width: 68px;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  text-align: right;
+  color: #333;
+}
+
+.seed-hint {
+  font-size: 0.75rem;
+  color: #aaa;
+  margin-top: 0.2rem;
+}
+
 kbd {
   font-size: 0.75rem;
   background: #f0f0f0;

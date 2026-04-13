@@ -17,18 +17,20 @@ const W_KM         = 0.4;    // truncation distance (km)
 const SIGMA_KM     = 0.25;   // detection scale parameter (km)
 const DENSITY      = 50;     // animals per km²
 const FLASH_FRAMES = 35;     // detection flash duration (~500ms at 60fps)
-const DEFAULT_SEED = 42;
 
 const BOAT_SPEEDS  = { slow: 0.0025, normal: 0.005, fast: 0.015 };
 
 // TODO: wire sigma, W, density to controls pane sliders
-let seed  = DEFAULT_SEED;
+// Each session starts with a fresh random seed; placement is deterministic from it,
+// but detection draws use a separate unseeded RNG so luck varies each replay.
+let seed  = Math.floor(Math.random() * 100000);
 let sigma = SIGMA_KM;
 let W     = W_KM;
 
 new p5(function (p) {
 
-  let rng;
+  let placementRng;   // seeded — governs animal placement only
+  let detectionRng;   // unseeded — governs detection draws; changes every run
   let animals  = [];
   let flashes  = [];
   let boatX    = 0;
@@ -68,15 +70,18 @@ new p5(function (p) {
     }
   };
 
-  // --- Initialise / reset (same seed = identical replay) ---
+  // --- Initialise / reset (same seed = identical animal placement) ---
   function initSim() {
-    rng     = createRng(seed);
+    placementRng = createRng(seed);
+    detectionRng = new Math.seedrandom(); // fresh unseeded RNG — different luck each run
     boatX   = 0;
     running = false;
     flashes = [];
 
+    syncSeedInput();
+
     const areaN = Math.round(DENSITY * ARENA_W_KM * arenaH);
-    animals = placeAnimals(areaN, ARENA_W_KM, arenaH, rng);
+    animals = placeAnimals(areaN, ARENA_W_KM, arenaH, placementRng);
 
     const trueD = areaN / (ARENA_W_KM * arenaH);
     resetState({ sigma, W, transectLength: ARENA_W_KM, trueD });
@@ -84,7 +89,7 @@ new p5(function (p) {
     syncPlayBtn();
   }
 
-  // --- Button wiring ---
+  // --- Button / input wiring ---
   function wireControls() {
     document.getElementById('btn-playpause').addEventListener('click', () => {
       if (boatX >= ARENA_W_KM) return; // transect complete — must reset first
@@ -92,8 +97,26 @@ new p5(function (p) {
       syncPlayBtn();
     });
 
+    // Replay: reset to the current seed's population
     document.getElementById('btn-reset').addEventListener('click', () => {
+      seed = parseSeedInput();
       initSim();
+    });
+
+    // New population: pick a fresh random seed, show it, and reset
+    document.getElementById('btn-new-population').addEventListener('click', () => {
+      seed = Math.floor(Math.random() * 100000); // intentionally unseeded
+      initSim();
+    });
+
+    // Typing a seed and pressing Enter (or blurring) instantly resets to that population
+    const seedInput = document.getElementById('seed-input');
+    seedInput.addEventListener('change', () => {
+      seed = parseSeedInput();
+      initSim();
+    });
+    seedInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') seedInput.blur(); // triggers 'change'
     });
 
     document.querySelectorAll('.btn-speed').forEach(btn => {
@@ -103,6 +126,16 @@ new p5(function (p) {
         btn.classList.add('active');
       });
     });
+  }
+
+  function parseSeedInput() {
+    const val = parseInt(document.getElementById('seed-input').value, 10);
+    return Number.isFinite(val) && val >= 0 ? val : seed;
+  }
+
+  function syncSeedInput() {
+    const el = document.getElementById('seed-input');
+    if (el) el.value = seed;
   }
 
   function syncPlayBtn() {
@@ -152,7 +185,7 @@ new p5(function (p) {
       p.drawingContext.setLineDash([4, 5]);
       p.stroke(p.color(200, 50, 50, alpha));
       p.strokeWeight(1.5);
-      p.line(flash.boatPx, transectY, flash.animalPx, flash.animalPy);
+      p.line(flash.animalPx, transectY, flash.animalPx, flash.animalPy);
       p.drawingContext.setLineDash([]);
 
       const ringR = 5 + t * 12;
@@ -237,12 +270,11 @@ new p5(function (p) {
     const speed = BOAT_SPEEDS[state.speed] || BOAT_SPEEDS.normal;
     for (const animal of animals) {
       const perpDist = Math.abs(animal.y - arenaH / 2);
-      if (tryDetect(animal, boatX, speed, arenaH / 2, sigma, W, rng)) {
+      if (tryDetect(animal, boatX, speed, arenaH / 2, sigma, W, detectionRng)) {
         animal.detected = true;
         flashes.push({
           animalPx: animal.x * PX_PER_KM,
           animalPy: transectY + (animal.y - arenaH / 2) * PX_PER_KM,
-          boatPx:   boatX * PX_PER_KM,
           age:      0,
         });
         recordDetection(perpDist);
