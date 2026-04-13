@@ -16,19 +16,55 @@
   </nav>
 
   <div class="module-layout">
+
     <div class="pane-sim" id="sim-container">
       <!-- p5.js canvas renders here -->
     </div>
 
     <div class="pane-controls">
       <!-- TODO: playback controls, sliders, toggles, presets, seed -->
-      <p>Controls go here.</p>
+      <p class="placeholder">Controls coming soon.<br><br>
+        <kbd>Space</kbd> play / pause<br>
+        <kbd>R</kbd> reset
+      </p>
     </div>
 
     <div class="pane-analytics">
-      <!-- TODO: detection function panel, running estimates strip, D-hat convergence chart -->
-      <p>Analytics go here.</p>
+      <div class="analytics-panels">
+
+        <!-- 1. Detection function -->
+        <div class="analytics-panel panel-detection-fn">
+          <h3 class="panel-title">Detection function</h3>
+          <div class="chart-area" id="chart-detection-fn"></div>
+        </div>
+
+        <!-- 2. Running estimates -->
+        <div class="analytics-panel panel-estimates">
+          <h3 class="panel-title">Estimates</h3>
+          <dl class="estimates-list">
+            <dt>Detections (n)</dt>
+            <dd id="est-n">—</dd>
+
+            <dt>Effort (L)</dt>
+            <dd id="est-effort">—</dd>
+
+            <dt>ESW</dt>
+            <dd id="est-esw">—</dd>
+
+            <dt>D̂</dt>
+            <dd id="est-dhat">—</dd>
+          </dl>
+        </div>
+
+        <!-- 3. D̂ convergence -->
+        <div class="analytics-panel panel-dhat">
+          <h3 class="panel-title">D̂ convergence</h3>
+          <div class="chart-area" id="chart-dhat"></div>
+        </div>
+
+      </div>
     </div>
+
   </div>
 
   <!-- Libraries (globals) -->
@@ -36,12 +72,12 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
 
-  <!-- Engine + sketch (ES modules so they can import from each other) -->
-  <script type="module" src="../src/rng.js"></script>
-  <script type="module" src="../src/stats.js"></script>
-  <script type="module" src="../src/spatial.js"></script>
-  <script type="module" src="../src/ds-engine.js"></script>
+  <!-- Engine + sketch + analytics (ES modules share the same state singleton) -->
   <script type="module" src="sketch.js"></script>
+  <script type="module">
+    import { initAnalytics } from './analytics.js';
+    initAnalytics();
+  </script>
 
 </body>
 </html>

@@ -3,11 +3,13 @@
  *
  * Handles all rendering for the DS simulation pane.
  * Imports the pure engine from src/ds-engine.js and calls it each frame.
+ * Pushes detection events to ds/state.js for the analytics layer.
  * p5 and D3 are available as globals (loaded via CDN in index.html).
  */
 
 import { createRng } from '../src/rng.js';
 import { placeAnimals, tryDetect } from '../src/ds-engine.js';
+import { resetState, recordDetection } from './state.js';
 
 // --- Config constants ---
 const ARENA_W_KM   = 4;      // transect length (km)
@@ -15,7 +17,7 @@ const W_KM         = 0.4;    // truncation distance (km)
 const SIGMA_KM     = 0.25;   // detection scale parameter (km)
 const DENSITY      = 50;     // animals per km²
 const BOAT_SPEED   = 0.005;  // km per frame
-const FLASH_FRAMES = 35;     // how long detection flash persists (~500ms at 60fps)
+const FLASH_FRAMES = 35;     // detection flash duration (~500ms at 60fps)
 const DEFAULT_SEED = 42;
 
 // TODO: wire these up to controls pane inputs
@@ -27,14 +29,14 @@ new p5(function (p) {
 
   let rng;
   let animals  = [];
-  let flashes  = [];   // active detection flash animations
+  let flashes  = [];
   let boatX    = 0;
   let running  = false;
 
   // Derived in setup() from canvas dimensions
   let PX_PER_KM;
   let transectY;
-  let arenaH;          // km — derived from canvas height so arena always fills the pane
+  let arenaH;   // km — computed so the arena exactly fills the canvas
 
   p.setup = function () {
     const container = document.getElementById('sim-container');
@@ -43,7 +45,7 @@ new p5(function (p) {
 
     PX_PER_KM = p.width / ARENA_W_KM;
     transectY  = p.height / 2;
-    arenaH     = p.height / PX_PER_KM;  // km visible above+below transect
+    arenaH     = p.height / PX_PER_KM;
 
     initSim();
   };
@@ -70,6 +72,9 @@ new p5(function (p) {
 
     const areaN = Math.round(DENSITY * ARENA_W_KM * arenaH);
     animals = placeAnimals(areaN, ARENA_W_KM, arenaH, rng);
+
+    const trueD = areaN / (ARENA_W_KM * arenaH);
+    resetState({ sigma, W, transectLength: ARENA_W_KM, trueD });
   }
 
   // --- Drawing ---
@@ -91,7 +96,7 @@ new p5(function (p) {
 
   function drawFlashes() {
     for (const flash of flashes) {
-      const t     = flash.age / FLASH_FRAMES;       // 0 → 1
+      const t     = flash.age / FLASH_FRAMES;
       const alpha = (1 - t) * 220;
 
       // Dotted red line from boat position at detection to animal
@@ -102,7 +107,7 @@ new p5(function (p) {
       p.drawingContext.setLineDash([]);
 
       // Expanding ring at the animal
-      const ringR = 5 + t * 12;                     // 5px → 17px radius
+      const ringR = 5 + t * 12;
       p.noFill();
       p.stroke(p.color(200, 50, 50, alpha));
       p.strokeWeight(1.5);
@@ -123,17 +128,15 @@ new p5(function (p) {
   // --- Simulation step ---
   function advanceBoat() {
     boatX += BOAT_SPEED;
-    if (boatX > ARENA_W_KM) {
-      running = false;
-    }
+    if (boatX > ARENA_W_KM) running = false;
   }
 
   function detectAnimals() {
     for (const animal of animals) {
+      const perpDist = Math.abs(animal.y - arenaH / 2);
       if (tryDetect(animal, boatX, BOAT_SPEED, arenaH / 2, sigma, W, rng)) {
         animal.detected = true;
 
-        // Spawn a flash at this animal's pixel position
         flashes.push({
           animalPx: animal.x * PX_PER_KM,
           animalPy: transectY + (animal.y - arenaH / 2) * PX_PER_KM,
@@ -141,7 +144,7 @@ new p5(function (p) {
           age:      0,
         });
 
-        // TODO: record detection distance for analytics
+        recordDetection(perpDist);
       }
     }
   }
