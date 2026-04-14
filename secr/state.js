@@ -16,7 +16,6 @@ export const state = {
   // ── Parameters (survive resetState; updated via updateParams) ──────────────
   g0:           0.5,          // max detection probability (at d=0)
   sigma:        0.15,         // km — home range / detection scale
-  movementType: 'brownian',   // 'randomWalk' | 'brownian' | 'levy'
 
   // ── Set on resetState ──────────────────────────────────────────────────────
   N:            5,            // true number of animals
@@ -83,10 +82,9 @@ export function recordOccasion(k, captures) {
 }
 
 // Called when parameters change live (detection surface must redraw).
-export function updateParams({ g0, sigma, movementType } = {}) {
-  if (g0           !== undefined) state.g0           = g0;
-  if (sigma        !== undefined) state.sigma        = sigma;
-  if (movementType !== undefined) state.movementType = movementType;
+export function updateParams({ g0, sigma } = {}) {
+  if (g0    !== undefined) state.g0    = g0;
+  if (sigma !== undefined) state.sigma = sigma;
   _notify();
 }
 
@@ -94,6 +92,10 @@ export function updateParams({ g0, sigma, movementType } = {}) {
 export function subscribe(fn) {
   _listeners.add(fn);
 }
+
+// Trigger a re-render of all subscribers without changing any state.
+// Used when a display option changes (e.g. surface toggle re-enabled) mid-run.
+export function notifyAll() { _notify(); }
 
 function _notify() {
   for (const fn of _listeners) fn(state);

@@ -20,25 +20,45 @@ import {
   updateDetectors,
   recordOccasion,
   updateParams,
+  notifyAll,
   state,
 } from './state.js';
 
 // ─── Config constants ─────────────────────────────────────────────────────────
 
-const BUFFER_KM   = 0.5;              // buffer zone around inner study area (km)
-const INNER_KM    = 1.0;              // inner study area side length (km)
+// Buffer = 2σ at default σ=0.20 (0.40km). Inner = total − 2×buffer = 1.20km.
+// Smaller buffer keeps the inner zone visually prominent and ensures most
+// animals are close enough to the detector array to be detectable.
+const BUFFER_KM   = 0.4;              // buffer zone around inner study area (km)
+const INNER_KM    = 1.2;              // inner study area side length (km)
 const ARENA_KM    = INNER_KM + 2 * BUFFER_KM; // total arena side (= 2 km)
 
 const G0_DEFAULT       = 0.5;
-const SIGMA_DEFAULT    = 0.15;        // km
-const N_DEFAULT        = 5;
+const SIGMA_DEFAULT    = 0.20;        // km — 2σ ≈ buffer width, animals regularly stray into inner area
+const N_DEFAULT        = 10;          // more animals → reliable detections in demos
 const K_DEFAULT        = 10;
 const GRID_N_DEFAULT   = 4;           // 4×4 = 16 detectors
 const TAU_DEFAULT      = 2.0;         // home range crossing time (occasions)
+const FIDELITY_DEFAULT = 1.0;         // site fidelity multiplier on spring strength
+const DISPLAY_LERP     = 0.15;        // display position lerp rate toward true position
 const FLASH_FRAMES     = 45;          // detection flash duration
 const TRAIL_LENGTH     = 60;          // frames of trail history per animal
 
 const FRAMES_PER_OCC = { slow: 240, normal: 120, fast: 30 };
+
+const MOVEMENT_PRESETS = {
+  resident:    { tau: 2.0, fidelity: 1.0 },
+  sedentary:   { tau: 6.0, fidelity: 3.0 },
+  wideRanging: { tau: 2.0, fidelity: 0.4 },
+  nomad:       { tau: 1.0, fidelity: 0.2 },
+};
+
+const DETECTOR_PRESETS = {
+  default:  { g0: 0.50, sigma: 0.20 },
+  camera:   { g0: 0.45, sigma: 0.08 },
+  liveTrap: { g0: 0.60, sigma: 0.05 },
+  acoustic: { g0: 0.20, sigma: 0.40 },
+};
 
 const ANIMAL_FILES = ['crocodile', 'dolphin', 'eagle', 'leopard', 'lobster', 'snake', 't-rex'];
 
@@ -65,10 +85,10 @@ let iconIndex     = Math.floor(Math.random() * ANIMAL_FILES.length);
 let g0            = G0_DEFAULT;
 let sigma         = SIGMA_DEFAULT;
 let tau           = TAU_DEFAULT;
+let fidelity      = FIDELITY_DEFAULT;
 let N             = N_DEFAULT;
 let K             = K_DEFAULT;
 let gridN         = GRID_N_DEFAULT;
-let movementType  = 'brownian';
 let detectorLayout = 'grid';
 let speed         = 'normal';
 
@@ -137,23 +157,30 @@ new p5(function (p) {
     if (phase === 'running') {
       const fpk = FRAMES_PER_OCC[speed] ?? 120;
 
-      // Compute per-frame movement params from τ (OU model: σ_eq ≈ sigma stays constant)
-      const springStr = 1 / (tau * fpk);
-      const stepSz    = sigma * Math.sqrt(2 * springStr);
+      // OUV movement parameters derived from UI sliders.
+      // noiseScale keeps equilibrium σ_position ≈ sigma / √fidelity regardless of τ.
+      const drag       = 0.08;
+      const springStr  = fidelity / (tau * fpk);
+      const noiseScale = sigma * Math.sqrt(2 * drag / (tau * fpk));
 
-      // Record current positions into trail before stepping
+      // Step all animals (updates true x, y, vx, vy) then lerp display positions
+      animals = animals.map(a => {
+        const stepped = stepAnimal(a, ARENA_KM, ARENA_KM, movementRng, noiseScale, springStr, drag);
+        return {
+          ...stepped,
+          dx: a.dx + DISPLAY_LERP * (stepped.x - a.dx),
+          dy: a.dy + DISPLAY_LERP * (stepped.y - a.dy),
+        };
+      });
+      updatePositions(animals);
+
+      // Record smoothed display positions into trail
       for (const animal of animals) {
         let trail = trails.get(animal.id);
         if (!trail) { trail = []; trails.set(animal.id, trail); }
-        trail.push({ x: animal.x, y: animal.y });
+        trail.push({ x: animal.dx, y: animal.dy });
         if (trail.length > TRAIL_LENGTH) trail.shift();
       }
-
-      // Move all animals one step
-      animals = animals.map(a =>
-        stepAnimal(a, ARENA_KM, ARENA_KM, movementRng, movementType, stepSz, springStr)
-      );
-      updatePositions(animals);
 
       // Tick toward next occasion
       framesSinceOcc++;
@@ -190,7 +217,8 @@ new p5(function (p) {
     const innerX0 = BUFFER_KM;
     const innerY0 = BUFFER_KM;
 
-    animals = placeAnimals(N, ARENA_KM, ARENA_KM, placementRng);
+    animals = placeAnimals(N, ARENA_KM, ARENA_KM, placementRng)
+      .map(a => ({ ...a, dx: a.x, dy: a.y }));
 
     if (detectorLayout === 'custom') {
       // Preserve user-placed detectors; re-index them
@@ -215,10 +243,10 @@ new p5(function (p) {
     g0             = parseFloat(document.getElementById('slider-g0')?.value)          || G0_DEFAULT;
     sigma          = parseFloat(document.getElementById('slider-sigma')?.value)        || SIGMA_DEFAULT;
     tau            = parseFloat(document.getElementById('slider-tau')?.value)          || TAU_DEFAULT;
+    fidelity       = parseFloat(document.getElementById('slider-fidelity')?.value)     || FIDELITY_DEFAULT;
     N              = parseInt(document.getElementById('slider-n')?.value, 10)          || N_DEFAULT;
     K              = parseInt(document.getElementById('slider-k')?.value, 10)          || K_DEFAULT;
     gridN          = parseInt(document.getElementById('slider-grid-n')?.value, 10)     || GRID_N_DEFAULT;
-    movementType   = document.getElementById('select-movement')?.value                 || 'brownian';
     detectorLayout = document.getElementById('select-detector-layout')?.value          || 'grid';
   }
 
@@ -311,7 +339,7 @@ new p5(function (p) {
     const img  = animalImgs[iconIndex];
     const size = 28;
     for (const animal of animals) {
-      const { px, py }    = worldToPx(animal.x, animal.y);
+      const { px, py }    = worldToPx(animal.dx, animal.dy);
       const framesLeft    = recentCaptures.get(animal.id) ?? 0;
       const col           = ANIMAL_COLOURS[animal.id % ANIMAL_COLOURS.length];
 
@@ -342,20 +370,36 @@ new p5(function (p) {
     }
   }
 
-  // Draw each animal's recent movement trail as a fading coloured line
+  // Draw each animal's movement trail as a smooth fading Catmull-Rom curve.
+  // The trail is split into CHUNKS segments, each drawn with increasing opacity,
+  // giving a fade-in effect from oldest to most recent position.
   function drawTrails() {
+    const CHUNKS = 5;
+    p.noFill();
     for (const animal of animals) {
       const trail = trails.get(animal.id);
-      if (!trail || trail.length < 2) continue;
-      const col = ANIMAL_COLOURS[animal.id % ANIMAL_COLOURS.length];
-      for (let i = 1; i < trail.length; i++) {
-        // t runs from 0 (oldest segment) to 1 (most recent segment)
-        const t = i / trail.length;
-        p.stroke(col[0], col[1], col[2], t * 180);
+      if (!trail || trail.length < 4) continue;
+      const col       = ANIMAL_COLOURS[animal.id % ANIMAL_COLOURS.length];
+      const chunkSize = Math.ceil(trail.length / CHUNKS);
+
+      for (let chunk = 0; chunk < CHUNKS; chunk++) {
+        const iStart = chunk * chunkSize;
+        const iEnd   = Math.min(iStart + chunkSize + 1, trail.length); // +1 for overlap
+        if (iEnd - iStart < 2) continue;
+
+        p.stroke(col[0], col[1], col[2], ((chunk + 1) / CHUNKS) * 190);
         p.strokeWeight(1.5);
-        const { px: x1, py: y1 } = worldToPx(trail[i - 1].x, trail[i - 1].y);
-        const { px: x2, py: y2 } = worldToPx(trail[i].x,     trail[i].y);
-        p.line(x1, y1, x2, y2);
+        p.beginShape();
+        // Duplicate first/last points as Catmull-Rom control vertices
+        const { px: cx0, py: cy0 } = worldToPx(trail[iStart].x,   trail[iStart].y);
+        const { px: cxN, py: cyN } = worldToPx(trail[iEnd-1].x, trail[iEnd-1].y);
+        p.curveVertex(cx0, cy0);
+        for (let i = iStart; i < iEnd; i++) {
+          const { px, py } = worldToPx(trail[i].x, trail[i].y);
+          p.curveVertex(px, py);
+        }
+        p.curveVertex(cxN, cyN);
+        p.endShape();
       }
     }
     p.noStroke();
@@ -365,9 +409,9 @@ new p5(function (p) {
     p.noStroke();
     p.fill(60);
     p.textSize(12);
-    p.textAlign(p.LEFT, p.TOP);
+    p.textAlign(p.RIGHT, p.TOP);
     const kLabel = currentK === 0 ? 'k = —' : `k = ${currentK} / ${targetK}`;
-    p.text(kLabel, 6, 6);
+    p.text(kLabel, p.width - 6, 6);
   }
 
   // Draw a dashed rectangle (p5 has no built-in)
@@ -456,6 +500,21 @@ new p5(function (p) {
     if (el) el.value = seed;
   }
 
+  // ── Canvas resize ─────────────────────────────────────────────────────────────
+
+  p.windowResized = function () {
+    const container = document.getElementById('sim-container');
+    const cs  = getComputedStyle(container);
+    const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const size = Math.min(container.clientWidth - pad, container.clientHeight);
+    if (size > 0) {
+      p.resizeCanvas(size, size);
+      PX_PER_KM = size / ARENA_KM;
+    }
+    // Notify analytics so charts can redraw at the new container dimensions
+    notifyAll();
+  };
+
   // ── Click-to-place detectors ─────────────────────────────────────────────────
 
   p.mousePressed = function () {
@@ -520,10 +579,34 @@ document.getElementById('slider-tau').addEventListener('input', e => {
   document.getElementById('val-tau').textContent = tau.toFixed(1) + ' occ';
 });
 
-document.getElementById('select-movement').addEventListener('change', e => {
-  movementType = e.target.value;
-  updateParams({ movementType });
+document.getElementById('slider-fidelity').addEventListener('input', e => {
+  fidelity = parseFloat(e.target.value);
+  document.getElementById('val-fidelity').textContent = fidelity.toFixed(1) + '×';
 });
+
+document.getElementById('select-movement-preset').addEventListener('change', e => {
+  const preset = MOVEMENT_PRESETS[e.target.value];
+  if (!preset) return;
+  tau      = preset.tau;
+  fidelity = preset.fidelity;
+  document.getElementById('slider-tau').value          = tau;
+  document.getElementById('slider-fidelity').value     = fidelity;
+  document.getElementById('val-tau').textContent       = tau.toFixed(1) + ' occ';
+  document.getElementById('val-fidelity').textContent  = fidelity.toFixed(1) + '×';
+});
+
+document.getElementById('select-detector-preset').addEventListener('change', e => {
+  const preset = DETECTOR_PRESETS[e.target.value];
+  if (!preset) return;
+  g0    = preset.g0;
+  sigma = preset.sigma;
+  document.getElementById('slider-g0').value          = g0;
+  document.getElementById('slider-sigma').value       = sigma;
+  document.getElementById('val-g0').textContent       = g0.toFixed(2);
+  document.getElementById('val-sigma').textContent    = sigma.toFixed(2) + ' km';
+  updateParams({ g0, sigma });
+});
+
 
 function syncDetectorSliders() {
   const show = detectorLayout === 'grid';
@@ -546,30 +629,43 @@ document.getElementById('btn-remove-all-detectors').addEventListener('click', ()
   if (clearDetectorsFn) clearDetectorsFn();
 });
 
+// Detection surface toggle — shows/hides the overlay in the sim pane
+document.getElementById('toggle-surface').addEventListener('change', e => {
+  const overlay = document.getElementById('surface-overlay');
+  if (!overlay) return;
+  overlay.style.display = e.target.checked ? 'flex' : 'none';
+  // Defer notifyAll one frame so the browser lays out the overlay before
+  // analytics.js reads clientWidth/clientHeight for the surface SVG size
+  if (e.target.checked) requestAnimationFrame(() => notifyAll());
+});
+
 document.getElementById('btn-reset-defaults').addEventListener('click', () => {
-  document.getElementById('slider-g0').value    = G0_DEFAULT;
-  document.getElementById('slider-sigma').value = SIGMA_DEFAULT;
-  document.getElementById('slider-n').value     = N_DEFAULT;
-  document.getElementById('slider-k').value     = K_DEFAULT;
+  document.getElementById('slider-g0').value     = G0_DEFAULT;
+  document.getElementById('slider-sigma').value  = SIGMA_DEFAULT;
+  document.getElementById('slider-n').value      = N_DEFAULT;
+  document.getElementById('slider-k').value      = K_DEFAULT;
   document.getElementById('slider-grid-n').value = GRID_N_DEFAULT;
-  document.getElementById('slider-tau').value   = TAU_DEFAULT;
-  document.getElementById('select-movement').value         = 'brownian';
+  document.getElementById('slider-tau').value      = TAU_DEFAULT;
+  document.getElementById('slider-fidelity').value = FIDELITY_DEFAULT;
   document.getElementById('select-detector-layout').value  = 'grid';
-  document.getElementById('val-g0').textContent    = G0_DEFAULT.toFixed(2);
-  document.getElementById('val-sigma').textContent = SIGMA_DEFAULT.toFixed(2) + ' km';
-  document.getElementById('val-n').textContent     = N_DEFAULT;
-  document.getElementById('val-k').textContent     = K_DEFAULT;
+  document.getElementById('select-movement-preset').value  = 'resident';
+  document.getElementById('select-detector-preset').value  = 'default';
+  document.getElementById('val-g0').textContent     = G0_DEFAULT.toFixed(2);
+  document.getElementById('val-sigma').textContent  = SIGMA_DEFAULT.toFixed(2) + ' km';
+  document.getElementById('val-n').textContent      = N_DEFAULT;
+  document.getElementById('val-k').textContent      = K_DEFAULT;
   document.getElementById('val-grid-n').textContent = `${GRID_N_DEFAULT}×${GRID_N_DEFAULT}`;
-  document.getElementById('val-tau').textContent   = TAU_DEFAULT.toFixed(1) + ' occ';
+  document.getElementById('val-tau').textContent      = TAU_DEFAULT.toFixed(1) + ' occ';
+  document.getElementById('val-fidelity').textContent = FIDELITY_DEFAULT.toFixed(1) + '×';
   g0           = G0_DEFAULT;
   sigma        = SIGMA_DEFAULT;
   tau          = TAU_DEFAULT;
   N            = N_DEFAULT;
   K            = K_DEFAULT;
   gridN        = GRID_N_DEFAULT;
-  movementType = 'brownian';
+  fidelity     = FIDELITY_DEFAULT;
   detectorLayout = 'grid';
   syncDetectorSliders();
-  updateParams({ g0, sigma, movementType });
+  updateParams({ g0, sigma });
   document.getElementById('btn-reset').click();
 });

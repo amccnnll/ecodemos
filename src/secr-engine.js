@@ -23,7 +23,7 @@ export function placeAnimals(n, arenaW, arenaH, rng) {
   return Array.from({ length: n }, (_, i) => {
     const cx = rng() * arenaW;
     const cy = rng() * arenaH;
-    return { id: i, x: cx, y: cy, cx, cy };
+    return { id: i, x: cx, y: cy, cx, cy, vx: 0, vy: 0 };
   });
 }
 
@@ -73,66 +73,57 @@ export function placeDetectors(
 
 // ─── Animal movement ──────────────────────────────────────────────────────────
 
-// Move one animal one step.
+// Move one animal one step using OUV (OU in velocity space).
 //
-// movementType:
-//   'randomWalk' — uniform random direction, fixed step length; no home range pull
-//   'brownian'   — Gaussian step + spring toward hidden home range centre
-//   'levy'       — power-law (Pareto α=1.5) step + spring toward centre
+// Each frame the velocity is updated: drag damps it, Gaussian noise perturbs it,
+// and a spring pulls it toward the hidden home range centre.  The position is
+// then shifted by the resulting velocity.  This gives smooth correlated paths
+// rather than the per-step direction jitter of a position-space OU process.
 //
-// stepSize (km)       — base movement magnitude per frame
-// springStrength (0–1)— fraction of displacement toward home range centre per step
+// Parameter derivation (caller's responsibility — see sketch.js):
+//   springStr  = fidelity / (tau × fpk)
+//   noiseScale = sigma × √(2 × drag / (tau × fpk))
+//   where drag is a fixed smoothness constant (≈ 0.08)
 //
-// habitatFn(x, y) → [0,1]: reserved for habitat-biased movement (v-next).
-// Accepted now so call signatures stay stable when habitat is added.
+// At equilibrium: σ_position ≈ sigma / √fidelity, independently of tau.
+// Changing fidelity shrinks or enlarges the effective home range.
+// Changing tau changes how quickly the animal moves within its range.
 //
-// Boundaries: soft clamp — arena edges stop the animal. Home range spring prevents
-// persistent wall-hugging. No wrap-around (unlike DS) since home ranges are localised.
+// Arena boundaries: velocity is reflected so animals don't accumulate against walls.
 export function stepAnimal(
   animal,
   arenaW, arenaH,
   rng,
-  movementType   = 'brownian',
-  stepSize       = 0.01,
-  springStrength = 0.05,
-  habitatFn      = () => 1,   // eslint-disable-line no-unused-vars
+  noiseScale    = 0.005,
+  springStr     = 0.005,
+  drag          = 0.08,
 ) {
-  let dx = 0;
-  let dy = 0;
+  // Gaussian noise via Box-Muller (2 uniform samples → 2 independent N(0,1))
+  const u1 = Math.max(rng(), 1e-10);
+  const r  = Math.sqrt(-2 * Math.log(u1));
+  const th = 2 * Math.PI * rng();
+  const nx = r * Math.cos(th) * noiseScale;
+  const ny = r * Math.sin(th) * noiseScale;
 
-  if (movementType === 'randomWalk') {
-    const angle = rng() * 2 * Math.PI;
-    dx = Math.cos(angle) * stepSize;
-    dy = Math.sin(angle) * stepSize;
+  // OUV update: drag velocity, apply spring toward home centre, add noise
+  let vx = (animal.vx ?? 0) * (1 - drag)
+         + springStr * (animal.cx - animal.x)
+         + nx;
+  let vy = (animal.vy ?? 0) * (1 - drag)
+         + springStr * (animal.cy - animal.y)
+         + ny;
 
-  } else if (movementType === 'brownian') {
-    // Box-Muller Gaussian step
-    const u1    = Math.max(rng(), 1e-10);
-    const r     = Math.sqrt(-2 * Math.log(u1)) * stepSize;
-    const angle = 2 * Math.PI * rng();
-    dx = Math.cos(angle) * r;
-    dy = Math.sin(angle) * r;
-    // Spring pull toward hidden home range centre
-    dx += (animal.cx - animal.x) * springStrength;
-    dy += (animal.cy - animal.y) * springStrength;
+  // Update position
+  let x = animal.x + vx;
+  let y = animal.y + vy;
 
-  } else if (movementType === 'levy') {
-    // Pareto inverse-CDF with α=1.5; cap extreme steps at 40% of arena width
-    const u     = Math.max(rng(), 1e-10);
-    const r     = Math.min(stepSize / Math.pow(u, 1 / 1.5), arenaW * 0.4);
-    const angle = rng() * 2 * Math.PI;
-    dx = Math.cos(angle) * r;
-    dy = Math.sin(angle) * r;
-    // Spring pull toward hidden home range centre
-    dx += (animal.cx - animal.x) * springStrength;
-    dy += (animal.cy - animal.y) * springStrength;
-  }
+  // Reflect off arena walls (preserves speed, prevents wall-hugging)
+  if (x < 0)      { x = -x;            vx = -vx; }
+  if (x > arenaW) { x = 2 * arenaW - x; vx = -vx; }
+  if (y < 0)      { y = -y;            vy = -vy; }
+  if (y > arenaH) { y = 2 * arenaH - y; vy = -vy; }
 
-  // Soft clamp at arena boundaries
-  const nx = Math.max(0, Math.min(arenaW, animal.x + dx));
-  const ny = Math.max(0, Math.min(arenaH, animal.y + dy));
-
-  return { ...animal, x: nx, y: ny };
+  return { ...animal, x, y, vx, vy };
 }
 
 // ─── Detection ────────────────────────────────────────────────────────────────
@@ -197,8 +188,8 @@ export function detectionSurface(
 // Compute ESA (effective sample area, km²):  ESA = ∫∫ p(x,y) · h(x,y) dx dy
 //
 // With uniform habitat (h=1) this is just Σ p_cell × cell_area.
-// Theoretical density estimate: D̂ = M / ESA
-// where M is the number of distinct individuals captured at least once.
+// This is the *single-occasion* ESA — only appropriate when K=1.
+// For multi-occasion surveys, use computeESA_K.
 export function computeESA(
   detectors,
   g0, sigma,
@@ -210,4 +201,24 @@ export function computeESA(
   const cellArea = (arenaW / cols) * (arenaH / rows);
   return detectionSurface(detectors, g0, sigma, arenaW, arenaH, cols, rows, habitatFn)
     .reduce((sum, c) => sum + c.p * cellArea, 0);
+}
+
+// Compute K-occasion ESA:  ∫∫ [1 − (1 − p₁(x,y))^K] · h(x,y) dx dy
+//
+// M counts individuals caught at least once across K occasions.
+// The matching denominator is the probability of detection across all K occasions,
+// not just a single occasion — otherwise D̂ ≈ K × true D at default settings.
+export function computeESA_K(
+  detectors,
+  g0, sigma,
+  arenaW, arenaH,
+  K,
+  cols      = 60,
+  rows      = 60,
+  habitatFn = () => 1,
+) {
+  if (!K || K <= 0) return 0;
+  const cellArea = (arenaW / cols) * (arenaH / rows);
+  return detectionSurface(detectors, g0, sigma, arenaW, arenaH, cols, rows, habitatFn)
+    .reduce((sum, c) => sum + (1 - Math.pow(1 - c.p, K)) * cellArea, 0);
 }

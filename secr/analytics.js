@@ -11,7 +11,7 @@
  */
 
 import { subscribe, state } from './state.js';
-import { detectionSurface, computeESA } from '../src/secr-engine.js';
+import { detectionSurface, computeESA_K } from '../src/secr-engine.js';
 
 // Match sketch.js — per-animal colours for capture history row headers
 const ANIMAL_COLOURS = [
@@ -23,14 +23,23 @@ const ANIMAL_LABELS = 'ABCDEFGHIJ';
 
 export function initAnalytics() {
   subscribe(render);
+  // Force a deferred render one frame after init.  This catches two failure modes:
+  // (a) resetState() fired before subscribe() was called (p5 preload timing race)
+  // (b) chart containers had 0 dimensions when the initial notification arrived
+  requestAnimationFrame(() => render(state));
 }
 
 function render(s) {
   if (!s.arenaW) return; // not yet initialised
-  updateSurface(s);
-  updateCaptureHistory(s);
-  updateDhat(s);
-  updateSecrEstimates(s);
+  // Run each panel independently — one failure should not block the others
+  for (const [name, fn] of [
+    ['surface',   updateSurface],
+    ['captures',  updateCaptureHistory],
+    ['dhat',      updateDhat],
+    ['estimates', updateSecrEstimates],
+  ]) {
+    try { fn(s); } catch (err) { console.error(`[SECR analytics] ${name}:`, err); }
+  }
 }
 
 // ─── 1. Detection surface heatmap ─────────────────────────────────────────────
@@ -44,12 +53,15 @@ let surfaceY;      // px scale for world y
 function updateSurface(s) {
   const container = document.getElementById('chart-detection-surface');
   if (!container) return;
+  // Skip expensive computation while the overlay is hidden
+  const overlayEl = document.getElementById('surface-overlay');
+  if (!overlayEl || overlayEl.style.display === 'none') return;
 
   const W    = container.clientWidth  || 260;
   const H    = container.clientHeight || W;
   // Square: use whichever dimension is smaller so the SVG fits its container
   const side   = Math.min(W, H);
-  const margin = { top: 8, right: 8, bottom: 24, left: 30 };
+  const margin = { top: 8, right: 8, bottom: 32, left: 30 };
   const innerW = side - margin.left - margin.right;
   const innerH = side - margin.top  - margin.bottom;
 
@@ -59,12 +71,42 @@ function updateSurface(s) {
     surfaceSvg = d3.select(container).append('svg')
       .attr('width', side).attr('height', side)
       .attr('data-side', side);
+
+    // Gradient definition for colour legend
+    const defs = surfaceSvg.append('defs');
+    const grad = defs.append('linearGradient').attr('id', 'surface-legend-grad')
+      .attr('x1', '0%').attr('x2', '100%');
+    const nStops = 12;
+    for (let i = 0; i <= nStops; i++) {
+      grad.append('stop')
+        .attr('offset', `${(i / nStops * 100).toFixed(1)}%`)
+        .attr('stop-color', d3.interpolateYlOrRd(i / nStops));
+    }
+
     surfaceG = surfaceSvg.append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
     surfaceG.append('g').attr('class', 'cells');
     surfaceG.append('g').attr('class', 'overlay');   // boundaries + detectors
-    surfaceG.append('g').attr('class', 'x-axis').attr('transform', `translate(0,${innerH})`);
     surfaceG.append('g').attr('class', 'y-axis');
+    // Colour legend at bottom
+    const legendG = surfaceG.append('g').attr('class', 'legend')
+      .attr('transform', `translate(0,${innerH + 10})`);
+    legendG.append('rect')
+      .attr('width', innerW).attr('height', 9).attr('rx', 2)
+      .attr('fill', 'url(#surface-legend-grad)');
+    legendG.append('text')
+      .attr('x', 0).attr('y', 20)
+      .attr('font-size', 9).attr('fill', '#777').attr('text-anchor', 'start')
+      .text('p = 0');
+    legendG.append('text')
+      .attr('x', innerW / 2).attr('y', 20)
+      .attr('font-size', 9).attr('fill', '#777').attr('text-anchor', 'middle')
+      .text('detection probability');
+    legendG.append('text')
+      .attr('x', innerW).attr('y', 20)
+      .attr('font-size', 9).attr('fill', '#777').attr('text-anchor', 'end')
+      .text('1');
+
     surfaceScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, 1]);
   }
 
@@ -92,7 +134,7 @@ function updateSurface(s) {
       .attr('y',      d => surfaceY(d.cy) - cellPxH / 2)
       .attr('width',  cellPxW + 0.5)   // slight overlap to avoid subpixel gaps
       .attr('height', cellPxH + 0.5)
-      .attr('fill',   d => d.p < 0.001 ? '#f5f5f8' : surfaceScale(d.p));
+      .attr('fill',   d => d.p < 0.001 ? 'transparent' : surfaceScale(d.p));
 
   // Overlay: inner study area boundary
   const overlay = surfaceG.select('.overlay');
@@ -120,10 +162,7 @@ function updateSurface(s) {
         .attr('opacity', 0.8);
   }
 
-  // Axes
-  surfaceG.select('.x-axis').call(
-    d3.axisBottom(surfaceX).ticks(4).tickFormat(d => d + ' km')
-  );
+  // Y-axis (km scale)
   surfaceG.select('.y-axis').call(
     d3.axisLeft(surfaceY).ticks(4).tickFormat(d => d + ' km')
   );
@@ -251,11 +290,21 @@ function updateDhat(s) {
 
   const W      = container.clientWidth  || 260;
   const H      = container.clientHeight || 160;
+  // Defer if container not yet laid out
+  if (W <= 1 || H <= 1) return;
+
   const margin = { top: 10, right: 16, bottom: 28, left: 46 };
   const innerW = W - margin.left - margin.right;
   const innerH = H - margin.top  - margin.bottom;
 
-  if (!dhatSvg) {
+  // Rebuild SVG when container size changes (e.g. after layout settles on first load)
+  const prevW = dhatSvg ? +dhatSvg.attr('width')  : 0;
+  const prevH = dhatSvg ? +dhatSvg.attr('height') : 0;
+  if (!dhatSvg || Math.abs(prevW - W) > 4 || Math.abs(prevH - H) > 4) {
+    dhatSvg = null;
+    dhatG   = null;
+    committedYHi  = 0;
+    committedXMax = s.K ?? 10;
     d3.select(container).selectAll('svg').remove();
     dhatSvg = d3.select(container).append('svg').attr('width', W).attr('height', H);
     dhatG   = dhatSvg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
@@ -263,6 +312,10 @@ function updateDhat(s) {
     dhatG.append('g').attr('class', 'y-axis');
     dhatG.append('path').attr('class', 'dhat-line');
     dhatG.append('line').attr('class', 'true-d-line');
+    dhatG.append('text').attr('class', 'x-label')
+      .attr('x', innerW / 2).attr('y', innerH + margin.bottom - 2)
+      .attr('text-anchor', 'middle').attr('font-size', 10).attr('fill', '#555')
+      .text('Occasion (k)');
     dhatG.append('text').attr('class', 'y-label')
       .attr('transform', 'rotate(-90)')
       .attr('x', -innerH / 2).attr('y', -36)
@@ -274,19 +327,24 @@ function updateDhat(s) {
   const k        = s.k ?? 0;
   const trueD    = s.trueD;
 
-  // Compute D̂ history up to current k
-  // ESA is constant for given g0, sigma, detectors
+  // Compute D̂ history up to current k.
+  // ESA must use the K-occasion formula: ∫∫ [1−(1−p₁)^ki] dx dy, where ki grows
+  // with each occasion. Precompute the detection surface once, then derive per-ki
+  // ESA by reducing over cells — avoids re-running detectionSurface k times.
   const hasDetectors = s.detectors && s.detectors.length > 0;
-  const esa = hasDetectors
-    ? computeESA(s.detectors, s.g0, s.sigma, s.arenaW, s.arenaH)
-    : 0;
+  const COLS = 60, ROWS = 60;
+  const surface  = hasDetectors
+    ? detectionSurface(s.detectors, s.g0, s.sigma, s.arenaW, s.arenaH, COLS, ROWS)
+    : [];
+  const cellArea = s.arenaW * s.arenaH / (COLS * ROWS);
 
   const history = [];
-  if (esa > 0 && k > 0) {
+  if (surface.length > 0 && k > 0) {
     for (let ki = 1; ki <= k; ki++) {
       const capturedByK = new Set(captures.filter(c => c.k <= ki).map(c => c.animalId));
-      const M    = capturedByK.size;
-      const dhat = M / esa;
+      const M      = capturedByK.size;
+      const esa_ki = surface.reduce((sum, c) => sum + (1 - Math.pow(1 - c.p, ki)) * cellArea, 0);
+      const dhat   = esa_ki > 0 ? M / esa_ki : 0;
       history.push({ k: ki, dhat });
     }
   }
@@ -345,8 +403,9 @@ function updateSecrEstimates(s) {
   const K    = s.K ?? '—';
 
   const hasDetectors = s.detectors && s.detectors.length > 0;
-  const esa  = hasDetectors && s.arenaW
-    ? computeESA(s.detectors, s.g0, s.sigma, s.arenaW, s.arenaH)
+  // Use K-occasion ESA to match the denominator for M (caught at least once across k occasions)
+  const esa  = hasDetectors && s.arenaW && k > 0
+    ? computeESA_K(s.detectors, s.g0, s.sigma, s.arenaW, s.arenaH, k)
     : 0;
   const dhat = esa > 0 && M > 0 ? M / esa : null;
 
