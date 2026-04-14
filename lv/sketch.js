@@ -177,8 +177,8 @@ function syncControlsFromState() {
   document.getElementById("row-delta").style.display = showCompetition ? "none" : "flex";
   document.getElementById("row-gamma").style.display = showCompetition ? "none" : "flex";
 
-  document.getElementById("label-prey0").textContent = showCompetition ? "N1_0" : "Prey0";
-  document.getElementById("label-pred0").textContent = showCompetition ? "N2_0" : "Pred0";
+  document.getElementById("label-prey0").textContent = showCompetition ? "N₁,₀" : "N₀";
+  document.getElementById("label-pred0").textContent = showCompetition ? "N₂,₀" : "P₀";
 
   setVal("slider-alpha", state.alpha);
   setVal("slider-beta", state.beta);

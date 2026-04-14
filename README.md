@@ -2,7 +2,7 @@
 
 Interactive, animated simulations of ecological models.
 
-> Work in progress — pls check back soon.
+View the demos here: https://amccnnll.github.io/ecodemos/
 
 ---
 

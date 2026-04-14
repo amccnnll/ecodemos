@@ -70,9 +70,9 @@ Checkpoint behaviour:
 
 ### Shared controls
 
-- dt slider: 0.005 to 0.080, step 0.001, default 0.030.
-- Initial population 1 slider ($N_0$ or $N_{1,0}$): 5 to 120, default 40.
-- Initial population 2 slider ($P_0$ or $N_{2,0}$): 1 to 60, default 9.
+- $\Delta t$ slider: 0.005 to 0.080, step 0.001, default 0.030.
+- $N_0$ or $N_{1,0}$ (initial population 1) slider: 5 to 120, default 40.
+- $P_0$ or $N_{2,0}$ (initial population 2) slider: 1 to 60, default 9.
 
 ### Classic predator-prey controls
 

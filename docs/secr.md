@@ -53,22 +53,22 @@ where $M$ is number of unique detected individuals.
 
 ### Detection and population
 
-- g0 slider: 0.05 to 1.00, step 0.01, default 0.40.
-- sigma slider: 0.05 to 0.50 km, step 0.01, default 0.20.
-- N slider: 1 to 50 individuals, step 1, default 10.
+- $g_0$ slider: 0.05 to 1.00, step 0.01, default 0.40.
+- $\sigma$ slider: 0.05 to 0.50 km, step 0.01, default 0.20.
+- $N$ slider: 1 to 50 individuals, step 1, default 10.
 - Occasions ($K$) slider: 5 to 100, step 1, default 10.
 
 ### Movement
 
 - Movement preset selector (resident, sedentary, wide-ranging, nomad).
-- Mobility tau slider: 0.5 to 20.0 occasions, step 0.5, default 5.0.
-- Fidelity slider: 0.2 to 4.0, step 0.1, default 1.0.
+- $\tau$ (mobility) slider: 0.5 to 20.0 occasions, step 0.5, default 5.0.
+- $f$ (fidelity) slider: 0.2 to 4.0, step 0.1, default 1.0.
 
 ### Detector design
 
 - Detector type preset selector.
 - Detector layout selector: grid, random, custom click-to-place.
-- Grid size slider: 3 to 7 per axis, default 4x4.
+- $n_{\mathrm{grid}}$ (grid size) slider: 3 to 7 per axis, default 4x4.
 - Remove all detectors button for custom mode.
 
 ### Visual toggles
@@ -98,12 +98,12 @@ For each occasion and detector j:
 
 Movement uses Ornstein-Uhlenbeck dynamics in velocity space, with two user-facing controls:
 
-- tau sets movement timescale
-- fidelity scales home-range tightness
+- $\tau$ sets movement timescale
+- $f$ scales home-range tightness
 
 Internal calibration ensures:
 
-- tau controls position autocorrelation timescale
+- $\tau$ controls position autocorrelation timescale
 - $\sigma_{\mathrm{eff}}$ is consistent across detection surface and ESA calculations
 
 ### ESA and $\hat{D}$
@@ -119,10 +119,10 @@ The demo uses $K$-occasion ESA (not single-occasion ESA), so $\hat{D}$ reflects 
 ## Assumptions and scope
 
 - $\hat{D}$ shown is an educational running estimator, not a full maximum-likelihood SECR fit.
-- g0 and sigma update live for visual/analytic response.
+- $g_0$ and $\sigma$ update live for visual/analytic response.
 - most structural controls apply on reset.
 
 ## External references
 
-- Distance Sampling publications: https://distancesampling.org/publications.html
-- Borchers and Efford (2008): https://doi.org/10.1111/j.0006-341X.2008.01044.x
+- Distance Sampling references and citations: https://distancesampling.org/resources/citations.html
+- Borchers and Efford (2008), Crossref record (DOI: 10.1111/j.1541-0420.2007.00927.x): https://api.crossref.org/works/10.1111/j.1541-0420.2007.00927.x

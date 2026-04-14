@@ -94,7 +94,7 @@
           </div>
 
           <div class="slider-row" id="row-b" style="display:none">
-            <span class="control-label slider-label">Shape (b)</span>
+            <span class="control-label slider-label">b (shape)</span>
             <input type="range" id="slider-b" class="param-slider"
                    min="1" max="10" step="0.1" value="2.5"
                    aria-label="Hazard-rate shape parameter b" />
@@ -102,7 +102,7 @@
           </div>
 
           <div class="slider-row">
-            <span class="control-label slider-label">Density</span>
+            <span class="control-label slider-label">D</span>
             <input type="range" id="slider-density" class="param-slider"
                    min="10" max="200" step="5" value="50"
                    aria-label="Animal density (per km²)" />
@@ -110,7 +110,7 @@
           </div>
 
           <div class="slider-row">
-            <span class="control-label slider-label">Length</span>
+            <span class="control-label slider-label">L</span>
             <input type="range" id="slider-transect" class="param-slider"
                    min="1" max="8" step="0.5" value="4"
                    aria-label="Transect length (km)" />
@@ -127,7 +127,7 @@
           </div>
 
           <div class="slider-row" id="row-clump-scale" style="display:none">
-            <span class="control-label slider-label">Clump scale</span>
+            <span class="control-label slider-label">s_clump</span>
             <input type="range" id="slider-clump-scale" class="param-slider"
                    min="0.02" max="0.30" step="0.01" value="0.10"
                    aria-label="Cluster spread as fraction of transect length" />
@@ -135,14 +135,14 @@
           </div>
 
           <div class="slider-row" id="row-regularity" style="display:none">
-            <span class="control-label slider-label">Regularity</span>
+            <span class="control-label slider-label">ρ (regularity)</span>
             <input type="range" id="slider-regularity" class="param-slider"
                    min="0" max="1" step="0.05" value="0.5"
                    aria-label="Grid jitter: 0 = perfect grid, 1 = Poisson" />
             <span class="slider-value" id="val-regularity">0.50</span>
           </div>
 
-          <p class="seed-hint">σ, W, detection functions and shape (b) update live. All other parameters take effect on Reset.</p>
+          <p class="seed-hint">σ, W, detection functions and b update live. All other parameters take effect on Reset.</p>
 
           <button id="btn-reset-defaults" class="btn-secondary btn-reset-defaults">↺ Reset to defaults</button>
 

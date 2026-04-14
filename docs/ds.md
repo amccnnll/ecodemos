@@ -61,10 +61,10 @@ Implementation detail:
 
 ### Detection and survey design
 
-- sigma slider: 0.05 to 0.50 km, step 0.01, default 0.25.
-- W slider: 0.10 to 0.60 km, step 0.01, default 0.40.
-- Density slider: 10 to 200 animals/km², step 5, default 50.
-- Transect length slider: 1.0 to 8.0 km, step 0.5, default 4.0.
+- $\sigma$ slider: 0.05 to 0.50 km, step 0.01, default 0.25.
+- $W$ slider: 0.10 to 0.60 km, step 0.01, default 0.40.
+- $D$ (density) slider: 10 to 200 animals/km², step 5, default 50.
+- $L$ (transect length) slider: 1.0 to 8.0 km, step 0.5, default 4.0.
 
 ### Model options
 
@@ -82,8 +82,8 @@ Implementation detail:
   - Uniform
   - Clustered
   - Regular
-- Clump scale (clustered only): 0.02 to 0.30, step 0.01, default 0.10.
-- Regularity (regular only): 0.00 to 1.00, step 0.05, default 0.50.
+- $s_{\mathrm{clump}}$ (clustered only): 0.02 to 0.30, step 0.01, default 0.10.
+- $\rho$ (regularity, regular only): 0.00 to 1.00, step 0.05, default 0.50.
 
 ### Run overlays
 
@@ -106,7 +106,7 @@ Implementation detail:
 
 - Classic DS assumption $g(0)=1$ holds in half-normal mode.
 - Animals are static in this version.
-- Some controls update live (sigma, W, model choices), while placement-related controls apply on reset.
+- Some controls update live ($\sigma$, $W$, model choices), while placement-related controls apply on reset.
 
 ## External references
 
