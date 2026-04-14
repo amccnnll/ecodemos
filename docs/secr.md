@@ -14,7 +14,7 @@ The key teaching point is that detection is spatial and imperfect:
 
 Detection model used in the demo:
 
-p(d) = g0 * exp(-(d^2) / (2 * sigma_eff^2))
+p(d) = g0 _ exp(-(d^2) / (2 _ sigma_eff^2))
 
 where:
 
@@ -82,7 +82,7 @@ Implementation consequence:
 For each occasion and detector j:
 
 1. compute distance d_ij from activity centre i to detector j
-2. compute p_ij = g0 * exp(-(d_ij^2)/(2 * sigma_eff^2))
+2. compute p_ij = g0 _ exp(-(d_ij^2)/(2 _ sigma_eff^2))
 3. draw Bernoulli detection using RNG
 4. record capture event {animalId, detectorId, k} if detected
 

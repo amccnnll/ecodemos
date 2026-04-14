@@ -13,7 +13,7 @@ The key teaching point is the separation between:
 
 Half-normal detection function:
 
-g(x) = exp(-(x^2) / (2 * sigma^2))
+g(x) = exp(-(x^2) / (2 \* sigma^2))
 
 where:
 
@@ -26,7 +26,7 @@ ESW = integral from 0 to W of g(x) dx
 
 Density estimator used in the analytics strip:
 
-D_hat = n / (2 * L * ESW)
+D_hat = n / (2 _ L _ ESW)
 
 where:
 

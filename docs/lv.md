@@ -23,23 +23,23 @@ State update per step:
 
 ### Classic predator-prey
 
-dPrey/dt = alpha * Prey - beta * Prey * Predator
+dPrey/dt = alpha _ Prey - beta _ Prey \* Predator
 
-dPredator/dt = delta * Prey * Predator - gamma * Predator
+dPredator/dt = delta _ Prey _ Predator - gamma \* Predator
 
 ### Dynamic predator-prey
 
-dPrey/dt = alpha * Prey * (1 - Prey / K) - beta * Prey * Predator
+dPrey/dt = alpha _ Prey _ (1 - Prey / K) - beta _ Prey _ Predator
 
-dPredator/dt = delta * Prey * Predator - gamma * Predator - m * Predator^2
+dPredator/dt = delta _ Prey _ Predator - gamma _ Predator - m _ Predator^2
 
 where K is prey carrying capacity and m is predator self-limitation.
 
 ### Competition
 
-dN1/dt = r1 * N1 * (1 - (N1 + alpha12 * N2) / K1)
+dN1/dt = r1 _ N1 _ (1 - (N1 + alpha12 \* N2) / K1)
 
-dN2/dt = r2 * N2 * (1 - (N2 + alpha21 * N1) / K2)
+dN2/dt = r2 _ N2 _ (1 - (N2 + alpha21 \* N1) / K2)
 
 ## Controls and exact meanings
 
