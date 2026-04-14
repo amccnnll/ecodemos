@@ -121,7 +121,7 @@ function updateSurface(s) {
 
   // Compute surface (only if detectors exist)
   const cells = hasDetectors
-    ? detectionSurface(s.detectors, s.g0, s.sigma, s.arenaW, s.arenaH, cols, rows)
+    ? detectionSurface(s.detectors, s.g0, s.sigmaEff, s.arenaW, s.arenaH, cols, rows)
     : Array.from({ length: cols * rows }, (_, i) => ({
         cx: ((i % cols) + 0.5) * (s.arenaW / cols),
         cy: (Math.floor(i / cols) + 0.5) * (s.arenaH / rows),
@@ -334,7 +334,7 @@ function updateDhat(s) {
   const hasDetectors = s.detectors && s.detectors.length > 0;
   const COLS = 60, ROWS = 60;
   const surface  = hasDetectors
-    ? detectionSurface(s.detectors, s.g0, s.sigma, s.arenaW, s.arenaH, COLS, ROWS)
+    ? detectionSurface(s.detectors, s.g0, s.sigmaEff, s.arenaW, s.arenaH, COLS, ROWS)
     : [];
   const cellArea = s.arenaW * s.arenaH / (COLS * ROWS);
 
@@ -405,7 +405,7 @@ function updateSecrEstimates(s) {
   const hasDetectors = s.detectors && s.detectors.length > 0;
   // Use K-occasion ESA to match the denominator for M (caught at least once across k occasions)
   const esa  = hasDetectors && s.arenaW && k > 0
-    ? computeESA_K(s.detectors, s.g0, s.sigma, s.arenaW, s.arenaH, k)
+    ? computeESA_K(s.detectors, s.g0, s.sigmaEff, s.arenaW, s.arenaH, k)
     : 0;
   const dhat = esa > 0 && M > 0 ? M / esa : null;
 

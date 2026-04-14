@@ -131,11 +131,15 @@ export function stepAnimal(
 // Run one complete occasion across all (animal, detector) pairs.
 // Returns capture events: [{ animalId, detectorId }]
 // A single animal may be captured by multiple detectors on the same occasion.
+//
+// Detection is based on distance from activity centre (cx, cy), not current
+// position — consistent with SECR theory where g(d) is a marginalised home-range
+// detection function, not an instantaneous proximity function.
 export function tryDetectsOnOccasion(animals, detectors, g0, sigma, rng) {
   const captures = [];
   for (const animal of animals) {
     for (const detector of detectors) {
-      const d = Math.hypot(animal.x - detector.x, animal.y - detector.y);
+      const d = Math.hypot(animal.cx - detector.x, animal.cy - detector.y);
       const g = g0 * halfNormal(d, sigma);
       if (rng() < g) {
         captures.push({ animalId: animal.id, detectorId: detector.id });

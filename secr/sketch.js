@@ -33,8 +33,8 @@ const BUFFER_KM   = 0.4;              // buffer zone around inner study area (km
 const INNER_KM    = 1.2;              // inner study area side length (km)
 const ARENA_KM    = INNER_KM + 2 * BUFFER_KM; // total arena side (= 2 km)
 
-const G0_DEFAULT       = 0.5;
-const SIGMA_DEFAULT    = 0.20;        // km — 2σ ≈ buffer width, animals regularly stray into inner area
+const G0_DEFAULT       = 0.4;
+const SIGMA_DEFAULT    = 0.10;        // km — home range scale; buffer ≈ 4σ at this value
 const N_DEFAULT        = 10;          // more animals → reliable detections in demos
 const K_DEFAULT        = 10;
 const GRID_N_DEFAULT   = 4;           // 4×4 = 16 detectors
@@ -54,11 +54,15 @@ const MOVEMENT_PRESETS = {
 };
 
 const DETECTOR_PRESETS = {
-  default:  { g0: 0.50, sigma: 0.20 },
+  default:  { g0: 0.40, sigma: 0.10 },
   camera:   { g0: 0.45, sigma: 0.08 },
   liveTrap: { g0: 0.60, sigma: 0.05 },
   acoustic: { g0: 0.20, sigma: 0.40 },
 };
+
+// Effective detection σ = intrinsic σ / √fidelity.
+// High fidelity → tighter home range → smaller effective detection range.
+function computeSigmaEff() { return sigma / Math.sqrt(fidelity); }
 
 const ANIMAL_FILES = ['crocodile', 'dolphin', 'eagle', 'leopard', 'lobster', 'snake', 't-rex'];
 
@@ -254,7 +258,7 @@ new p5(function (p) {
 
   function runOccasion() {
     currentK++;
-    const captures = tryDetectsOnOccasion(animals, detectors, g0, sigma, detectionRng);
+    const captures = tryDetectsOnOccasion(animals, detectors, g0, computeSigmaEff(), detectionRng);
 
     // Spawn detection flashes (one per capture event, at the detector position)
     for (const c of captures) {
@@ -559,7 +563,7 @@ document.getElementById('slider-g0').addEventListener('input', e => {
 document.getElementById('slider-sigma').addEventListener('input', e => {
   sigma = parseFloat(e.target.value);
   document.getElementById('val-sigma').textContent = sigma.toFixed(2) + ' km';
-  updateParams({ sigma });
+  updateParams({ sigma, sigmaEff: computeSigmaEff() });
 });
 
 document.getElementById('slider-n').addEventListener('input', e => {
@@ -582,6 +586,7 @@ document.getElementById('slider-tau').addEventListener('input', e => {
 document.getElementById('slider-fidelity').addEventListener('input', e => {
   fidelity = parseFloat(e.target.value);
   document.getElementById('val-fidelity').textContent = fidelity.toFixed(1) + '×';
+  updateParams({ sigmaEff: computeSigmaEff() });
 });
 
 document.getElementById('select-movement-preset').addEventListener('change', e => {
@@ -593,6 +598,7 @@ document.getElementById('select-movement-preset').addEventListener('change', e =
   document.getElementById('slider-fidelity').value     = fidelity;
   document.getElementById('val-tau').textContent       = tau.toFixed(1) + ' occ';
   document.getElementById('val-fidelity').textContent  = fidelity.toFixed(1) + '×';
+  updateParams({ sigmaEff: computeSigmaEff() });
 });
 
 document.getElementById('select-detector-preset').addEventListener('change', e => {
@@ -604,7 +610,7 @@ document.getElementById('select-detector-preset').addEventListener('change', e =
   document.getElementById('slider-sigma').value       = sigma;
   document.getElementById('val-g0').textContent       = g0.toFixed(2);
   document.getElementById('val-sigma').textContent    = sigma.toFixed(2) + ' km';
-  updateParams({ g0, sigma });
+  updateParams({ g0, sigma, sigmaEff: computeSigmaEff() });
 });
 
 
