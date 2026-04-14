@@ -79,9 +79,9 @@
             <div class="slider-row">
               <span class="control-label slider-label">g₀</span>
               <input type="range" id="slider-g0" class="param-slider"
-                     min="0.05" max="1.0" step="0.01" value="0.5"
+                     min="0.05" max="1.0" step="0.01" value="0.40"
                      aria-label="Maximum detection probability g₀" />
-              <span class="slider-value" id="val-g0">0.50</span>
+              <span class="slider-value" id="val-g0">0.40</span>
             </div>
 
             <div class="slider-row">
@@ -95,7 +95,7 @@
             <div class="slider-row">
               <span class="control-label slider-label">N</span>
               <input type="range" id="slider-n" class="param-slider"
-                     min="1" max="20" step="1" value="10"
+                     min="1" max="50" step="1" value="10"
                      aria-label="Number of animals" />
               <span class="slider-value" id="val-n">10</span>
             </div>
@@ -103,7 +103,7 @@
             <div class="slider-row">
               <span class="control-label slider-label">Occasions</span>
               <input type="range" id="slider-k" class="param-slider"
-                     min="5" max="30" step="1" value="10"
+                     min="5" max="100" step="1" value="10"
                      aria-label="Occasions per run (K)" />
               <span class="slider-value" id="val-k">10</span>
             </div>
@@ -121,9 +121,9 @@
             <div class="slider-row">
               <span class="control-label slider-label">Mobility (τ)</span>
               <input type="range" id="slider-tau" class="param-slider"
-                     min="0.5" max="20" step="0.5" value="2"
+                     min="0.5" max="20" step="0.5" value="5"
                      aria-label="Home range crossing time τ (occasions): low = fast, high = slow" />
-              <span class="slider-value" id="val-tau">2.0 occ</span>
+              <span class="slider-value" id="val-tau">5.0 occ</span>
             </div>
 
             <div class="slider-row">
@@ -165,6 +165,14 @@
 
             <div class="controls-divider"></div>
 
+            <label class="checkbox-row">
+              <input type="checkbox" id="toggle-centroids" />
+              Show activity centres
+            </label>
+            <p class="seed-hint">True centres (•) and estimated centres (×) per animal. Estimated = mean of capturing detector positions; converges toward truth as k grows.</p>
+
+            <div class="controls-divider"></div>
+
             <p class="seed-hint">g₀ and σ update live. All other parameters take effect on Reset. τ takes effect immediately.</p>
             <p class="seed-hint">τ = occasions to cross home range radius. Low τ → restless; high τ → sedentary.</p>
 
@@ -196,6 +204,15 @@
 
           <dt class="true-row">True D</dt>
           <dd id="est-secr-trued" class="true-row">—</dd>
+
+          <dt>Home range (πσ²)</dt>
+          <dd id="est-secr-hr">—</dd>
+
+          <dt>Recapture rate</dt>
+          <dd id="est-secr-recap">—</dd>
+
+          <dt>Coverage (M/N)</dt>
+          <dd id="est-secr-coverage">—</dd>
         </dl>
       </div><!-- /.pane-secr-estimates -->
 

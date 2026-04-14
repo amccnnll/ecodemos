@@ -81,13 +81,14 @@ export function placeDetectors(
 // rather than the per-step direction jitter of a position-space OU process.
 //
 // Parameter derivation (caller's responsibility — see sketch.js):
-//   springStr  = fidelity / (tau × fpk)
-//   noiseScale = sigma × √(2 × drag / (tau × fpk))
+//   springStr  = drag / (tau × fpk)
+//   noiseScale = sigma × drag × √(2 / (fidelity × tau × fpk))
 //   where drag is a fixed smoothness constant (≈ 0.08)
 //
 // At equilibrium: σ_position ≈ sigma / √fidelity, independently of tau.
-// Changing fidelity shrinks or enlarges the effective home range.
-// Changing tau changes how quickly the animal moves within its range.
+// τ sets the home-range crossing time (position autocorrelation time = τ·fpk).
+// Fidelity purely controls noise amplitude — higher fidelity = tighter home range.
+// System is overdamped for all reasonable τ (drag² > 4·Ks since drag/(τ·fpk) ≪ drag).
 //
 // Arena boundaries: velocity is reflected so animals don't accumulate against walls.
 export function stepAnimal(

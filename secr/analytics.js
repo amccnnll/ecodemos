@@ -409,12 +409,20 @@ function updateSecrEstimates(s) {
     : 0;
   const dhat = esa > 0 && M > 0 ? M / esa : null;
 
-  _setText('est-secr-k',     k > 0 ? `${k} / ${K}` : '—');
-  _setText('est-secr-m',     M > 0 ? String(M)       : '—');
-  _setText('est-secr-caps',  caps > 0 ? String(caps)  : '—');
-  _setText('est-secr-esa',   esa > 0 ? fmt2(esa) + ' km²' : '—');
-  _setText('est-secr-dhat',  dhat != null ? fmt1(dhat) : '—');
-  _setText('est-secr-trued', s.trueD != null ? fmt1(s.trueD) : '—');
+  _setText('est-secr-k',        k > 0 ? `${k} / ${K}` : '—');
+  _setText('est-secr-m',        M > 0 ? String(M)       : '—');
+  _setText('est-secr-caps',     caps > 0 ? String(caps)  : '—');
+  _setText('est-secr-esa',      esa > 0 ? fmt2(esa) + ' km²' : '—');
+  _setText('est-secr-dhat',     dhat != null ? fmt1(dhat) : '—');
+  _setText('est-secr-trued',    s.trueD != null ? fmt1(s.trueD) : '—');
+
+  const hrArea  = s.sigmaEff ? Math.PI * s.sigmaEff ** 2 : null;
+  const recap   = M > 0 && k > 0 ? caps / (M * k) : null;
+  const coverage = s.N > 0 ? M / s.N : null;
+
+  _setText('est-secr-hr',       hrArea   != null ? fmt2(hrArea) + ' km²' : '—');
+  _setText('est-secr-recap',    recap    != null ? fmt2(recap)            : '—');
+  _setText('est-secr-coverage', coverage != null ? Math.round(coverage * 100) + '%' : '—');
 }
 
 function _setText(id, val) {

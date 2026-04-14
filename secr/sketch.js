@@ -34,27 +34,27 @@ const INNER_KM    = 1.2;              // inner study area side length (km)
 const ARENA_KM    = INNER_KM + 2 * BUFFER_KM; // total arena side (= 2 km)
 
 const G0_DEFAULT       = 0.4;
-const SIGMA_DEFAULT    = 0.10;        // km — home range scale; buffer ≈ 4σ at this value
-const N_DEFAULT        = 10;          // more animals → reliable detections in demos
+const SIGMA_DEFAULT    = 0.20;        // km — buffer ≈ 2σ so most animals overlap the detector array
+const N_DEFAULT        = 10;          // animals — visual clarity over statistical power
 const K_DEFAULT        = 10;
 const GRID_N_DEFAULT   = 4;           // 4×4 = 16 detectors
-const TAU_DEFAULT      = 2.0;         // home range crossing time (occasions)
+const TAU_DEFAULT      = 5.0;         // home range crossing time (occasions)
 const FIDELITY_DEFAULT = 1.0;         // site fidelity multiplier on spring strength
 const DISPLAY_LERP     = 0.15;        // display position lerp rate toward true position
 const FLASH_FRAMES     = 45;          // detection flash duration
 const TRAIL_LENGTH     = 60;          // frames of trail history per animal
 
-const FRAMES_PER_OCC = { slow: 240, normal: 120, fast: 30 };
+const FRAMES_PER_OCC = { slow: 120, normal: 60, fast: 15 };
 
 const MOVEMENT_PRESETS = {
-  resident:    { tau: 2.0, fidelity: 1.0 },
+  resident:    { tau: 5.0, fidelity: 1.0 },
   sedentary:   { tau: 6.0, fidelity: 3.0 },
   wideRanging: { tau: 2.0, fidelity: 0.4 },
   nomad:       { tau: 1.0, fidelity: 0.2 },
 };
 
 const DETECTOR_PRESETS = {
-  default:  { g0: 0.40, sigma: 0.10 },
+  default:  { g0: 0.40, sigma: 0.20 },
   camera:   { g0: 0.45, sigma: 0.08 },
   liveTrap: { g0: 0.60, sigma: 0.05 },
   acoustic: { g0: 0.20, sigma: 0.40 },
@@ -99,6 +99,7 @@ let speed         = 'normal';
 // Exposed from p5 closure so the detector-layout listener can clear detectors
 // without triggering a full reset
 let clearDetectorsFn = null;
+let showCentroids    = false;  // controlled by toggle-centroids checkbox
 
 // ─── p5 sketch ────────────────────────────────────────────────────────────────
 
@@ -156,16 +157,21 @@ new p5(function (p) {
     drawFlashes();
     drawTrails();
     drawAnimals();
+    drawCentroids();
     drawHUD();
 
     if (phase === 'running') {
       const fpk = FRAMES_PER_OCC[speed] ?? 120;
 
       // OUV movement parameters derived from UI sliders.
-      // noiseScale keeps equilibrium σ_position ≈ sigma / √fidelity regardless of τ.
+      // Derivation (overdamped Langevin, continuous-time limit):
+      //   Position autocorrelation time τ_x = drag / Ks  →  Ks = drag / (τ·fpk)
+      //   Equilibrium var(x) = noiseScale² / (2·Ks·drag) = σ²/fidelity
+      //   → noiseScale = σ · drag · √(2 / (fidelity · τ · fpk))
+      // τ sets crossing time; fidelity purely controls noise amplitude (range tightness).
       const drag       = 0.08;
-      const springStr  = fidelity / (tau * fpk);
-      const noiseScale = sigma * Math.sqrt(2 * drag / (tau * fpk));
+      const springStr  = drag / (tau * fpk);
+      const noiseScale = sigma * drag * Math.sqrt(2 / (fidelity * tau * fpk));
 
       // Step all animals (updates true x, y, vx, vy) then lerp display positions
       animals = animals.map(a => {
@@ -239,6 +245,7 @@ new p5(function (p) {
                  innerW: INNER_KM, innerH: INNER_KM, innerX0, innerY0 });
     updatePositions(animals);
     updateDetectors(detectors);
+    updateParams({ g0, sigma, sigmaEff: computeSigmaEff() });
     syncPlayBtn();
     syncSeedInput();
   }
@@ -359,6 +366,49 @@ new p5(function (p) {
     }
     p.noTint();
     p.imageMode(p.CORNER);
+  }
+
+  // Draw true and estimated activity centres for each animal.
+  // True centre:      filled dot in animal colour (always shown).
+  // Estimated centre: cross (×) in animal colour (shown once animal has ≥1 capture).
+  // Estimated centre = mean position of detectors that caught the animal.
+  function drawCentroids() {
+    if (!showCentroids) return;
+
+    // Build capture list per animal from shared state
+    const capsByAnimal = new Map();
+    for (const c of state.captures) {
+      if (!capsByAnimal.has(c.animalId)) capsByAnimal.set(c.animalId, []);
+      capsByAnimal.get(c.animalId).push(c.detectorId);
+    }
+    const detMap = new Map(detectors.map(d => [d.id, d]));
+
+    for (const animal of animals) {
+      const [r, g, b] = ANIMAL_COLOURS[animal.id % ANIMAL_COLOURS.length];
+      const { px: tcx, py: tcy } = worldToPx(animal.cx, animal.cy);
+
+      // True centroid — filled dot
+      p.push();
+      p.noStroke();
+      p.fill(r, g, b, 210);
+      p.circle(tcx, tcy, 8);
+      p.pop();
+
+      // Estimated centroid — cross (×), only once captured
+      const capDets = capsByAnimal.get(animal.id);
+      if (capDets && capDets.length > 0) {
+        const ex = capDets.reduce((s, did) => s + (detMap.get(did)?.x ?? 0), 0) / capDets.length;
+        const ey = capDets.reduce((s, did) => s + (detMap.get(did)?.y ?? 0), 0) / capDets.length;
+        const { px: ecx, py: ecy } = worldToPx(ex, ey);
+        const cs = 5;
+        p.push();
+        p.stroke(r, g, b, 230);
+        p.strokeWeight(2);
+        p.line(ecx - cs, ecy - cs, ecx + cs, ecy + cs);
+        p.line(ecx + cs, ecy - cs, ecx - cs, ecy + cs);
+        p.pop();
+      }
+    }
   }
 
   function drawFlashes() {
@@ -645,6 +695,10 @@ document.getElementById('toggle-surface').addEventListener('change', e => {
   if (e.target.checked) requestAnimationFrame(() => notifyAll());
 });
 
+document.getElementById('toggle-centroids').addEventListener('change', e => {
+  showCentroids = e.target.checked;
+});
+
 document.getElementById('btn-reset-defaults').addEventListener('click', () => {
   document.getElementById('slider-g0').value     = G0_DEFAULT;
   document.getElementById('slider-sigma').value  = SIGMA_DEFAULT;
@@ -671,7 +725,9 @@ document.getElementById('btn-reset-defaults').addEventListener('click', () => {
   gridN        = GRID_N_DEFAULT;
   fidelity     = FIDELITY_DEFAULT;
   detectorLayout = 'grid';
+  showCentroids  = false;
+  document.getElementById('toggle-centroids').checked = false;
   syncDetectorSliders();
-  updateParams({ g0, sigma });
+  updateParams({ g0, sigma, sigmaEff: computeSigmaEff() });
   document.getElementById('btn-reset').click();
 });

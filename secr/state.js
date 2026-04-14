@@ -15,8 +15,8 @@
 export const state = {
   // ── Parameters (survive resetState; updated via updateParams) ──────────────
   g0:           0.4,           // max detection probability (at d=0)
-  sigma:        0.10,          // km — intrinsic home range scale (UI slider)
-  sigmaEff:     0.10,          // km — effective detection σ = sigma / √fidelity
+  sigma:        0.20,          // km — intrinsic home range scale (UI slider)
+  sigmaEff:     0.20,          // km — effective detection σ = sigma / √fidelity
 
   // ── Set on resetState ──────────────────────────────────────────────────────
   N:            5,            // true number of animals
