@@ -1,6 +1,6 @@
 # ecodemos
 
-Interactive, animated simulations of quantitative ecological models.
+Interactive, animated simulations of ecological models.
 
 > Work in progress — pls check back soon.
 

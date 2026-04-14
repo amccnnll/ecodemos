@@ -4,6 +4,25 @@
  */
 
 function derivatives(prey, predator, params) {
+  if (params.modelType === "dynamicPredatorPrey") {
+    const { alpha, beta, delta, gamma, Kdyn, mPred } = params;
+    const kSafe = Math.max(1e-6, Kdyn);
+    const mSafe = Math.max(0, mPred);
+
+    return {
+      dPrey: alpha * prey * (1 - prey / kSafe) - beta * prey * predator,
+      dPred: delta * prey * predator - gamma * predator - mSafe * predator * predator,
+    };
+  }
+
+  if (params.modelType === "competition") {
+    const { r1, r2, K1, K2, alpha12, alpha21 } = params;
+    return {
+      dPrey: r1 * prey * (1 - (prey + alpha12 * predator) / Math.max(1e-6, K1)),
+      dPred: r2 * predator * (1 - (predator + alpha21 * prey) / Math.max(1e-6, K2)),
+    };
+  }
+
   const { alpha, beta, delta, gamma } = params;
   return {
     dPrey: alpha * prey - beta * prey * predator,
