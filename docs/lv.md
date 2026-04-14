@@ -23,23 +23,35 @@ State update per step:
 
 ### Classic predator-prey
 
-dPrey/dt = alpha _ Prey - beta _ Prey \* Predator
+$$
+\frac{dN}{dt} = \alpha N - \beta N P
+$$
 
-dPredator/dt = delta _ Prey _ Predator - gamma \* Predator
+$$
+\frac{dP}{dt} = \delta N P - \gamma P
+$$
 
 ### Dynamic predator-prey
 
-dPrey/dt = alpha _ Prey _ (1 - Prey / K) - beta _ Prey _ Predator
+$$
+\frac{dN}{dt} = \alpha N\left(1-\frac{N}{K}\right) - \beta N P
+$$
 
-dPredator/dt = delta _ Prey _ Predator - gamma _ Predator - m _ Predator^2
+$$
+\frac{dP}{dt} = \delta N P - \gamma P - mP^2
+$$
 
-where K is prey carrying capacity and m is predator self-limitation.
+where $K$ is prey carrying capacity and $m$ is predator self-limitation.
 
 ### Competition
 
-dN1/dt = r1 _ N1 _ (1 - (N1 + alpha12 \* N2) / K1)
+$$
+\frac{dN_1}{dt} = r_1N_1\left(1-\frac{N_1+\alpha_{12}N_2}{K_1}\right)
+$$
 
-dN2/dt = r2 _ N2 _ (1 - (N2 + alpha21 \* N1) / K2)
+$$
+\frac{dN_2}{dt} = r_2N_2\left(1-\frac{N_2+\alpha_{21}N_1}{K_2}\right)
+$$
 
 ## Controls and exact meanings
 
@@ -59,15 +71,15 @@ Checkpoint behaviour:
 ### Shared controls
 
 - dt slider: 0.005 to 0.080, step 0.001, default 0.030.
-- Initial population 1 slider (Prey0 or N1_0): 5 to 120, default 40.
-- Initial population 2 slider (Pred0 or N2_0): 1 to 60, default 9.
+- Initial population 1 slider ($N_0$ or $N_{1,0}$): 5 to 120, default 40.
+- Initial population 2 slider ($P_0$ or $N_{2,0}$): 1 to 60, default 9.
 
 ### Classic predator-prey controls
 
-- alpha slider: 0.2 to 2.0, step 0.01, default 1.10.
-- beta slider: 0.01 to 0.20, step 0.001, default 0.06.
-- delta slider: 0.005 to 0.10, step 0.001, default 0.03.
-- gamma slider: 0.1 to 2.0, step 0.01, default 0.70.
+- $\alpha$ slider: 0.2 to 2.0, step 0.01, default 1.10.
+- $\beta$ slider: 0.01 to 0.20, step 0.001, default 0.06.
+- $\delta$ slider: 0.005 to 0.10, step 0.001, default 0.03.
+- $\gamma$ slider: 0.1 to 2.0, step 0.01, default 0.70.
 - Presets:
   - Balanced cycles
   - Predator crash
@@ -76,9 +88,9 @@ Checkpoint behaviour:
 
 ### Dynamic predator-prey controls
 
-- uses alpha, beta, delta, gamma controls
-- K (prey) slider: 20 to 250, step 1, default 120
-- m (pred) slider: 0.000 to 0.200, step 0.001, default 0.010
+- uses $\alpha$, $\beta$, $\delta$, $\gamma$ controls
+- $K$ (prey) slider: 20 to 250, step 1, default 120
+- $m$ (predator self-limitation) slider: 0.000 to 0.200, step 0.001, default 0.010
 - Dynamic presets:
   - Damped spiral
   - Slow damping / predator collapse
@@ -86,12 +98,12 @@ Checkpoint behaviour:
 
 ### Competition controls
 
-- r1 slider: 0.1 to 2.0, step 0.01, default 0.90.
-- r2 slider: 0.1 to 2.0, step 0.01, default 0.80.
-- K1 slider: 10 to 200, step 1, default 75.
-- K2 slider: 10 to 200, step 1, default 65.
-- alpha12 slider: 0.00 to 2.00, step 0.01, default 0.60.
-- alpha21 slider: 0.00 to 2.00, step 0.01, default 0.50.
+- $r_1$ slider: 0.1 to 2.0, step 0.01, default 0.90.
+- $r_2$ slider: 0.1 to 2.0, step 0.01, default 0.80.
+- $K_1$ slider: 10 to 200, step 1, default 75.
+- $K_2$ slider: 10 to 200, step 1, default 65.
+- $\alpha_{12}$ slider: 0.00 to 2.00, step 0.01, default 0.60.
+- $\alpha_{21}$ slider: 0.00 to 2.00, step 0.01, default 0.50.
 - Competition presets:
   - Coexistence
   - Species 1 wins

@@ -14,27 +14,35 @@ The key teaching point is that detection is spatial and imperfect:
 
 Detection model used in the demo:
 
-p(d) = g0 _ exp(-(d^2) / (2 _ sigma_eff^2))
+$$
+p(d) = g_0\exp\!\left(-\frac{d^2}{2\sigma_{\mathrm{eff}}^2}\right)
+$$
 
 where:
 
-- d is distance from activity centre to detector
-- g0 is baseline detection at d = 0
-- sigma_eff is effective spatial scale used in detection and ESA
+- $d$ is distance from activity centre to detector
+- $g_0$ is baseline detection at $d=0$
+- $\sigma_{\mathrm{eff}}$ is effective spatial scale used in detection and ESA
 
 Effective sigma mapping:
 
-sigma_eff = sigma / sqrt(fidelity)
+$$
+\sigma_{\mathrm{eff}} = \frac{\sigma}{\sqrt{\text{fidelity}}}
+$$
 
 K-occasion effective sampling area:
 
-ESA_K = integral over arena of [1 - (1 - p1(x, y))^K] dA
+$$
+\mathrm{ESA}_K = \iint_{\mathrm{arena}} \left[1 - \left(1-p_1(x,y)\right)^K\right] dA
+$$
 
 Estimator shown in the panel:
 
-D_hat = M / ESA_K
+$$
+\hat{D} = \frac{M}{\mathrm{ESA}_K}
+$$
 
-where M is number of unique detected individuals.
+where $M$ is number of unique detected individuals.
 
 ## Controls and exact meanings
 
@@ -48,7 +56,7 @@ where M is number of unique detected individuals.
 - g0 slider: 0.05 to 1.00, step 0.01, default 0.40.
 - sigma slider: 0.05 to 0.50 km, step 0.01, default 0.20.
 - N slider: 1 to 50 individuals, step 1, default 10.
-- Occasions (K) slider: 5 to 100, step 1, default 10.
+- Occasions ($K$) slider: 5 to 100, step 1, default 10.
 
 ### Movement
 
@@ -72,7 +80,7 @@ where M is number of unique detected individuals.
 
 ### Activity-centre detection
 
-Detection is computed from each animal's activity centre (cx, cy), not instantaneous display position (x, y).
+Detection is computed from each animal's activity centre $(c_x, c_y)$, not instantaneous display position $(x, y)$.
 
 Implementation consequence:
 
@@ -81,8 +89,8 @@ Implementation consequence:
 
 For each occasion and detector j:
 
-1. compute distance d_ij from activity centre i to detector j
-2. compute p_ij = g0 _ exp(-(d_ij^2)/(2 _ sigma_eff^2))
+1. compute distance $d_{ij}$ from activity centre $i$ to detector $j$
+2. compute $p_{ij} = g_0\exp\!\left(-d_{ij}^2/(2\sigma_{\mathrm{eff}}^2)\right)$
 3. draw Bernoulli detection using RNG
 4. record capture event {animalId, detectorId, k} if detected
 
@@ -96,11 +104,11 @@ Movement uses Ornstein-Uhlenbeck dynamics in velocity space, with two user-facin
 Internal calibration ensures:
 
 - tau controls position autocorrelation timescale
-- sigma_eff is consistent across detection surface and ESA calculations
+- $\sigma_{\mathrm{eff}}$ is consistent across detection surface and ESA calculations
 
-### ESA and D_hat
+### ESA and $\hat{D}$
 
-The demo uses K-occasion ESA (not single-occasion ESA), so D_hat reflects cumulative detection opportunity across occasions.
+The demo uses $K$-occasion ESA (not single-occasion ESA), so $\hat{D}$ reflects cumulative detection opportunity across occasions.
 
 ### Analytics robustness
 
@@ -110,7 +118,7 @@ The demo uses K-occasion ESA (not single-occasion ESA), so D_hat reflects cumula
 
 ## Assumptions and scope
 
-- D_hat shown is an educational running estimator, not a full maximum-likelihood SECR fit.
+- $\hat{D}$ shown is an educational running estimator, not a full maximum-likelihood SECR fit.
 - g0 and sigma update live for visual/analytic response.
 - most structural controls apply on reset.
 

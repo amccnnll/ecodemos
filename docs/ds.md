@@ -13,26 +13,32 @@ The key teaching point is the separation between:
 
 Half-normal detection function:
 
-g(x) = exp(-(x^2) / (2 \* sigma^2))
+$$
+g(x) = \exp\!\left(-\frac{x^2}{2\sigma^2}\right)
+$$
 
 where:
 
-- x is perpendicular distance from transect (km)
-- sigma controls the falloff rate
+- $x$ is perpendicular distance from transect (km)
+- $\sigma$ controls the falloff rate
 
 Effective strip width:
 
-ESW = integral from 0 to W of g(x) dx
+$$
+\mathrm{ESW} = \int_0^W g(x)\,dx
+$$
 
 Density estimator used in the analytics strip:
 
-D_hat = n / (2 _ L _ ESW)
+$$
+\hat{D} = \frac{n}{2L\,\mathrm{ESW}}
+$$
 
 where:
 
-- n is number of detections used in analysis
-- L is effort (km) at each detection event
-- W is truncation distance (km)
+- $n$ is number of detections used in analysis
+- $L$ is effort (km) at each detection event
+- $W$ is truncation distance (km)
 
 ## Controls and exact meanings
 
@@ -57,7 +63,7 @@ Implementation detail:
 
 - sigma slider: 0.05 to 0.50 km, step 0.01, default 0.25.
 - W slider: 0.10 to 0.60 km, step 0.01, default 0.40.
-- Density slider: 10 to 200 animals/km^2, step 5, default 50.
+- Density slider: 10 to 200 animals/km², step 5, default 50.
 - Transect length slider: 1.0 to 8.0 km, step 0.5, default 4.0.
 
 ### Model options
@@ -68,7 +74,7 @@ Implementation detail:
 - Model function (fitted/analysed function):
   - Half-normal
   - Hazard-rate
-- Shape b (hazard-rate only): 1.0 to 10.0, step 0.1, default 2.5.
+- Shape $b$ (hazard-rate only): 1.0 to 10.0, step 0.1, default 2.5.
 
 ### Distribution options
 
@@ -90,15 +96,15 @@ Implementation detail:
   detection is attempted once per animal when observer x first crosses animal x.
   This avoids multiple Bernoulli attempts per animal per pass.
 - MLE fitting:
-  sigma_hat is fitted by numerical optimisation (golden-section search) when enough detections are available.
+  $\hat{\sigma}$ is fitted by numerical optimisation (golden-section search) when enough detections are available.
 - Convergence metric:
-  running D_hat uses effort at detection time, not final transect length.
+  running $\hat{D}$ uses effort at detection time, not final transect length.
 - W post-hoc filtering:
-  when W changes, analytics are rebuilt using only d <= W.
+  when $W$ changes, analytics are rebuilt using only $d \le W$.
 
 ## Assumptions and scope
 
-- Classic DS assumption g(0) = 1 holds in half-normal mode.
+- Classic DS assumption $g(0)=1$ holds in half-normal mode.
 - Animals are static in this version.
 - Some controls update live (sigma, W, model choices), while placement-related controls apply on reset.
 
