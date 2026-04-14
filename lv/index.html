@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lotka-Volterra — Ecology Demos</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <span class="nav-title">Ecology Demos</span>
+    <a href="/ecodemos/">Home</a>
+    <a href="/ecodemos/ds/">Distance Sampling</a>
+    <a href="/ecodemos/secr/">SECR</a>
+    <a href="/ecodemos/lv/">Lotka-Volterra</a>
+  </nav>
+
+  <div class="module-layout">
+
+    <div class="pane-sim" id="sim-container">
+      <div class="lv-sim-readout">
+        <span>Time: <strong id="sim-time">0.0 t</strong></span>
+        <span>Prey: <strong id="sim-prey">40.0</strong></span>
+        <span>Predators: <strong id="sim-pred">9.0</strong></span>
+      </div>
+    </div>
+
+    <div class="pane-controls">
+      <div class="controls-section">
+        <div class="playback-row">
+          <button id="btn-playpause" class="btn-primary">▶ Run</button>
+          <button id="btn-reset" class="btn-secondary">↺ Reset</button>
+        </div>
+        <div class="speed-row">
+          <span class="control-label">Speed</span>
+          <div class="btn-group">
+            <button class="btn-speed" data-speed="slow">Slow</button>
+            <button class="btn-speed active" data-speed="normal">Normal</button>
+            <button class="btn-speed" data-speed="fast">Fast</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-divider"></div>
+
+      <div class="controls-section">
+        <div class="select-row">
+          <span class="control-label">Preset</span>
+          <select id="select-preset" class="fn-select">
+            <option value="balanced">Balanced cycles</option>
+            <option value="predatorCrash">Predator crash</option>
+            <option value="preyCrash">Prey crash</option>
+            <option value="highCycles">High-amplitude cycles</option>
+          </select>
+        </div>
+
+        <div class="slider-row">
+          <span class="control-label slider-label">alpha</span>
+          <input type="range" id="slider-alpha" class="param-slider" min="0.2" max="2.0" step="0.01" value="1.1" />
+          <span class="slider-value" id="val-alpha">1.10</span>
+        </div>
+
+        <div class="slider-row">
+          <span class="control-label slider-label">beta</span>
+          <input type="range" id="slider-beta" class="param-slider" min="0.01" max="0.2" step="0.001" value="0.06" />
+          <span class="slider-value" id="val-beta">0.06</span>
+        </div>
+
+        <div class="slider-row">
+          <span class="control-label slider-label">delta</span>
+          <input type="range" id="slider-delta" class="param-slider" min="0.005" max="0.1" step="0.001" value="0.03" />
+          <span class="slider-value" id="val-delta">0.03</span>
+        </div>
+
+        <div class="slider-row">
+          <span class="control-label slider-label">gamma</span>
+          <input type="range" id="slider-gamma" class="param-slider" min="0.1" max="2.0" step="0.01" value="0.7" />
+          <span class="slider-value" id="val-gamma">0.70</span>
+        </div>
+
+        <div class="slider-row">
+          <span class="control-label slider-label">dt</span>
+          <input type="range" id="slider-dt" class="param-slider" min="0.005" max="0.08" step="0.001" value="0.03" />
+          <span class="slider-value" id="val-dt">0.03</span>
+        </div>
+
+        <div class="slider-row">
+          <span class="control-label slider-label">Prey0</span>
+          <input type="range" id="slider-prey0" class="param-slider" min="5" max="120" step="1" value="40" />
+          <span class="slider-value" id="val-prey0">40</span>
+        </div>
+
+        <div class="slider-row">
+          <span class="control-label slider-label">Pred0</span>
+          <input type="range" id="slider-predator0" class="param-slider" min="1" max="60" step="1" value="9" />
+          <span class="slider-value" id="val-predator0">9</span>
+        </div>
+
+        <p class="seed-hint">All parameters apply on Reset. RK4 integration is used for numerical stability.</p>
+      </div>
+    </div>
+
+    <div class="pane-analytics">
+      <div class="analytics-panels">
+
+        <div class="analytics-panel panel-lv-timeseries">
+          <h3 class="panel-title">Population over time</h3>
+          <p class="panel-subtitle">Blue: prey · Red: predators</p>
+          <div class="chart-area" id="chart-lv-timeseries"></div>
+        </div>
+
+        <div class="analytics-panel panel-lv-estimates">
+          <h3 class="panel-title">Current values</h3>
+          <dl class="estimates-list">
+            <dt>Time</dt>
+            <dd id="est-lv-time">0.00</dd>
+
+            <dt class="input-row">Prey</dt>
+            <dd id="est-lv-prey" class="input-row">40.00</dd>
+
+            <dt class="true-row">Predators</dt>
+            <dd id="est-lv-pred" class="true-row">9.00</dd>
+
+            <dt>Prey equilibrium</dt>
+            <dd id="est-lv-prey-eq">23.33</dd>
+
+            <dt>Predator equilibrium</dt>
+            <dd id="est-lv-pred-eq">18.33</dd>
+          </dl>
+        </div>
+
+        <div class="analytics-panel panel-lv-phase">
+          <h3 class="panel-title">Phase plane</h3>
+          <p class="panel-subtitle">Trajectory through prey-predator state space</p>
+          <div class="chart-area" id="chart-lv-phase"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+
+  <script type="module" src="sketch.js"></script>
+  <script type="module">
+    import { initAnalytics } from "./analytics.js";
+    initAnalytics();
+  </script>
+
+</body>
+</html>

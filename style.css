@@ -79,6 +79,29 @@ body {
 .panel-estimates    { flex: 0 0 150px; }
 .panel-dhat         { flex: 1.2; }
 
+.panel-lv-timeseries { flex: 2.1; }
+.panel-lv-estimates  { flex: 0 0 190px; }
+.panel-lv-phase      { flex: 1.2; }
+
+.lv-sim-readout {
+  position: absolute;
+  top: 0.75rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 0.82rem;
+  color: #444;
+  z-index: 5;
+}
+
+.lv-sim-readout strong {
+  color: #1f1f1f;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ─── SECR module overrides ─────────────────────────────────────────────────── */
 
 /*
