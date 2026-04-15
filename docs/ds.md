@@ -2,113 +2,422 @@
 
 ## What this demo shows
 
-This simulation demonstrates line-transect distance sampling. The observer travels along a transect. Animals further from the transect are less likely to be detected. The observed perpendicular distances are then used to estimate detectability and density.
+This simulation demonstrates line-transect distance sampling. An observer traverses a fixed straight transect. Animals within a strip around the transect are detected with a probability that declines with perpendicular distance. The recorded distances are then used to estimate how detectable animals are and, from that, how dense the population is.
 
-The key teaching point is the separation between:
+The central teaching point is the separation between two views of the same scene:
 
-- truth known to the simulator (all animal positions)
-- data seen by the method (detected distances only)
+- the simulator's omniscient view — all animal positions are visible on screen, detected animals shown in red, missed animals in grey;
+- the method's view — only the perpendicular distances of detected animals are available to the estimator.
 
-## Core equations
+---
 
-Half-normal detection function:
+## Arena geometry
+
+The simulation canvas maps directly to a rectangle in kilometre coordinates. All positions used by the engine are stored and computed in km; pixel positions are computed only for rendering.
+
+- **Transect length** ($L$, km) is set by the transect slider. This is the x-dimension of the arena: `arenaWKm = sliderValue`.
+- **Arena height** ($H$, km) is derived from the canvas dimensions so that one pixel represents the same distance in both axes: `arenaH = canvasHeight / (canvasWidth / arenaWKm)`.
+- **Transect** runs horizontally along the centreline of the canvas: $y = H/2$ in km coordinates. It is a fixed line; the observer moves along it.
+- **Pixel scale**: `PX_PER_KM = canvasWidth / arenaWKm`. Recomputed on every reset (canvas width is fixed; a different transect length changes the scale).
+- **Observer x-position** (`boatX`) runs from 0 to `arenaWKm` in km. The observer icon is drawn at `boatX * PX_PER_KM` pixels from the left edge.
+
+---
+
+## Animal placement
+
+All three distribution modes call into `src/ds-engine.js`. All use the seeded placement RNG (see §RNG below). All coordinates are in km.
+
+### Animal count
+
+```
+areaN = Math.round(density * arenaWKm * arenaH)
+```
+
+After rounding, the realised true density fed to the analytics is:
+
+```
+trueD = areaN / (arenaWKm * arenaH)
+```
+
+This will differ slightly from the slider value when rounding is non-trivial.
+
+### Uniform distribution (`placeAnimals`)
+
+Each of the $n$ animals is placed by two independent draws:
+
+```
+x = rng() * arenaW
+y = rng() * arenaH
+```
+
+where `rng()` returns a value in $[0, 1)$ from the seeded placement RNG. The result is a realisation of a homogeneous Poisson process with no spatial structure beyond the arena boundary.
+
+### Clustered distribution (`placeAnimalsClumped`)
+
+A two-level process. Parameters: `clumpScale` (slider default 0.10).
+
+1. **Number of clusters**: `nClusters = Math.max(3, Math.round(n / 6))`.
+2. **Cluster centres**: each placed at `(rng()*arenaW, rng()*arenaH)` using the seeded RNG — uniform independently in each axis.
+3. **Animal scatter**: for each animal, a cluster is chosen uniformly at random (seeded), then a displacement is drawn using the Box–Muller transform:
+   ```
+   u1    = rng(),   u2 = rng()
+   mag   = sigmaCluster * sqrt(-2 * log(u1))
+   angle = 2π * u2
+   dx    = mag * cos(angle),   dy = mag * sin(angle)
+   ```
+   where `sigmaCluster = arenaW * clumpScale`. The angular direction is isotropic (circular Gaussian scatter around the cluster centre).
+4. **Wrap-around**: animals that scatter beyond the arena edge are wrapped using modular arithmetic:
+   ```
+   x = ((cx + dx) % arenaW + arenaW) % arenaW
+   y = ((cy + dy) % arenaH + arenaH) % arenaH
+   ```
+   This preserves the total count and keeps all animals inside the arena.
+
+The `clumpScale` slider controls `sigmaCluster` as a fraction of transect length. At `clumpScale = 0.10` (default), the cluster spread is 10% of the transect length.
+
+### Regular distribution (`placeAnimalsRegular`)
+
+A perturbed grid. Parameters: `regularity` (slider default 0.50).
+
+1. **Grid dimensions**: `nCols = Math.round(sqrt(n * arenaW / arenaH))`, `nRows = Math.ceil(n / nCols)`. The aspect ratio of the grid matches the arena.
+2. **Cell size**: `dx = arenaW / nCols`, `dy = arenaH / nRows`.
+3. **Animal position**: for the $i$-th animal, `col = i % nCols`, `row = floor(i / nCols)`:
+   ```
+   x = (col + 0.5 + (rng() - 0.5) * regularity) * dx
+   y = (row + 0.5 + (rng() - 0.5) * regularity) * dy
+   ```
+   The jitter term `(rng() - 0.5) * regularity` is drawn from the seeded RNG.
+
+The `regularity` parameter spans two extremes:
+- `regularity = 0`: no jitter — animals sit exactly at grid cell centres.
+- `regularity = 1`: maximum jitter — each animal is displaced by up to ±0.5 cell widths in each axis independently. This makes spacing variable but still non-Poisson (the grid skeleton persists in expectation).
+
+Values in between produce intermediate over-dispersion relative to a Poisson process.
+
+---
+
+## Seed and RNG architecture
+
+The simulation uses **two separate random number generators** with different seeding strategies. This is a deliberate design choice.
+
+### Placement RNG (seeded)
+
+```js
+placementRng = createRng(seed)   // src/rng.js — Alea PRNG
+```
+
+All animal positions (uniform draws, cluster centres, cluster assignments, scatter displacements, grid jitter) are generated by this seeded generator. Fixing the seed and pressing Reset reproduces the exact same spatial layout of animals.
+
+### Detection RNG (unseeded)
+
+```js
+detectionRng = new Math.seedrandom()   // fresh random seed each initSim() call
+```
+
+All Bernoulli detection draws (whether a given animal is detected when the observer passes) use this fresh, unseeded generator. Consequence: the same population can yield different detected sets on each replay, reflecting genuine sampling variability rather than just seed choice.
+
+### Seed value
+
+- Range: 0–99999 (five-digit integer).
+- On page load: `seed = Math.floor(Math.random() * 100000)` — random for each browser session.
+- Seed input field: type a value, press Enter or click away. The field strips non-digit characters and clamps to [0, 99999]. Any invalid entry reverts to the current seed.
+- New Population button: draws a completely new random seed, then calls `initSim()`.
+- Reset button: reads the current seed-input value and calls `initSim()`.
+
+---
+
+## Observer mechanics
+
+The observer moves at constant speed along the transect (`y = arenaH / 2`) from `boatX = 0` to `boatX = arenaWKm`.
+
+### Speed settings
+
+| Label  | km per frame |
+|--------|-------------|
+| Slow   | 0.0025      |
+| Normal | 0.005       |
+| Fast   | 0.015       |
+
+At 60 fps, Normal speed traverses a 4 km transect in approximately 13 seconds of real time. The speed setting affects only playback rate; it does not change what gets detected (because of the one-shot detection rule — see §Detection below).
+
+Each frame when `running = true`, `advanceBoat()` adds the current speed increment to `boatX`. When `boatX >= arenaWKm`, the run stops and the play button switches to "↺ Run again".
+
+---
+
+## Detection mechanism
+
+All detection logic is in `src/ds-engine.js` (`tryDetect`). The key properties are:
+
+### One-shot rule
+
+Detection is attempted **exactly once** per animal per run. The trigger condition is:
+
+```
+boatX - animal.x ∈ [0, boatSpeed)
+```
+
+In words: the observer's current x-position has just crossed the animal's x-position this frame. If `boatX - animal.x < 0` (not yet reached) or `>= boatSpeed` (already passed), the function returns false immediately and no draw is made. This ensures each animal gets precisely one Bernoulli trial per traversal, regardless of playback speed.
+
+### Perpendicular distance
+
+```
+perpDist = |animal.y - arenaH / 2|   (km)
+```
+
+If `perpDist > W`, the animal is outside the truncation strip and `tryDetect` returns false without a draw.
+
+### Bernoulli draw
+
+If the one-shot condition is met and `perpDist <= W`, a single uniform draw `u = detectionRng()` is compared to the detection probability:
+
+```
+detected = u < g(perpDist, sigma)
+```
+
+where `g` is either `halfNormal` or `hazardRate` depending on the field truth function setting.
+
+---
+
+## Detection functions
+
+Both functions are implemented in `src/stats.js`.
+
+### Half-normal
 
 $$
-g(x) = \exp\!\left(-\frac{x^2}{2\sigma^2}\right)
+g(x,\sigma) = \exp\!\left(-\frac{x^2}{2\sigma^2}\right)
 $$
 
-where:
+- $g(0,\sigma) = 1$ for all $\sigma$ — perfect detectability on the transect line.
+- $\sigma$ (km) is the distance at which detection probability falls to $e^{-1/2} \approx 0.607$.
+- Slider range: 0.05–0.50 km, step 0.01, default 0.25 km.
 
-- $x$ is perpendicular distance from transect (km)
-- $\sigma$ controls the falloff rate
-
-Effective strip width:
-
-$$
-\mathrm{ESW} = \int_0^W g(x)\,dx
-$$
-
-Density estimator used in the analytics strip:
+### Hazard-rate
 
 $$
-\hat{D} = \frac{n}{2L\,\mathrm{ESW}}
+g(x,\sigma,b) = 1 - \exp\!\left[-\left(\frac{\sigma}{x}\right)^b\right]
 $$
 
-where:
+- At $x = 0$: `hazardRate` returns 1 (special-cased to avoid division by zero).
+- $b$ controls the shape of the "shoulder" near the transect. Higher $b$ gives a wider flat shoulder followed by a sharper drop.
+- $b$ slider range: 1.0–10.0, step 0.1, default 2.5.
 
-- $n$ is number of detections used in analysis
-- $L$ is effort (km) at each detection event
-- $W$ is truncation distance (km)
+---
 
-## Controls and exact meanings
+## State recording
 
-### Playback
+When a detection fires, `recordDetection(perpDist, boatX)` is called:
 
-- Run/Pause: starts or pauses traversal.
-- Reset: restarts from the same seeded population.
-- Speed: Slow, Normal, Fast.
+- `perpDist` — perpendicular distance in km (raw, not yet filtered by W).
+- `boatX` — observer x-position in km **at the moment of detection**.
 
-### Seed and stochasticity
+Both values are appended to parallel arrays in the shared state singleton (`ds/state.js`):
 
-- Seed: integer seed used for population placement.
-- New: draws a new random seed and resets.
+```
+state.detectedDistances[]   // perpendicular distances, all raw detections
+state.detectedEfforts[]     // boatX at each detection
+```
 
-Implementation detail:
+These arrays grow monotonically during a run. They are cleared on reset (`resetState()`).
 
-- Placement uses a seeded RNG.
-- Detection draws use a separate unseeded RNG.
-- Result: same seed gives the same population, but repeated resets can still give different detection outcomes.
+---
 
-### Detection and survey design
+## Truncation and W post-hoc filtering
 
-- $\sigma$ slider: 0.05 to 0.50 km, step 0.01, default 0.25.
-- $W$ slider: 0.10 to 0.60 km, step 0.01, default 0.40.
-- $D$ (density) slider: 10 to 200 animals/km², step 5, default 50.
-- $L$ (transect length) slider: 1.0 to 8.0 km, step 0.5, default 4.0.
+The truncation distance $W$ has two roles:
 
-### Model options
+1. **Hard truncation during detection**: `tryDetect` returns false when `perpDist > W`. No draw is made; the animal is never recorded.
+2. **Post-hoc filtering in analytics**: the analytics layer refilters stored distances on every state change:
+   ```js
+   filteredDists = detectedDistances.filter(d => d <= W)
+   ```
+   This means if $W$ is decreased after some detections have been stored, those beyond-W distances are excluded from the histogram, MLE, and D̂ history — even though they were recorded. If $W$ is increased, detections from earlier in the run that were beyond the old W (but within the new W) will not appear, because they were never recorded in the first place.
 
-- Field truth function:
-  - Half-normal
-  - Hazard-rate
-- Model function (fitted/analysed function):
-  - Half-normal
-  - Hazard-rate
-- Shape $b$ (hazard-rate only): 1.0 to 10.0, step 0.1, default 2.5.
+The consequence is asymmetric: lowering $W$ live re-analyses with a smaller sample; raising $W$ live has no effect on data already collected.
 
-### Distribution options
+---
 
-- Distribution:
-  - Uniform
-  - Clustered
-  - Regular
-- $s_{\mathrm{clump}}$ (clustered only): 0.02 to 0.30, step 0.01, default 0.10.
-- $\rho$ (regularity, regular only): 0.00 to 1.00, step 0.05, default 0.50.
+## ESW computation
 
-### Run overlays
+### Half-normal (analytical)
 
-- Keep previous runs: overlays old fitted curves and convergence traces.
-- Clear runs: removes retained overlays.
+$$
+\mathrm{ESW}(\sigma, W) = \sigma\sqrt{\frac{\pi}{2}}\;\mathrm{erf}\!\left(\frac{W}{\sigma\sqrt{2}}\right)
+$$
 
-## Engine implementation notes
+The error function is computed via the Abramowitz & Stegun polynomial approximation (max error $1.5 \times 10^{-7}$).
 
-- One-shot detection timing:
-  detection is attempted once per animal when observer x first crosses animal x.
-  This avoids multiple Bernoulli attempts per animal per pass.
-- MLE fitting:
-  $\hat{\sigma}$ is fitted by numerical optimisation (golden-section search) when enough detections are available.
-- Convergence metric:
-  running $\hat{D}$ uses effort at detection time, not final transect length.
-- W post-hoc filtering:
-  when $W$ changes, analytics are rebuilt using only $d \le W$.
+### Hazard-rate (numerical)
 
-## Assumptions and scope
+200-step trapezoid rule over $[0, W]$:
 
-- Classic DS assumption $g(0)=1$ holds in half-normal mode.
-- Animals are static in this version.
-- Some controls update live ($\sigma$, $W$, model choices), while placement-related controls apply on reset.
+$$
+\mathrm{ESW}(\sigma, b, W) \approx \sum_{i=0}^{199} \frac{g(x_i) + g(x_{i+1})}{2}\,\Delta x, \quad \Delta x = W/200
+$$
+
+where $g$ is `hazardRate(x, sigma, b)`.
+
+---
+
+## MLE fitting
+
+`fitSigmaMLE` in `src/stats.js` finds the $\hat{\sigma}$ that minimises the negative log-likelihood. The analytics layer calls it when there are **at least 3** within-W detections; fewer returns `null` and `σ̂` is shown as "—".
+
+The search uses **golden-section** over a fixed interval $[\sigma_{\min}, \sigma_{\max}]$. The shape parameter $b$ is **not optimised** — it is held at the current slider value throughout.
+
+### NLL for half-normal
+
+$$
+\mathrm{NLL}(\sigma) = n\log\bigl[\mathrm{ESW}(\sigma,W)\bigr] + \sum_{i=1}^{n}\frac{d_i^2}{2\sigma^2}
+$$
+
+### NLL for hazard-rate
+
+$$
+\mathrm{NLL}(\sigma) = n\log\bigl[\mathrm{ESW}(\sigma,b,W)\bigr] - \sum_{i=1}^{n}\log\bigl[g_{\mathrm{HR}}(d_i,\sigma,b)\bigr]
+$$
+
+In both cases, $d_i$ are the within-W perpendicular distances and ESW is computed by the respective method above.
+
+---
+
+## Density estimator
+
+`estimateDensity(n, L, sigma, W, modelFn, b)` in `src/stats.js` returns:
+
+$$
+\hat{D} = \frac{n}{2L\,\mathrm{ESW}(\hat\sigma, W)}
+$$
+
+where $L$ is effort in km, $n$ is the count of within-W detections, and ESW uses $\hat\sigma$ if fitted, or the true $\sigma$ slider value if fewer than 3 detections are available.
+
+### Per-detection effort in the convergence chart
+
+The D̂ convergence chart does **not** use the final transect length as effort. Instead, for each successive within-W detection, the chart plots the density estimate using effort = `boatX` at the moment that detection was made. For the $k$-th within-W detection, $L_k$ = observer x-position (km) when the $k$-th animal was detected.
+
+This means the convergence trace shows how $\hat{D}$ evolves as data accumulates during the survey, including the effect of early noise when $n$ is small.
+
+The full D̂ history array is rebuilt from scratch on every state-change event (each detection, and whenever W, σ, b, or model function changes).
+
+---
+
+## Analytics panels
+
+Three panels are drawn by `ds/analytics.js` using D3. They subscribe to state and re-render on every change.
+
+### 1. Detection function chart
+
+- **Blue solid curve**: the field truth detection function $g(x, \sigma_{\rm true})$, drawn with the currently selected field truth function and the true $\sigma$ value.
+- **Pink dashed curve**: the MLE-fitted function $g(x, \hat\sigma)$, drawn with the model function when $\hat\sigma$ is available ($n \geq 3$).
+- **Histogram bars** (light blue, 10 equal bins over $[0, W]$): observed within-W distances. Bar heights are normalised to the $g(x)$ scale using the formula:
+  ```
+  scale = n * binWidth / ESW_truth
+  barHeight[i] = binCount[i] / scale
+  ```
+  so that a perfect half-normal detection function would make the histogram lie on the true curve.
+- **Ghost fitted curves**: if "Keep previous runs" is checked, past fitted curves are shown as progressively more transparent pink dashed lines (up to 8 past runs retained, oldest most faded).
+- The x-axis domain updates to the current W value; the y-axis domain expands if bar heights exceed 1.1.
+
+### 2. Running estimates strip
+
+Displays six values updated live:
+
+| Field | Value |
+|-------|-------|
+| $n$ | count of within-W detections |
+| Effort | `boatX` progress (km); updates `state.transectLength` on each detection from `detectedEfforts[last]` — see note below |
+| ESW | computed from $\hat\sigma$ (or true $\sigma$ if no fit) and current W |
+| $\hat\sigma$ | MLE estimate (km), or "—" if $n < 3$ |
+| True $\sigma$ | slider value |
+| $\hat{D}$ | last entry in the D̂ history |
+| True $D$ | `trueD = areaN / (arenaWKm * arenaH)` |
+
+The "Effort" readout is the boatX at the time of the last detection, not the total traversed distance. During a run, it thus reflects distance surveyed up to the most recent animal found.
+
+### 3. D̂ convergence chart
+
+- **Green line**: D̂ vs cumulative within-W detections for the current run.
+- **Red dashed horizontal line**: true D.
+- **Ghost traces**: previous runs overlaid as faded green lines (same cap and fade logic as detection function ghosts).
+- Axes use expand-only domain tracking — they grow when data goes outside the current range but never contract mid-run. On hard reset (no data, no ghosts) the axes snap back to their initial defaults.
+
+---
+
+## Ghost / keep-runs mechanic
+
+The "Keep previous runs" checkbox controls ghost retention. Ghosts are managed entirely within `analytics.js` — they are not stored in the shared state singleton.
+
+When a reset is detected (state goes from $n > 0$ to $n = 0$):
+- If the checkbox is checked, the current run's D̂ history and fitted $\hat\sigma$ are saved as a ghost object: `{ dhatHistory, sigmaHat, trueD, modelFn, b }`.
+- The ghost list is capped at **8 entries** (oldest removed when limit is exceeded).
+- Ghost curves on the detection function chart record the model function active at the time of that run, so a run fitted with hazard-rate is always displayed with hazard-rate even if the model is later changed.
+
+"Clear runs" empties the ghost list immediately and forces a redraw.
+
+---
+
+## Control taxonomy
+
+### Live update (takes effect without reset)
+
+These controls change simulation parameters immediately. Analytics are rebuilt from stored detections on the next state notification.
+
+| Control | Variable | Effect |
+|---------|----------|--------|
+| $\sigma$ slider | `sigma` | Changes both the truth curve and MLE fitting |
+| $W$ slider | `W` | Restricts or expands the truncation strip; all stored detections are refiltered |
+| Field truth function | `truthFn` | Changes which $g(x)$ governs future detection draws and the blue truth curve |
+| Model function | `modelFn` | Changes which $g(x)$ is fitted by MLE and shown as the pink curve |
+| Shape $b$ | `b` | Affects hazard-rate detection and MLE (only visible when truth or model is hazard-rate) |
+
+Note: changing `sigma` or `truthFn` live affects future detections for the current run (if still in progress), not past ones that are already stored.
+
+### Reset required (takes effect on next Reset or New Population)
+
+| Control | Variable |
+|---------|----------|
+| Density $D$ | `density` |
+| Transect length $L$ | `arenaWKm` |
+| Distribution type | `distribution` |
+| Clump scale $s_{\rm clump}$ | `clumpScale` |
+| Regularity $\rho$ | `regularity` |
+| Seed | `seed` |
+
+Changing these updates the displayed readout immediately but the population is only regenerated when `initSim()` is called (via Reset, New Population, or Run Again after completion).
+
+### Reset Defaults
+
+Resets **all** controls to their factory defaults, then calls Reset:
+
+| Parameter | Default |
+|-----------|---------|
+| $\sigma$ | 0.25 km |
+| $W$ | 0.40 km |
+| Density | 50 /km² |
+| Transect length | 4.0 km |
+| $b$ | 2.5 |
+| Field truth function | Half-normal |
+| Model function | Half-normal |
+| Distribution | Uniform |
+| Clump scale | 0.10 |
+| Regularity | 0.50 |
+
+---
+
+## Assumptions and limitations
+
+- Animals are **static** throughout a run. There is no movement model.
+- The transect is a **fixed straight line** through the centre of the arena.
+- Each animal receives **exactly one Bernoulli trial** per traversal. Multiple passes are not modelled.
+- $g(0) = 1$ holds in both half-normal and hazard-rate modes.
+- The MLE holds $b$ fixed; joint optimisation of $(\sigma, b)$ is not implemented.
+- The hazard-rate ESW uses a fixed 200-step numerical integration; for very small $b$ or extreme parameter combinations, this approximation may be imprecise.
+- The detector sees **perpendicular distance only** — no forward detection angle or acoustic range model.
+- There is no measurement error; recorded distances are exact.
+
+---
 
 ## External references
 
-- Distance Sampling project: https://distancesampling.org
-- About and resources: https://distancesampling.org/about.html
+- Distance Sampling methods: https://distancesampling.org
+- Resources and background: https://distancesampling.org/about.html

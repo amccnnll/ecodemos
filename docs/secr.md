@@ -2,127 +2,382 @@
 
 ## What this demo shows
 
-This simulation demonstrates SECR using repeated detector occasions. The method infers density from capture histories and detector geometry, rather than assuming a fixed surveyed strip as in DS.
+This simulation demonstrates SECR using repeated detector occasions. Animals move within a two-dimensional arena and are sampled by a fixed detector array. Density is estimated from who was caught, at which detectors, and on which occasions — with no assumption of a fixed observable strip.
 
-The key teaching point is that detection is spatial and imperfect:
+The central teaching point is that detection is spatial and imperfect:
 
-- each individual has a latent activity centre
-- detectors sample around those centres over multiple occasions
-- density is estimated from who was detected, where, and when
+- each individual has a latent activity centre that is never directly observed;
+- detectors sample probabilistically around those centres over multiple occasions;
+- the estimator infers density from capture histories and detector geometry alone.
 
-## Core equations
+---
 
-Detection model used in the demo:
+## Arena geometry
+
+The arena is a square with side length `ARENA_KM = 2.0 km`. It is divided into two zones:
+
+| Zone | Variable | Value |
+|------|----------|-------|
+| Inner study area | `INNER_KM` | 1.2 km × 1.2 km |
+| Buffer zone (each side) | `BUFFER_KM` | 0.4 km |
+
+The buffer is `= 2σ` at the default `σ = 0.20 km`. This is a standard SECR convention: animals whose activity centres lie within `~2σ` of the detector array contribute meaningfully to detections. Animals further out are effectively invisible.
+
+The canvas is a square. `PX_PER_KM = canvasSize / ARENA_KM`. All world coordinates are in km; pixel coordinates are computed for display only using `worldToPx(wx, wy)`.
+
+Inner study area corners: `(innerX0, innerY0) = (BUFFER_KM, BUFFER_KM) = (0.4, 0.4)`.
+
+---
+
+## Animal placement
+
+`placeAnimals(N, ARENA_KM, ARENA_KM, placementRng)` in `src/secr-engine.js`.
+
+Each of the $N$ animals is placed by drawing activity-centre coordinates uniformly:
+
+```
+cx = rng() * arenaW
+cy = rng() * arenaH
+```
+
+The animal starts exactly at its activity centre: `x = cx`, `y = cy`. Velocity is initialised to zero: `vx = 0`, `vy = 0`.
+
+Activity centres span the **full** arena (inner + buffer), not just the inner study area. This is correct: real populations extend beyond any detector array, and some of those individuals can still be detected.
+
+The true density is `trueD = N / (ARENA_KM²) = N / 4.0` animals/km².
+
+---
+
+## Detector placement
+
+`placeDetectors(layout, innerW, innerH, innerX0, innerY0, rng, gridN, nRandom)` in `src/secr-engine.js`.
+
+All detectors are placed **within the inner study area** only.
+
+### Grid layout
+
+`gridN × gridN` detectors on a regular grid. Cell size `dx = innerW / gridN`, `dy = innerH / gridN`. Each detector at:
+
+```
+x = innerX0 + (col + 0.5) * dx
+y = innerY0 + (row + 0.5) * dy
+```
+
+Default `gridN = 4` → 16 detectors. Range: 3–7, giving 9–49 detectors.
+
+### Random layout
+
+16 detectors placed by independent uniform draws within the inner study area:
+
+```
+x = innerX0 + rng() * innerW
+y = innerY0 + rng() * innerH
+```
+
+Uses the seeded placement RNG.
+
+### Custom layout
+
+Detectors are managed directly by sketch.js. Clicking within the inner study area places a new detector; clicking an existing detector removes it. Pressing "Remove all" calls `clearDetectorsFn()` which empties the array and notifies analytics. Custom detectors are preserved through Reset (the positions are re-indexed but not regenerated).
+
+---
+
+## Seed and RNG architecture
+
+Three separate RNGs are used:
+
+| RNG | Seeding | Purpose |
+|-----|---------|---------|
+| `placementRng = createRng(seed)` | Seeded (Alea PRNG) | Animal centres, grid/random detector positions |
+| `movementRng = new Math.seedrandom()` | Fresh unseeded each `initSim()` | Per-frame OUV movement steps |
+| `detectionRng = new Math.seedrandom()` | Fresh unseeded each `initSim()` | Bernoulli detection draws each occasion |
+
+Same seed → same animal and detector layout. Movement paths and detection outcomes vary on every replay, even with the same seed.
+
+Seed range: 0–99999. Each browser session starts with a random seed. Entering and committing a seed value in the input field immediately calls `initSim()`.
+
+---
+
+## Movement model (OUV)
+
+Each frame during a run, every animal takes one `stepAnimal()` call from `src/secr-engine.js`. The model is Ornstein-Uhlenbeck in velocity space (OUV), also called an Ornstein-Uhlenbeck process in position via second-order Langevin dynamics.
+
+### Frame-level update
+
+```
+u1 = max(rng(), 1e-10),   u2 = rng()
+r  = sqrt(-2 * log(u1)),  θ = 2π * u2
+nx = r * cos(θ) * noiseScale          // Box-Muller N(0, noiseScale²)
+ny = r * sin(θ) * noiseScale
+
+vx_new = vx * (1 - drag) + springStr * (cx - x) + nx
+vy_new = vy * (1 - drag) + springStr * (cy - y) + ny
+x_new  = x + vx_new
+y_new  = y + vy_new
+```
+
+where `drag = 0.08` is a fixed constant.
+
+### Wall reflection
+
+If an animal would exit the arena, its position is reflected and the outward velocity component is negated:
+
+```
+if x < 0:       x = -x,           vx = -vx
+if x > arenaW:  x = 2*arenaW - x, vx = -vx
+(same for y)
+```
+
+### Parameter derivation
+
+`springStr` and `noiseScale` are computed each frame from the slider values:
+
+```js
+const fpk        = FRAMES_PER_OCC[speed]   // frames per occasion
+const drag       = 0.08
+const springStr  = drag / (tau * fpk)
+const noiseScale = sigma * drag * sqrt(2 / (fidelity * tau * fpk))
+```
+
+The derivation comes from the overdamped continuous-time Langevin equation:
+
+- Position autocorrelation time $\tau_x = \mathrm{drag} / K_s$, so $K_s = \mathrm{drag}/(\tau \cdot \mathrm{fpk})$.
+- Equilibrium variance: $\mathrm{Var}(x) = \mathrm{noiseScale}^2 / (2 K_s \cdot \mathrm{drag}) = \sigma^2 / \mathrm{fidelity}$.
+
+This gives:
+- $\tau$ (occasions) → controls position autocorrelation time (how long the animal takes to cross its home range).
+- fidelity → controls noise amplitude → range tightness. Higher fidelity = smaller effective home range radius = $\sigma / \sqrt{\mathrm{fidelity}}$.
+
+### Speed and frames per occasion
+
+| Label  | Frames per occasion |
+|--------|---------------------|
+| Slow   | 120 |
+| Normal | 60 |
+| Fast   | 15 |
+
+At 60 fps and Normal speed, each occasion takes 1 second of real time.
+
+### Display smoothing
+
+The physics simulation runs at `true` positions `(x, y)`. A separate display position `(dx, dy)` is lerped toward the true position each frame:
+
+```
+dx_new = dx + 0.15 * (x - dx)
+dy_new = dy + 0.15 * (y - dy)
+```
+
+The `DISPLAY_LERP = 0.15` factor creates smooth animation without affecting the detection computation. Detection uses `(cx, cy)`, not `(dx, dy)`.
+
+---
+
+## Movement presets
+
+Presets set $\tau$ and fidelity simultaneously.
+
+| Preset | $\tau$ (occasions) | Fidelity | Effect |
+|--------|--------------------|----------|--------|
+| Resident | 5.0 | 1.0 | Default. Moderate range size, moderate return. |
+| Sedentary | 6.0 | 3.0 | Tighter home range (radius ÷ √3). Slower crossing time. |
+| Wide-ranging | 2.0 | 0.4 | Larger effective range (radius × √2.5). Faster crossing. |
+| Nomad | 1.0 | 0.2 | Very fast, large range — barely constrained to a centre. |
+
+---
+
+## Detection function
+
+One occasion = one call to `tryDetectsOnOccasion(animals, detectors, g0, sigmaEff, rng)`.
+
+For every (animal $i$, detector $j$) pair:
+
+1. Distance from the animal's **activity centre** to the detector:
+   ```
+   d_ij = hypot(animal.cx - detector.x, animal.cy - detector.y)
+   ```
+2. Detection probability:
+   ```
+   g_ij = g0 * halfNormal(d_ij, sigmaEff)
+        = g0 * exp(-d_ij² / (2 * sigmaEff²))
+   ```
+3. Bernoulli draw: `detected = detectionRng() < g_ij`.
+4. If detected: record `{ animalId, detectorId }`.
+
+Each animal can be detected by **multiple detectors on the same occasion**. Each (animal, detector, occasion) triple produces one capture event. The capture history therefore records the detector index too, not just presence/absence.
+
+Detection is based on `(cx, cy)` (the latent activity centre) — not on the display position `(dx, dy)` or the physics position `(x, y)`. This is consistent with the SECR model: the detection function $g(d)$ is a marginalised home-range detection function, integrating over all locations within the home range that a centre at $(c_x, c_y)$ implies.
+
+### Effective detection σ
+
+```
+sigmaEff = sigma / sqrt(fidelity)
+```
+
+Higher fidelity compresses the home range. `sigmaEff` is passed to `tryDetectsOnOccasion` and to all ESA computations. The UI slider reads `sigma`; the underlying detection range is automatically adjusted.
+
+### Detector type presets
+
+These set `g0` and `sigma` simultaneously.
+
+| Preset | $g_0$ | $\sigma$ (km) | Interpretation |
+|--------|-------|---------------|----------------|
+| Default | 0.40 | 0.20 | Balanced starting point |
+| Camera trap | 0.45 | 0.08 | High detection within narrow field |
+| Live trap | 0.60 | 0.05 | Very localised, high if animal passes |
+| Acoustic | 0.20 | 0.40 | Wide detection radius, moderate probability |
+
+---
+
+## Effective sample area (ESA)
+
+### Single-occasion $p_1(x, y)$
+
+The probability that an animal with activity centre at $(c_x, c_y)$ is detected by at least one detector on a single occasion:
 
 $$
-p(d) = g_0\exp\!\left(-\frac{d^2}{2\sigma_{\mathrm{eff}}^2}\right)
+p_1(c_x, c_y) = 1 - \prod_{j=1}^{J} \bigl(1 - g_0 \cdot g(d_j)\bigr)
+$$
+
+where $d_j = \|(c_x, c_y) - \text{det}_j\|$ and $g(d) = \exp(-d^2 / 2\sigma_{\rm eff}^2)$.
+
+This is computed as a log-sum for numerical stability:
+
+```js
+logNonDetect += log(1 - g0 * halfNormal(d, sigma) + 1e-15)
+p1 = 1 - exp(logNonDetect)
+```
+
+### $K$-occasion ESA
+
+The probability of being caught **at least once** across $k$ independent occasions:
+
+$$
+p_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k
+$$
+
+ESA is then the numerical integral over the full arena:
+
+$$
+\mathrm{ESA}(k) = \sum_{\rm cells} \bigl[1 - (1 - p_1)^k\bigr] \cdot \Delta A
+$$
+
+The arena is discretised into **60 × 60 = 3600 cells** for ESA computation (both in the analytics D̂ historical series and in the estimates strip). `cellArea = arenaW * arenaH / (60 * 60)`.
+
+For the D̂ convergence chart, the detection surface (`p_1` for each cell) is computed once and reused for all $k = 1, 2, \ldots, k_{\rm current}$, by applying the $k$-exponent formula cell-by-cell. This avoids recomputing the surface $k$ times.
+
+The estimates strip uses `computeESA_K` from `src/secr-engine.js`, which is equivalent: a grid reduction over the surface.
+
+---
+
+## Density estimator
+
+$$
+\hat{D}(k) = \frac{M(k)}{\mathrm{ESA}(k)}
 $$
 
 where:
+- $M(k)$ = number of **unique** animal IDs in captures with occasion $\leq k$.
+- $\mathrm{ESA}(k)$ = $K$-occasion ESA using `sigmaEff` and the current detector layout.
 
-- $d$ is distance from activity centre to detector
-- $g_0$ is baseline detection at $d=0$
-- $\sigma_{\mathrm{eff}}$ is effective spatial scale used in detection and ESA
+$\hat{D}$ is plotted at each completed occasion as a convergence trace. True density is `N / ARENA_KM²`.
 
-Effective sigma mapping:
+This is an **educational estimator only** — it uses the true $g_0$ and $\sigma$ parameters and does not fit a likelihood model to the capture histories. A full SECR MLE would estimate $g_0$, $\sigma$, and $D$ from the data.
 
-$$
-\sigma_{\mathrm{eff}} = \frac{\sigma}{\sqrt{\text{fidelity}}}
-$$
+---
 
-K-occasion effective sampling area:
+## Analytics panels
 
-$$
-\mathrm{ESA}_K = \iint_{\mathrm{arena}} \left[1 - \left(1-p_1(x,y)\right)^K\right] dA
-$$
+Four panels rendered by `secr/analytics.js` using D3. They subscribe to the shared state and re-render on every notification (detector change, parameter change, or occasion completion). Position updates do not trigger re-renders.
 
-Estimator shown in the panel:
+### 1. Detection surface heatmap
 
-$$
-\hat{D} = \frac{M}{\mathrm{ESA}_K}
-$$
+Shows the single-occasion detection probability $p_1(c_x, c_y)$ over the full arena as a 50 × 50 colour grid using the YlOrRd D3 colour scale. A cell is transparent if $p < 0.001$.
 
-where $M$ is number of unique detected individuals.
+The heatmap redraws whenever `g0`, `sigma`/`sigmaEff`, or the detector layout changes. It is skipped entirely when the "Show detection surface" overlay is not visible — this avoids expensive grid computation on every occasion tick.
 
-## Controls and exact meanings
+The inner study area boundary is overlaid as a dashed blue rectangle. Detector positions are overlaid as small blue dots.
 
-### Playback and seed
+### 2. Capture history matrix
 
-- Run/Pause, Reset, Speed.
-- Seed and New for reproducible initial states.
+One row per captured animal (in order of first capture), one column per completed occasion. Cells show a coloured background and the detector IDs (comma-separated) for all detectors that caught the animal on that occasion. Empty occasions show a grey cell.
 
-### Detection and population
+Row labels are coloured boxes A–J matching the per-animal colours used in the simulation display.
 
-- $g_0$ slider: 0.05 to 1.00, step 0.01, default 0.40.
-- $\sigma$ slider: 0.05 to 0.50 km, step 0.01, default 0.20.
-- $N$ slider: 1 to 50 individuals, step 1, default 10.
-- Occasions ($K$) slider: 5 to 100, step 1, default 10.
+### 3. D̂ convergence chart
 
-### Movement
+Green line: $\hat{D}(k)$ for $k = 1, \ldots, k_{\rm current}$. Red dashed horizontal line: true $D$. X-axis: occasion index. Y-axis has expand-only tracking as in the DS module.
 
-- Movement preset selector (resident, sedentary, wide-ranging, nomad).
-- $\tau$ (mobility) slider: 0.5 to 20.0 occasions, step 0.5, default 5.0.
-- $f$ (fidelity) slider: 0.2 to 4.0, step 0.1, default 1.0.
+### 4. Running estimates strip
 
-### Detector design
+| Field | Value |
+|-------|-------|
+| $k$ | Current / target occasions |
+| $M$ | Unique individuals caught |
+| Total captures | Count of all (animal, detector, occasion) events |
+| ESA | $k$-occasion ESA (km²) at current $k$ |
+| $\hat{D}$ | $M / \mathrm{ESA}(k)$ |
+| True $D$ | $N / \mathrm{ARENA\_KM}^2$ |
 
-- Detector type preset selector.
-- Detector layout selector: grid, random, custom click-to-place.
-- $n_{\mathrm{grid}}$ (grid size) slider: 3 to 7 per axis, default 4x4.
-- Remove all detectors button for custom mode.
+Additional derived quantities shown below the table:
+- Estimated home-range area: $\pi \sigma_{\rm eff}^2$ (km²).
+- Mean recapture rate: total captures / ($M \times k$), computed only when $M > 0$ and $k > 0$.
 
-### Visual toggles
+---
 
-- Show detection surface.
-- Show activity centres.
+## Phase states
 
-## Engine implementation details
+The simulation has four phases, tracked in `phase`:
 
-### Activity-centre detection
+| State | Label | Transition |
+|-------|-------|-----------|
+| `idle` | ▶ Run | After `initSim()`, before first Run press |
+| `running` | ⏸ Pause | While occasions are ticking |
+| `paused` | ▶ Resume | After Pause press |
+| `complete` | ↺ Run again | After `currentK >= targetK` |
 
-Detection is computed from each animal's activity centre $(c_x, c_y)$, not instantaneous display position $(x, y)$.
+"Run again" (pressed when complete) adds another `K` occasions to `targetK` and continues on the same population — it does **not** reset the animals or detectors.
 
-Implementation consequence:
+---
 
-- movement animation can be smooth and realistic
-- detection probability remains consistent with the SECR centre-based formulation
+## Control taxonomy
 
-For each occasion and detector j:
+### Live update (no reset required)
 
-1. compute distance $d_{ij}$ from activity centre $i$ to detector $j$
-2. compute $p_{ij} = g_0\exp\!\left(-d_{ij}^2/(2\sigma_{\mathrm{eff}}^2)\right)$
-3. draw Bernoulli detection using RNG
-4. record capture event {animalId, detectorId, k} if detected
+| Control | Effect |
+|---------|--------|
+| $g_0$ slider | Updates detection probability and surface immediately |
+| $\sigma$ slider | Updates `sigmaEff`, detection surface, and ESA immediately |
+| Fidelity $f$ slider | Updates `sigmaEff` (via `sigma / √f`) and surface |
+| Detector type preset | Sets $g_0$ and $\sigma$; same as moving those two sliders |
+| Show detection surface checkbox | Toggles heatmap visibility; triggers redraw |
+| Show activity centres checkbox | Toggles centroid overlay |
 
-### Movement model (OUV)
+### Reset required
 
-Movement uses Ornstein-Uhlenbeck dynamics in velocity space, with two user-facing controls:
+| Control | Effect |
+|---------|--------|
+| $N$ slider | Number of animals (placement regenerated) |
+| $K$ slider | Occasions per run |
+| $\tau$ slider | Movement timescale (affects movement physics) |
+| Distribution layout | Grid / random / custom |
+| Grid size $n_{\rm grid}$ | Only applicable in grid mode |
+| Seed | Entirely new placement |
 
-- $\tau$ sets movement timescale
-- $f$ scales home-range tightness
+Add/remove detectors in custom mode is the one exception: detector changes take effect immediately without a full reset, because `updateDetectors()` notifies the analytics and the surface redraws.
 
-Internal calibration ensures:
+---
 
-- $\tau$ controls position autocorrelation timescale
-- $\sigma_{\mathrm{eff}}$ is consistent across detection surface and ESA calculations
+## Assumptions and limitations
 
-### ESA and $\hat{D}$
+- The density estimator uses known true $g_0$ and $\sigma$. A real SECR analysis would estimate these from the capture histories.
+- $g(d)$ is half-normal only. No other detection function is implemented.
+- The movement model is the same for all individuals — there is no individual variation in $\tau$ or fidelity.
+- The arena has reflecting boundaries. In reality, populations extend beyond any study area.
+- Multiple detections of the same individual by the same detector on different occasions are tracked independently. The capture history records every (animal, detector, occasion) event — not just first capture.
+- Habitat is uniform; `habitatFn = () => 1` throughout.
 
-The demo uses $K$-occasion ESA (not single-occasion ESA), so $\hat{D}$ reflects cumulative detection opportunity across occasions.
-
-### Analytics robustness
-
-- deferred initial render avoids startup race conditions
-- chart creation guards against zero-size containers
-- state notifications separate visual updates from computational updates
-
-## Assumptions and scope
-
-- $\hat{D}$ shown is an educational running estimator, not a full maximum-likelihood SECR fit.
-- $g_0$ and $\sigma$ update live for visual/analytic response.
-- most structural controls apply on reset.
+---
 
 ## External references
 
-- Distance Sampling references and citations: https://distancesampling.org/resources/citations.html
-- Borchers and Efford (2008), Crossref record (DOI: 10.1111/j.1541-0420.2007.00927.x): https://api.crossref.org/works/10.1111/j.1541-0420.2007.00927.x
+- Borchers and Efford (2008), DOI: https://api.crossref.org/works/10.1111/j.1541-0420.2007.00927.x
+- Distance Sampling project resources: https://distancesampling.org/resources/citations.html
