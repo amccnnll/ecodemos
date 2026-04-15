@@ -1,4 +1,5 @@
 # Lotka-Volterra (LV)
+
 # Lotka-Volterra (LV)
 
 ## What this demo shows
@@ -24,18 +25,23 @@ For a state vector $(N, P)$ at time $t$ with step size $\Delta t$:
 $$
 k_1 = f(N, P)
 $$
+
 $$
 k_2 = f\!\left(N + \tfrac{\Delta t}{2} k_{1,N},\ P + \tfrac{\Delta t}{2} k_{1,P}\right)
 $$
+
 $$
 k_3 = f\!\left(N + \tfrac{\Delta t}{2} k_{2,N},\ P + \tfrac{\Delta t}{2} k_{2,P}\right)
 $$
+
 $$
 k_4 = f\!\left(N + \Delta t\, k_{3,N},\ P + \Delta t\, k_{3,P}\right)
 $$
+
 $$
 N_{t+\Delta t} = N + \frac{\Delta t}{6}(k_{1,N} + 2k_{2,N} + 2k_{3,N} + k_{4,N})
 $$
+
 $$
 P_{t+\Delta t} = P + \frac{\Delta t}{6}(k_{1,P} + 2k_{2,P} + 2k_{3,P} + k_{4,P})
 $$
@@ -44,7 +50,7 @@ After each step, both populations are clamped to zero from below:
 
 ```js
 return {
-  prey:     Math.max(0, nextPrey),
+  prey: Math.max(0, nextPrey),
   predator: Math.max(0, nextPred),
 };
 ```
@@ -59,11 +65,11 @@ Slider range: 0.005 to 0.080, step 0.001, default 0.030. This is the integration
 
 The simulation advances by a fixed number of RK4 steps per animation frame (`requestAnimationFrame`):
 
-| Speed | Steps per frame |
-|-------|-----------------|
-| Slow | 1 |
-| Normal | 2 |
-| Fast | 6 |
+| Speed  | Steps per frame |
+| ------ | --------------- |
+| Slow   | 1               |
+| Normal | 2               |
+| Fast   | 6               |
 
 At Normal speed and default $\Delta t = 0.030$, the simulation advances by 0.060 model-time units per frame — approximately 3.6 model-time units per second at 60 fps.
 
@@ -76,18 +82,19 @@ At Normal speed and default $\Delta t = 0.030$, the simulation advances by 0.060
 $$
 \frac{dN}{dt} = \alpha N - \beta N P
 $$
+
 $$
 \frac{dP}{dt} = \delta N P - \gamma P
 $$
 
 Parameters:
 
-| Symbol | Role | Default | Range | Step |
-|--------|------|---------|-------|------|
-| $\alpha$ | Prey intrinsic growth rate | 1.10 | 0.2–2.0 | 0.01 |
-| $\beta$ | Predation rate coefficient | 0.06 | 0.01–0.20 | 0.001 |
-| $\delta$ | Predator conversion efficiency | 0.03 | 0.005–0.10 | 0.001 |
-| $\gamma$ | Predator mortality rate | 0.70 | 0.1–2.0 | 0.01 |
+| Symbol   | Role                           | Default | Range      | Step  |
+| -------- | ------------------------------ | ------- | ---------- | ----- |
+| $\alpha$ | Prey intrinsic growth rate     | 1.10    | 0.2–2.0    | 0.01  |
+| $\beta$  | Predation rate coefficient     | 0.06    | 0.01–0.20  | 0.001 |
+| $\delta$ | Predator conversion efficiency | 0.03    | 0.005–0.10 | 0.001 |
+| $\gamma$ | Predator mortality rate        | 0.70    | 0.1–2.0    | 0.01  |
 
 The system has two equilibria. The trivial one is $(0, 0)$. The non-trivial one is:
 
@@ -99,12 +106,12 @@ In the ideal system (no numerical error, no clamping) trajectories are closed ne
 
 #### Classic presets
 
-| Name | $\alpha$ | $\beta$ | $\delta$ | $\gamma$ | $N_0$ | $P_0$ | $\Delta t$ |
-|------|---------|---------|---------|---------|--------|--------|------------|
-| Balanced cycles | 1.10 | 0.060 | 0.030 | 0.70 | 40 | 9 | 0.030 |
-| Predator crash | 0.30 | 0.010 | 0.003 | 1.30 | 55 | 22 | 0.020 |
-| Prey crash | 0.45 | 0.160 | 0.060 | 0.40 | 22 | 26 | 0.020 |
-| High-amplitude cycles | 1.30 | 0.080 | 0.028 | 0.75 | 55 | 7 | 0.020 |
+| Name                  | $\alpha$ | $\beta$ | $\delta$ | $\gamma$ | $N_0$ | $P_0$ | $\Delta t$ |
+| --------------------- | -------- | ------- | -------- | -------- | ----- | ----- | ---------- |
+| Balanced cycles       | 1.10     | 0.060   | 0.030    | 0.70     | 40    | 9     | 0.030      |
+| Predator crash        | 0.30     | 0.010   | 0.003    | 1.30     | 55    | 22    | 0.020      |
+| Prey crash            | 0.45     | 0.160   | 0.060    | 0.40     | 22    | 26    | 0.020      |
+| High-amplitude cycles | 1.30     | 0.080   | 0.028    | 0.75     | 55    | 7     | 0.020      |
 
 ### Dynamic predator-prey
 
@@ -113,16 +120,17 @@ Adds logistic prey growth and predator self-limitation:
 $$
 \frac{dN}{dt} = \alpha N\!\left(1 - \frac{N}{K}\right) - \beta N P
 $$
+
 $$
 \frac{dP}{dt} = \delta N P - \gamma P - m P^2
 $$
 
 Additional parameters:
 
-| Symbol | Role | Default | Range | Step |
-|--------|------|---------|-------|------|
-| $K$ | Prey carrying capacity | 120 | 20–250 | 1 |
-| $m$ | Predator self-limitation | 0.010 | 0.000–0.200 | 0.001 |
+| Symbol | Role                     | Default | Range       | Step  |
+| ------ | ------------------------ | ------- | ----------- | ----- |
+| $K$    | Prey carrying capacity   | 120     | 20–250      | 1     |
+| $m$    | Predator self-limitation | 0.010   | 0.000–0.200 | 0.001 |
 
 In the engine, $K$ is guarded: `kSafe = max(1e-6, Kdyn)` and `mSafe = max(0, mPred)` to prevent division by zero or negative values.
 
@@ -138,31 +146,32 @@ This system can exhibit damped spirals, limit cycles, or collapse depending on p
 
 #### Dynamic presets
 
-| Name | $\alpha$ | $\beta$ | $\delta$ | $\gamma$ | $K$ | $m$ | $N_0$ | $P_0$ | $\Delta t$ |
-|------|---------|---------|---------|---------|-----|-----|--------|--------|------------|
-| Damped spiral | 1.00 | 0.035 | 0.020 | 0.80 | 150 | 0.050 | 80 | 18 | 0.030 |
-| Slow damping / predator collapse | 0.60 | 0.050 | 0.010 | 1.00 | 80 | 0.0001 | 80 | 12 | 0.030 |
-| Tight cycle | 0.90 | 0.030 | 0.020 | 0.75 | 120 | 0.020 | 50 | 14 | 0.030 |
+| Name                             | $\alpha$ | $\beta$ | $\delta$ | $\gamma$ | $K$ | $m$    | $N_0$ | $P_0$ | $\Delta t$ |
+| -------------------------------- | -------- | ------- | -------- | -------- | --- | ------ | ----- | ----- | ---------- |
+| Damped spiral                    | 1.00     | 0.035   | 0.020    | 0.80     | 150 | 0.050  | 80    | 18    | 0.030      |
+| Slow damping / predator collapse | 0.60     | 0.050   | 0.010    | 1.00     | 80  | 0.0001 | 80    | 12    | 0.030      |
+| Tight cycle                      | 0.90     | 0.030   | 0.020    | 0.75     | 120 | 0.020  | 50    | 14    | 0.030      |
 
 ### Competition
 
 $$
 \frac{dN_1}{dt} = r_1 N_1\!\left(1 - \frac{N_1 + \alpha_{12} N_2}{K_1}\right)
 $$
+
 $$
 \frac{dN_2}{dt} = r_2 N_2\!\left(1 - \frac{N_2 + \alpha_{21} N_1}{K_2}\right)
 $$
 
 Parameters:
 
-| Symbol | Role | Default | Range | Step |
-|--------|------|---------|-------|------|
-| $r_1$ | Species 1 growth rate | 0.90 | 0.1–2.0 | 0.01 |
-| $r_2$ | Species 2 growth rate | 0.80 | 0.1–2.0 | 0.01 |
-| $K_1$ | Species 1 carrying capacity | 75 | 10–200 | 1 |
-| $K_2$ | Species 2 carrying capacity | 65 | 10–200 | 1 |
-| $\alpha_{12}$ | Effect of species 2 on species 1 | 0.60 | 0.00–2.00 | 0.01 |
-| $\alpha_{21}$ | Effect of species 1 on species 2 | 0.50 | 0.00–2.00 | 0.01 |
+| Symbol        | Role                             | Default | Range     | Step |
+| ------------- | -------------------------------- | ------- | --------- | ---- |
+| $r_1$         | Species 1 growth rate            | 0.90    | 0.1–2.0   | 0.01 |
+| $r_2$         | Species 2 growth rate            | 0.80    | 0.1–2.0   | 0.01 |
+| $K_1$         | Species 1 carrying capacity      | 75      | 10–200    | 1    |
+| $K_2$         | Species 2 carrying capacity      | 65      | 10–200    | 1    |
+| $\alpha_{12}$ | Effect of species 2 on species 1 | 0.60    | 0.00–2.00 | 0.01 |
+| $\alpha_{21}$ | Effect of species 1 on species 2 | 0.50    | 0.00–2.00 | 0.01 |
 
 In the engine, both $K$ values are guarded: `max(1e-6, K1)` and `max(1e-6, K2)`.
 
@@ -176,11 +185,11 @@ The analytics panel computes and displays these values live. The condition for s
 
 #### Competition presets
 
-| Name | $r_1$ | $r_2$ | $K_1$ | $K_2$ | $\alpha_{12}$ | $\alpha_{21}$ | $N_{1,0}$ | $N_{2,0}$ | $\Delta t$ |
-|------|-------|-------|-------|-------|--------------|--------------|-----------|-----------|------------|
-| Coexistence | 0.90 | 0.80 | 75 | 65 | 0.60 | 0.50 | 40 | 35 | 0.030 |
-| Species 1 wins | 1.00 | 0.70 | 85 | 60 | 0.45 | 1.35 | 55 | 45 | 0.030 |
-| Species 2 wins | 0.70 | 1.00 | 60 | 85 | 1.30 | 0.45 | 45 | 55 | 0.030 |
+| Name           | $r_1$ | $r_2$ | $K_1$ | $K_2$ | $\alpha_{12}$ | $\alpha_{21}$ | $N_{1,0}$ | $N_{2,0}$ | $\Delta t$ |
+| -------------- | ----- | ----- | ----- | ----- | ------------- | ------------- | --------- | --------- | ---------- |
+| Coexistence    | 0.90  | 0.80  | 75    | 65    | 0.60          | 0.50          | 40        | 35        | 0.030      |
+| Species 1 wins | 1.00  | 0.70  | 85    | 60    | 0.45          | 1.35          | 55        | 45        | 0.030      |
+| Species 2 wins | 0.70  | 1.00  | 60    | 85    | 1.30          | 0.45          | 45        | 55        | 0.030      |
 
 ---
 

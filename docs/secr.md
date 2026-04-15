@@ -16,10 +16,10 @@ The central teaching point is that detection is spatial and imperfect:
 
 The arena is a square with side length `ARENA_KM = 2.0 km`. It is divided into two zones:
 
-| Zone | Variable | Value |
-|------|----------|-------|
-| Inner study area | `INNER_KM` | 1.2 km × 1.2 km |
-| Buffer zone (each side) | `BUFFER_KM` | 0.4 km |
+| Zone                    | Variable    | Value           |
+| ----------------------- | ----------- | --------------- |
+| Inner study area        | `INNER_KM`  | 1.2 km × 1.2 km |
+| Buffer zone (each side) | `BUFFER_KM` | 0.4 km          |
 
 The buffer is `= 2σ` at the default `σ = 0.20 km`. This is a standard SECR convention: animals whose activity centres lie within `~2σ` of the detector array contribute meaningfully to detections. Animals further out are effectively invisible.
 
@@ -86,11 +86,11 @@ Detectors are managed directly by sketch.js. Clicking within the inner study are
 
 Three separate RNGs are used:
 
-| RNG | Seeding | Purpose |
-|-----|---------|---------|
-| `placementRng = createRng(seed)` | Seeded (Alea PRNG) | Animal centres, grid/random detector positions |
-| `movementRng = new Math.seedrandom()` | Fresh unseeded each `initSim()` | Per-frame OUV movement steps |
-| `detectionRng = new Math.seedrandom()` | Fresh unseeded each `initSim()` | Bernoulli detection draws each occasion |
+| RNG                                    | Seeding                         | Purpose                                        |
+| -------------------------------------- | ------------------------------- | ---------------------------------------------- |
+| `placementRng = createRng(seed)`       | Seeded (Alea PRNG)              | Animal centres, grid/random detector positions |
+| `movementRng = new Math.seedrandom()`  | Fresh unseeded each `initSim()` | Per-frame OUV movement steps                   |
+| `detectionRng = new Math.seedrandom()` | Fresh unseeded each `initSim()` | Bernoulli detection draws each occasion        |
 
 Same seed → same animal and detector layout. Movement paths and detection outcomes vary on every replay, even with the same seed.
 
@@ -133,10 +133,10 @@ if x > arenaW:  x = 2*arenaW - x, vx = -vx
 `springStr` and `noiseScale` are computed each frame from the slider values:
 
 ```js
-const fpk        = FRAMES_PER_OCC[speed]   // frames per occasion
-const drag       = 0.08
-const springStr  = drag / (tau * fpk)
-const noiseScale = sigma * drag * sqrt(2 / (fidelity * tau * fpk))
+const fpk = FRAMES_PER_OCC[speed]; // frames per occasion
+const drag = 0.08;
+const springStr = drag / (tau * fpk);
+const noiseScale = sigma * drag * sqrt(2 / (fidelity * tau * fpk));
 ```
 
 The derivation comes from the overdamped continuous-time Langevin equation:
@@ -145,16 +145,17 @@ The derivation comes from the overdamped continuous-time Langevin equation:
 - Equilibrium variance: $\mathrm{Var}(x) = \mathrm{noiseScale}^2 / (2 K_s \cdot \mathrm{drag}) = \sigma^2 / \mathrm{fidelity}$.
 
 This gives:
+
 - $\tau$ (occasions) → controls position autocorrelation time (how long the animal takes to cross its home range).
 - fidelity → controls noise amplitude → range tightness. Higher fidelity = smaller effective home range radius = $\sigma / \sqrt{\mathrm{fidelity}}$.
 
 ### Speed and frames per occasion
 
 | Label  | Frames per occasion |
-|--------|---------------------|
-| Slow   | 120 |
-| Normal | 60 |
-| Fast   | 15 |
+| ------ | ------------------- |
+| Slow   | 120                 |
+| Normal | 60                  |
+| Fast   | 15                  |
 
 At 60 fps and Normal speed, each occasion takes 1 second of real time.
 
@@ -175,12 +176,12 @@ The `DISPLAY_LERP = 0.15` factor creates smooth animation without affecting the 
 
 Presets set $\tau$ and fidelity simultaneously.
 
-| Preset | $\tau$ (occasions) | Fidelity | Effect |
-|--------|--------------------|----------|--------|
-| Resident | 5.0 | 1.0 | Default. Moderate range size, moderate return. |
-| Sedentary | 6.0 | 3.0 | Tighter home range (radius ÷ √3). Slower crossing time. |
-| Wide-ranging | 2.0 | 0.4 | Larger effective range (radius × √2.5). Faster crossing. |
-| Nomad | 1.0 | 0.2 | Very fast, large range — barely constrained to a centre. |
+| Preset       | $\tau$ (occasions) | Fidelity | Effect                                                   |
+| ------------ | ------------------ | -------- | -------------------------------------------------------- |
+| Resident     | 5.0                | 1.0      | Default. Moderate range size, moderate return.           |
+| Sedentary    | 6.0                | 3.0      | Tighter home range (radius ÷ √3). Slower crossing time.  |
+| Wide-ranging | 2.0                | 0.4      | Larger effective range (radius × √2.5). Faster crossing. |
+| Nomad        | 1.0                | 0.2      | Very fast, large range — barely constrained to a centre. |
 
 ---
 
@@ -218,12 +219,12 @@ Higher fidelity compresses the home range. `sigmaEff` is passed to `tryDetectsOn
 
 These set `g0` and `sigma` simultaneously.
 
-| Preset | $g_0$ | $\sigma$ (km) | Interpretation |
-|--------|-------|---------------|----------------|
-| Default | 0.40 | 0.20 | Balanced starting point |
-| Camera trap | 0.45 | 0.08 | High detection within narrow field |
-| Live trap | 0.60 | 0.05 | Very localised, high if animal passes |
-| Acoustic | 0.20 | 0.40 | Wide detection radius, moderate probability |
+| Preset      | $g_0$ | $\sigma$ (km) | Interpretation                              |
+| ----------- | ----- | ------------- | ------------------------------------------- |
+| Default     | 0.40  | 0.20          | Balanced starting point                     |
+| Camera trap | 0.45  | 0.08          | High detection within narrow field          |
+| Live trap   | 0.60  | 0.05          | Very localised, high if animal passes       |
+| Acoustic    | 0.20  | 0.40          | Wide detection radius, moderate probability |
 
 ---
 
@@ -242,8 +243,8 @@ where $d_j = \|(c_x, c_y) - \text{det}_j\|$ and $g(d) = \exp(-d^2 / 2\sigma_{\rm
 This is computed as a log-sum for numerical stability:
 
 ```js
-logNonDetect += log(1 - g0 * halfNormal(d, sigma) + 1e-15)
-p1 = 1 - exp(logNonDetect)
+logNonDetect += log(1 - g0 * halfNormal(d, sigma) + 1e-15);
+p1 = 1 - exp(logNonDetect);
 ```
 
 ### $K$-occasion ESA
@@ -275,6 +276,7 @@ $$
 $$
 
 where:
+
 - $M(k)$ = number of **unique** animal IDs in captures with occasion $\leq k$.
 - $\mathrm{ESA}(k)$ = $K$-occasion ESA using `sigmaEff` and the current detector layout.
 
@@ -308,16 +310,17 @@ Green line: $\hat{D}(k)$ for $k = 1, \ldots, k_{\rm current}$. Red dashed horizo
 
 ### 4. Running estimates strip
 
-| Field | Value |
-|-------|-------|
-| $k$ | Current / target occasions |
-| $M$ | Unique individuals caught |
+| Field          | Value                                            |
+| -------------- | ------------------------------------------------ |
+| $k$            | Current / target occasions                       |
+| $M$            | Unique individuals caught                        |
 | Total captures | Count of all (animal, detector, occasion) events |
-| ESA | $k$-occasion ESA (km²) at current $k$ |
-| $\hat{D}$ | $M / \mathrm{ESA}(k)$ |
-| True $D$ | $N / \mathrm{ARENA\_KM}^2$ |
+| ESA            | $k$-occasion ESA (km²) at current $k$            |
+| $\hat{D}$      | $M / \mathrm{ESA}(k)$                            |
+| True $D$       | $N / \mathrm{ARENA\_KM}^2$                       |
 
 Additional derived quantities shown below the table:
+
 - Estimated home-range area: $\pi \sigma_{\rm eff}^2$ (km²).
 - Mean recapture rate: total captures / ($M \times k$), computed only when $M > 0$ and $k > 0$.
 
@@ -327,12 +330,12 @@ Additional derived quantities shown below the table:
 
 The simulation has four phases, tracked in `phase`:
 
-| State | Label | Transition |
-|-------|-------|-----------|
-| `idle` | ▶ Run | After `initSim()`, before first Run press |
-| `running` | ⏸ Pause | While occasions are ticking |
-| `paused` | ▶ Resume | After Pause press |
-| `complete` | ↺ Run again | After `currentK >= targetK` |
+| State      | Label       | Transition                                |
+| ---------- | ----------- | ----------------------------------------- |
+| `idle`     | ▶ Run       | After `initSim()`, before first Run press |
+| `running`  | ⏸ Pause     | While occasions are ticking               |
+| `paused`   | ▶ Resume    | After Pause press                         |
+| `complete` | ↺ Run again | After `currentK >= targetK`               |
 
 "Run again" (pressed when complete) adds another `K` occasions to `targetK` and continues on the same population — it does **not** reset the animals or detectors.
 
@@ -342,25 +345,25 @@ The simulation has four phases, tracked in `phase`:
 
 ### Live update (no reset required)
 
-| Control | Effect |
-|---------|--------|
-| $g_0$ slider | Updates detection probability and surface immediately |
-| $\sigma$ slider | Updates `sigmaEff`, detection surface, and ESA immediately |
-| Fidelity $f$ slider | Updates `sigmaEff` (via `sigma / √f`) and surface |
-| Detector type preset | Sets $g_0$ and $\sigma$; same as moving those two sliders |
-| Show detection surface checkbox | Toggles heatmap visibility; triggers redraw |
-| Show activity centres checkbox | Toggles centroid overlay |
+| Control                         | Effect                                                     |
+| ------------------------------- | ---------------------------------------------------------- |
+| $g_0$ slider                    | Updates detection probability and surface immediately      |
+| $\sigma$ slider                 | Updates `sigmaEff`, detection surface, and ESA immediately |
+| Fidelity $f$ slider             | Updates `sigmaEff` (via `sigma / √f`) and surface          |
+| Detector type preset            | Sets $g_0$ and $\sigma$; same as moving those two sliders  |
+| Show detection surface checkbox | Toggles heatmap visibility; triggers redraw                |
+| Show activity centres checkbox  | Toggles centroid overlay                                   |
 
 ### Reset required
 
-| Control | Effect |
-|---------|--------|
-| $N$ slider | Number of animals (placement regenerated) |
-| $K$ slider | Occasions per run |
-| $\tau$ slider | Movement timescale (affects movement physics) |
-| Distribution layout | Grid / random / custom |
-| Grid size $n_{\rm grid}$ | Only applicable in grid mode |
-| Seed | Entirely new placement |
+| Control                  | Effect                                        |
+| ------------------------ | --------------------------------------------- |
+| $N$ slider               | Number of animals (placement regenerated)     |
+| $K$ slider               | Occasions per run                             |
+| $\tau$ slider            | Movement timescale (affects movement physics) |
+| Distribution layout      | Grid / random / custom                        |
+| Grid size $n_{\rm grid}$ | Only applicable in grid mode                  |
+| Seed                     | Entirely new placement                        |
 
 Add/remove detectors in custom mode is the one exception: detector changes take effect immediately without a full reset, because `updateDetectors()` notifies the analytics and the surface redraws.
 
