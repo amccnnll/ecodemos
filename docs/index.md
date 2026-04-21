@@ -11,6 +11,3 @@ Reference documentation for all current simulations.
 - [Spatially Explicit Capture-Recapture (SECR)](./secr.html)
 - [Lotka-Volterra (LV)](./lv.html)
 
-## Shared references
-
-- [Glossary](./glossary.html)

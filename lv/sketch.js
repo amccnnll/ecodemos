@@ -67,38 +67,43 @@ function applyCompetitionPreset(name) {
 }
 
 function applyDynamicPreset(name) {
+  // All three presets share α=0.8, β=0.05, δ=0.02, γ=0.7 so N*=γ/δ=35 in all cases.
+  // The contrast comes entirely from K:
+  //   dampedSpiral: K=60  → N*=35 > K/2=30 → stable equilibrium (damped oscillations)
+  //   tightCycle:   K=200 → N*=35 < K/2=100 → unstable equilibrium → limit cycle (paradox of enrichment)
+  //   slowDamping:  K=25  → K < N*=35 → no interior equilibrium → predator collapse
   const presets = {
     dampedSpiral: {
-      alpha: 1.0,
-      beta: 0.035,
-      delta: 0.02,
-      gamma: 0.8,
-      Kdyn: 150,
-      mPred: 0.05,
-      prey0: 80,
-      predator0: 18,
-      dt: 0.03,
-    },
-    slowDamping: {
-      alpha: 0.6,
+      alpha: 0.8,
       beta: 0.05,
-      delta: 0.01,
-      gamma: 1.0,
-      Kdyn: 80,
-      mPred: 0.0001,
-      prey0: 80,
-      predator0: 12,
+      delta: 0.02,
+      gamma: 0.7,
+      Kdyn: 60,
+      mPred: 0,
+      prey0: 10,
+      predator0: 2,
       dt: 0.03,
     },
     tightCycle: {
-      alpha: 0.9,
-      beta: 0.03,
+      alpha: 0.8,
+      beta: 0.05,
       delta: 0.02,
-      gamma: 0.75,
-      Kdyn: 120,
-      mPred: 0.02,
+      gamma: 0.7,
+      Kdyn: 200,
+      mPred: 0,
       prey0: 50,
-      predator0: 14,
+      predator0: 3,
+      dt: 0.02,
+    },
+    slowDamping: {
+      alpha: 0.8,
+      beta: 0.05,
+      delta: 0.02,
+      gamma: 0.7,
+      Kdyn: 25,
+      mPred: 0,
+      prey0: 10,
+      predator0: 15,
       dt: 0.03,
     },
   };

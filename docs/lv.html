@@ -204,15 +204,15 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#glossary" id="toc-glossary" class="nav-link active" data-scroll-target="#glossary">Glossary</a>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#glossary" id="toc-glossary" class="nav-link" data-scroll-target="#glossary">Glossary</a>
   <ul class="collapse">
-  <li><a href="#controls-all-modes" id="toc-controls-all-modes" class="nav-link" data-scroll-target="#controls-all-modes">Controls — all modes</a></li>
-  <li><a href="#controls-predator-prey-classic-mode" id="toc-controls-predator-prey-classic-mode" class="nav-link" data-scroll-target="#controls-predator-prey-classic-mode">Controls — predator-prey (classic) mode</a></li>
-  <li><a href="#controls-dynamic-predator-prey-mode-additional" id="toc-controls-dynamic-predator-prey-mode-additional" class="nav-link" data-scroll-target="#controls-dynamic-predator-prey-mode-additional">Controls — dynamic predator-prey mode (additional)</a></li>
-  <li><a href="#controls-competition-mode" id="toc-controls-competition-mode" class="nav-link" data-scroll-target="#controls-competition-mode">Controls — competition mode</a></li>
+  <li><a href="#controls-all-modes" id="toc-controls-all-modes" class="nav-link" data-scroll-target="#controls-all-modes">Controls: all modes</a></li>
+  <li><a href="#controls-predator-prey-classic-mode" id="toc-controls-predator-prey-classic-mode" class="nav-link" data-scroll-target="#controls-predator-prey-classic-mode">Controls: predator-prey (classic) mode</a></li>
+  <li><a href="#controls-dynamic-predator-prey-mode-additional" id="toc-controls-dynamic-predator-prey-mode-additional" class="nav-link" data-scroll-target="#controls-dynamic-predator-prey-mode-additional">Controls: dynamic predator-prey mode (additional)</a></li>
+  <li><a href="#controls-competition-mode" id="toc-controls-competition-mode" class="nav-link" data-scroll-target="#controls-competition-mode">Controls: competition mode</a></li>
   <li><a href="#key-symbols" id="toc-key-symbols" class="nav-link" data-scroll-target="#key-symbols">Key symbols</a></li>
   </ul></li>
-  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a></li>
   <li><a href="#numerical-integration" id="toc-numerical-integration" class="nav-link" data-scroll-target="#numerical-integration">Numerical integration</a>
   <ul class="collapse">
   <li><a href="#rk4-step" id="toc-rk4-step" class="nav-link" data-scroll-target="#rk4-step">RK4 step</a></li>
@@ -229,7 +229,7 @@ window.Quarto = {
   <li><a href="#checkpoint-auto-pause" id="toc-checkpoint-auto-pause" class="nav-link" data-scroll-target="#checkpoint-auto-pause">Checkpoint auto-pause</a></li>
   <li><a href="#controls" id="toc-controls" class="nav-link" data-scroll-target="#controls">Controls</a>
   <ul class="collapse">
-  <li><a href="#parameter-sliders-behaviour-on-input-vs-change" id="toc-parameter-sliders-behaviour-on-input-vs-change" class="nav-link" data-scroll-target="#parameter-sliders-behaviour-on-input-vs-change">Parameter sliders — behaviour on input vs change</a></li>
+  <li><a href="#parameter-sliders-behaviour-on-input-vs-change" id="toc-parameter-sliders-behaviour-on-input-vs-change" class="nav-link" data-scroll-target="#parameter-sliders-behaviour-on-input-vs-change">Parameter sliders: behaviour on input vs change</a></li>
   <li><a href="#model-type" id="toc-model-type" class="nav-link" data-scroll-target="#model-type">Model type</a></li>
   <li><a href="#reset-vs-reset-defaults" id="toc-reset-vs-reset-defaults" class="nav-link" data-scroll-target="#reset-vs-reset-defaults">Reset vs Reset Defaults</a></li>
   <li><a href="#speed-buttons" id="toc-speed-buttons" class="nav-link" data-scroll-target="#speed-buttons">Speed buttons</a></li>
@@ -267,10 +267,22 @@ window.Quarto = {
 </header>
 
 
+<p><a href="./ecodemos/lv/">→ Open simulation</a></p>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>Three two-species dynamical systems integrated via RK4, displayed as a live time series and phase-plane trajectory. The three modes are:</p>
+<ul>
+<li><strong>Classic predator-prey</strong>: the standard Lotka-Volterra system with no density dependence.</li>
+<li><strong>Dynamic predator-prey</strong>: adds logistic prey growth and predator self-limitation.</li>
+<li><strong>Competition</strong>: two-species Lotka-Volterra competition with carrying capacities and interaction coefficients.</li>
+</ul>
+<p>The visualisation shows both how populations change over time and how they trace paths through state space (the phase plane).</p>
+<hr>
+</section>
 <section id="glossary" class="level2">
 <h2 class="anchored" data-anchor-id="glossary">Glossary</h2>
 <section id="controls-all-modes" class="level3">
-<h3 class="anchored" data-anchor-id="controls-all-modes">Controls — all modes</h3>
+<h3 class="anchored" data-anchor-id="controls-all-modes">Controls: all modes</h3>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -303,7 +315,7 @@ window.Quarto = {
 </table>
 </section>
 <section id="controls-predator-prey-classic-mode" class="level3">
-<h3 class="anchored" data-anchor-id="controls-predator-prey-classic-mode">Controls — predator-prey (classic) mode</h3>
+<h3 class="anchored" data-anchor-id="controls-predator-prey-classic-mode">Controls: predator-prey (classic) mode</h3>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 50%">
@@ -318,19 +330,19 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\(\alpha\)</span></td>
-<td>Prey intrinsic growth rate — rate of increase of the prey population in the absence of predators. Default: 1.1.</td>
+<td>Prey intrinsic growth rate: rate of increase of the prey population in the absence of predators. Default: 1.1.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\beta\)</span></td>
-<td>Predation rate — rate at which each predator removes prey per unit time. Default: 0.06.</td>
+<td>Predation rate: rate at which each predator removes prey per unit time. Default: 0.06.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\delta\)</span></td>
-<td>Predator conversion efficiency — prey consumed per new predator produced. Default: 0.03.</td>
+<td>Predator conversion efficiency: prey consumed per new predator produced. Default: 0.03.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\gamma\)</span></td>
-<td>Predator death rate — intrinsic rate of decrease of predators in the absence of prey. Default: 0.7.</td>
+<td>Predator death rate: intrinsic rate of decrease of predators in the absence of prey. Default: 0.7.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(N_0\)</span></td>
@@ -344,7 +356,7 @@ window.Quarto = {
 </table>
 </section>
 <section id="controls-dynamic-predator-prey-mode-additional" class="level3">
-<h3 class="anchored" data-anchor-id="controls-dynamic-predator-prey-mode-additional">Controls — dynamic predator-prey mode (additional)</h3>
+<h3 class="anchored" data-anchor-id="controls-dynamic-predator-prey-mode-additional">Controls: dynamic predator-prey mode (additional)</h3>
 <p>Adds logistic prey growth and predator self-limitation to the classic system.</p>
 <table class="caption-top table">
 <colgroup>
@@ -360,21 +372,21 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td>Dynamic preset</td>
-<td>Named presets: Damped spiral, Slow damping / predator collapse, Tight cycle.</td>
+<td>Named presets: Damped oscillations, Limit cycle, Predator collapse. All three share the same α/β/δ/γ; only K varies, isolating the effect of prey carrying capacity.</td>
 </tr>
 <tr class="even">
 <td>K (prey)</td>
-<td>Prey carrying capacity — logistic ceiling for prey growth in the absence of predators. Default: 120.</td>
+<td>Prey carrying capacity: logistic ceiling for prey growth in the absence of predators. Default: 120.</td>
 </tr>
 <tr class="odd">
 <td>m (predator)</td>
-<td>Predator self-limitation coefficient — intraspecific competition among predators. Default: 0.01.</td>
+<td>Predator self-limitation coefficient: intraspecific competition among predators. Default: 0.01.</td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="controls-competition-mode" class="level3">
-<h3 class="anchored" data-anchor-id="controls-competition-mode">Controls — competition mode</h3>
+<h3 class="anchored" data-anchor-id="controls-competition-mode">Controls: competition mode</h3>
 <p>Replaces the predator-prey parameters with two-species competition parameters.</p>
 <table class="caption-top table">
 <colgroup>
@@ -410,11 +422,11 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\alpha_{12}\)</span></td>
-<td>Effect of species 2 on species 1 — per-individual competitive impact. Default: 0.60.</td>
+<td>Effect of species 2 on species 1: per-individual competitive impact. Default: 0.60.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\alpha_{21}\)</span></td>
-<td>Effect of species 1 on species 2 — per-individual competitive impact. Default: 0.50.</td>
+<td>Effect of species 1 on species 2: per-individual competitive impact. Default: 0.50.</td>
 </tr>
 </tbody>
 </table>
@@ -486,17 +498,6 @@ window.Quarto = {
 <hr>
 </section>
 </section>
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>Three two-species dynamical systems integrated via RK4, displayed as a live time series and phase-plane trajectory. The three modes are:</p>
-<ul>
-<li><strong>Classic predator-prey</strong> — the standard Lotka-Volterra system with no density dependence.</li>
-<li><strong>Dynamic predator-prey</strong> — adds logistic prey growth and predator self-limitation.</li>
-<li><strong>Competition</strong> — two-species Lotka-Volterra competition with carrying capacities and interaction coefficients.</li>
-</ul>
-<p>The visualisation shows both how populations change over time and how they trace paths through state space (the phase plane).</p>
-<hr>
-</section>
 <section id="numerical-integration" class="level2">
 <h2 class="anchored" data-anchor-id="numerical-integration">Numerical integration</h2>
 <p>All three modes are integrated using <strong>RK4</strong> (classical fourth-order Runge-Kutta). The integration is in <code>src/lv-engine.js</code>.</p>
@@ -557,7 +558,7 @@ P_{t+\Delta t} = P + \frac{\Delta t}{6}(k_{1,P} + 2k_{2,P} + 2k_{3,P} + k_{4,P})
 </tr>
 </tbody>
 </table>
-<p>At Normal speed and default <span class="math inline">\(\Delta t = 0.030\)</span>, the simulation advances by 0.060 model-time units per frame — approximately 3.6 model-time units per second at 60 fps.</p>
+<p>At Normal speed and default <span class="math inline">\(\Delta t = 0.030\)</span>, the simulation advances by 0.060 model-time units per frame, approximately 3.6 model-time units per second at 60 fps.</p>
 <hr>
 </section>
 </section>
@@ -739,20 +740,22 @@ N^* = \frac{\gamma}{\delta}, \quad P^* = \frac{\alpha}{\beta}
 N^* = \frac{\gamma + m \alpha / \beta}{\delta + m \alpha / (\beta K)}, \quad P^* = \max\!\left(0,\ \frac{\delta N^* - \gamma}{m}\right)
 \]</span></p>
 <p>This system can exhibit damped spirals, limit cycles, or collapse depending on parameter choice, unlike the neutral cycles of classic LV.</p>
+<p>The key stability criterion is whether <span class="math inline">\(N^* &gt; K/2\)</span>. When <span class="math inline">\(N^* &gt; K/2\)</span>, the interior equilibrium is stable and trajectories spiral inward (damped oscillations). When <span class="math inline">\(N^* &lt; K/2\)</span>, a limit cycle emerges (paradox of enrichment). When <span class="math inline">\(K &lt; N^* = \gamma/\delta\)</span> (no <span class="math inline">\(m\)</span>), the prey carrying capacity is too low to sustain predators and they collapse.</p>
 <section id="dynamic-presets" class="level4">
 <h4 class="anchored" data-anchor-id="dynamic-presets">Dynamic presets</h4>
+<p>All three presets share the same <span class="math inline">\(\alpha\)</span>, <span class="math inline">\(\beta\)</span>, <span class="math inline">\(\delta\)</span>, <span class="math inline">\(\gamma\)</span>, so <span class="math inline">\(N^* = \gamma/\delta = 35\)</span> is fixed. Only <span class="math inline">\(K\)</span> varies, making the comparison clean.</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 34%">
+<col style="width: 26%">
+<col style="width: 10%">
 <col style="width: 8%">
-<col style="width: 7%">
-<col style="width: 8%">
-<col style="width: 8%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 3%">
 <col style="width: 3%">
 <col style="width: 6%">
-<col style="width: 5%">
-<col style="width: 5%">
-<col style="width: 10%">
+<col style="width: 6%">
+<col style="width: 12%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -770,43 +773,44 @@ N^* = \frac{\gamma + m \alpha / \beta}{\delta + m \alpha / (\beta K)}, \quad P^*
 </thead>
 <tbody>
 <tr class="odd">
-<td>Damped spiral</td>
-<td>1.00</td>
-<td>0.035</td>
-<td>0.020</td>
+<td>Damped oscillations</td>
 <td>0.80</td>
-<td>150</td>
 <td>0.050</td>
-<td>80</td>
-<td>18</td>
+<td>0.020</td>
+<td>0.70</td>
+<td>60</td>
+<td>0</td>
+<td>10</td>
+<td>2</td>
 <td>0.030</td>
 </tr>
 <tr class="even">
-<td>Slow damping / predator collapse</td>
-<td>0.60</td>
+<td>Limit cycle</td>
+<td>0.80</td>
 <td>0.050</td>
-<td>0.010</td>
-<td>1.00</td>
-<td>80</td>
-<td>0.0001</td>
-<td>80</td>
-<td>12</td>
-<td>0.030</td>
+<td>0.020</td>
+<td>0.70</td>
+<td>200</td>
+<td>0</td>
+<td>50</td>
+<td>3</td>
+<td>0.020</td>
 </tr>
 <tr class="odd">
-<td>Tight cycle</td>
-<td>0.90</td>
-<td>0.030</td>
+<td>Predator collapse</td>
+<td>0.80</td>
+<td>0.050</td>
 <td>0.020</td>
-<td>0.75</td>
-<td>120</td>
-<td>0.020</td>
-<td>50</td>
-<td>14</td>
+<td>0.70</td>
+<td>25</td>
+<td>0</td>
+<td>10</td>
+<td>15</td>
 <td>0.030</td>
 </tr>
 </tbody>
 </table>
+<p>Damped oscillations: <span class="math inline">\(N^* = 35 &gt; K/2 = 30\)</span>, so the equilibrium is stable. Limit cycle: <span class="math inline">\(N^* = 35 \ll K/2 = 100\)</span>, so a limit cycle forms (paradox of enrichment). Predator collapse: <span class="math inline">\(K = 25 &lt; N^* = 35\)</span>, so prey carrying capacity is too low to sustain predators.</p>
 </section>
 </section>
 <section id="competition" class="level3">
@@ -990,7 +994,7 @@ N_1^* = \frac{K_1 - \alpha_{12} K_2}{1 - \alpha_{12}\alpha_{21}}, \quad N_2^* = 
 <section id="controls" class="level2">
 <h2 class="anchored" data-anchor-id="controls">Controls</h2>
 <section id="parameter-sliders-behaviour-on-input-vs-change" class="level3">
-<h3 class="anchored" data-anchor-id="parameter-sliders-behaviour-on-input-vs-change">Parameter sliders — behaviour on input vs change</h3>
+<h3 class="anchored" data-anchor-id="parameter-sliders-behaviour-on-input-vs-change">Parameter sliders: behaviour on input vs change</h3>
 <p>All parameter sliders use a two-event pattern:</p>
 <ul>
 <li><code>input</code> event: updates the parameter value and display label immediately (live preview of the number).</li>
@@ -1006,7 +1010,7 @@ N_1^* = \frac{K_1 - \alpha_{12} K_2}{1 - \alpha_{12}\alpha_{21}}, \quad N_2^* = 
 <h3 class="anchored" data-anchor-id="reset-vs-reset-defaults">Reset vs Reset Defaults</h3>
 <ul>
 <li><strong>Reset</strong>: resets simulation time and populations to current initial conditions (<code>prey0</code>, <code>predator0</code>) without changing any parameters.</li>
-<li><strong>Reset Defaults</strong>: restores all parameters to the default preset for the active mode, then resets. For classic PP this is the “Balanced” preset; for dynamic PP the “Damped spiral” preset; for competition the “Coexistence” preset.</li>
+<li><strong>Reset Defaults</strong>: restores all parameters to the default preset for the active mode, then resets. For classic PP this is the “Balanced” preset; for dynamic PP the “Damped oscillations” preset; for competition the “Coexistence” preset.</li>
 </ul>
 </section>
 <section id="speed-buttons" class="level3">
@@ -1036,7 +1040,7 @@ N_1^* = \frac{K_1 - \alpha_{12} K_2}{1 - \alpha_{12}\alpha_{21}}, \quad N_2^* = 
 <section id="assumptions-and-limitations" class="level2">
 <h2 class="anchored" data-anchor-id="assumptions-and-limitations">Assumptions and limitations</h2>
 <ul>
-<li>The model is deterministic — there is no demographic stochasticity. Populations can reach fractional values.</li>
+<li>The model is deterministic; there is no demographic stochasticity. Populations can reach fractional values.</li>
 <li>Non-negativity is enforced by clamping, not by the ODEs. In particular, classic LV has no built-in carrying capacity on prey; prey grows without bound if predator density is very low.</li>
 <li>In classic LV, the interior equilibrium is a centre (neutral stability). Integration with finite <span class="math inline">\(\Delta t\)</span> can produce slow orbital drift. Smaller <span class="math inline">\(\Delta t\)</span> reduces but does not eliminate this.</li>
 <li>The 1600-point series cap means long runs lose early history. The phase plane shows only the retained window.</li>

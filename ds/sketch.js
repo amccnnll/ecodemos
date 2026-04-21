@@ -418,6 +418,74 @@ document.getElementById('slider-regularity').addEventListener('input', (e) => {
   document.getElementById('val-regularity').textContent = regularity.toFixed(2);
 });
 
+// Presets — set sliders to a named scenario and reset
+const DS_PRESETS = {
+  goodConditions: {
+    sigma: 0.25, W: 0.40, density: 50, transect: 4.0,
+    b: 2.5, truthFn: 'halfNormal', modelFn: 'halfNormal',
+    distribution: 'uniform', clumpScale: 0.10, regularity: 0.50,
+  },
+  poorDetectability: {
+    // Very steep half-normal: most animals missed even close to the transect
+    sigma: 0.08, W: 0.20, density: 100, transect: 6.0,
+    b: 2.5, truthFn: 'halfNormal', modelFn: 'halfNormal',
+    distribution: 'uniform', clumpScale: 0.10, regularity: 0.50,
+  },
+  sparsePopulation: {
+    // Low density: few detections per run, noisy D̂ convergence
+    sigma: 0.30, W: 0.50, density: 10, transect: 6.0,
+    b: 2.5, truthFn: 'halfNormal', modelFn: 'halfNormal',
+    distribution: 'uniform', clumpScale: 0.10, regularity: 0.50,
+  },
+  shortTransect: {
+    // Short survey: high variance in D̂ despite good conditions
+    sigma: 0.25, W: 0.40, density: 80, transect: 1.5,
+    b: 2.5, truthFn: 'halfNormal', modelFn: 'halfNormal',
+    distribution: 'uniform', clumpScale: 0.10, regularity: 0.50,
+  },
+};
+
+function applyDSPreset(name) {
+  const p = DS_PRESETS[name];
+  if (!p) return;
+
+  document.getElementById('slider-sigma').value        = p.sigma;
+  document.getElementById('slider-w').value            = p.W;
+  document.getElementById('slider-density').value      = p.density;
+  document.getElementById('slider-transect').value     = p.transect;
+  document.getElementById('slider-b').value            = p.b;
+  document.getElementById('select-truth-fn').value     = p.truthFn;
+  document.getElementById('select-model-fn').value     = p.modelFn;
+  document.getElementById('select-distribution').value = p.distribution;
+  document.getElementById('slider-clump-scale').value  = p.clumpScale;
+  document.getElementById('slider-regularity').value   = p.regularity;
+
+  document.getElementById('val-sigma').textContent        = p.sigma.toFixed(2) + ' km';
+  document.getElementById('val-w').textContent            = p.W.toFixed(2) + ' km';
+  document.getElementById('val-density').textContent      = p.density + ' /km²';
+  document.getElementById('val-transect').textContent     = p.transect.toFixed(1) + ' km';
+  document.getElementById('val-b').textContent            = p.b.toFixed(1);
+  document.getElementById('val-clump-scale').textContent  = p.clumpScale.toFixed(2);
+  document.getElementById('val-regularity').textContent   = p.regularity.toFixed(2);
+
+  truthFn      = p.truthFn;
+  modelFn      = p.modelFn;
+  b            = p.b;
+  distribution = p.distribution;
+  clumpScale   = p.clumpScale;
+  regularity   = p.regularity;
+
+  syncBSlider();
+  syncMismatchWarning();
+  syncDistributionSliders();
+  updateParams({ truthFn, modelFn, b });
+  document.getElementById('btn-reset').click();
+}
+
+document.getElementById('select-ds-preset').addEventListener('change', (e) => {
+  if (e.target.value) applyDSPreset(e.target.value);
+});
+
 // Reset all Complications controls to their default values, then trigger a full Reset
 document.getElementById('btn-reset-defaults').addEventListener('click', () => {
   document.getElementById('slider-sigma').value       = SIGMA_KM;

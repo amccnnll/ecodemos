@@ -48,3 +48,6 @@ $RECYCLE.BIN/
 # Package manager locks (keep only one — uncomment your choice)
 # package-lock.json
 # yarn.lock
+
+# Local scratch space — not tracked
+scratch/

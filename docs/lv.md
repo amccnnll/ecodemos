@@ -2,9 +2,23 @@
 title: "Lotka-Volterra (LV)"
 ---
 
+[→ Open simulation](/ecodemos/lv/)
+
+## Overview
+
+Three two-species dynamical systems integrated via RK4, displayed as a live time series and phase-plane trajectory. The three modes are:
+
+- **Classic predator-prey**: the standard Lotka-Volterra system with no density dependence.
+- **Dynamic predator-prey**: adds logistic prey growth and predator self-limitation.
+- **Competition**: two-species Lotka-Volterra competition with carrying capacities and interaction coefficients.
+
+The visualisation shows both how populations change over time and how they trace paths through state space (the phase plane).
+
+---
+
 ## Glossary
 
-### Controls — all modes
+### Controls: all modes
 
 | Control | Description |
 |---|---|
@@ -13,28 +27,28 @@ title: "Lotka-Volterra (LV)"
 | $\Delta t$ | RK4 integration time step. Smaller = more accurate but slower; larger = faster but potentially unstable. Default: 0.03. |
 | Unbounded time | Disables the auto-pause checkpoints (default every 50 time units). Simulation runs until manually paused. |
 
-### Controls — predator-prey (classic) mode
+### Controls: predator-prey (classic) mode
 
 | Control | Description |
 |---|---|
-| $\alpha$ | Prey intrinsic growth rate — rate of increase of the prey population in the absence of predators. Default: 1.1. |
-| $\beta$ | Predation rate — rate at which each predator removes prey per unit time. Default: 0.06. |
-| $\delta$ | Predator conversion efficiency — prey consumed per new predator produced. Default: 0.03. |
-| $\gamma$ | Predator death rate — intrinsic rate of decrease of predators in the absence of prey. Default: 0.7. |
+| $\alpha$ | Prey intrinsic growth rate: rate of increase of the prey population in the absence of predators. Default: 1.1. |
+| $\beta$ | Predation rate: rate at which each predator removes prey per unit time. Default: 0.06. |
+| $\delta$ | Predator conversion efficiency: prey consumed per new predator produced. Default: 0.03. |
+| $\gamma$ | Predator death rate: intrinsic rate of decrease of predators in the absence of prey. Default: 0.7. |
 | $N_0$ | Initial prey population. Default: 40. |
 | $P_0$ | Initial predator population. Default: 9. |
 
-### Controls — dynamic predator-prey mode (additional)
+### Controls: dynamic predator-prey mode (additional)
 
 Adds logistic prey growth and predator self-limitation to the classic system.
 
 | Control | Description |
 |---|---|
-| Dynamic preset | Named presets: Damped spiral, Slow damping / predator collapse, Tight cycle. |
-| K (prey) | Prey carrying capacity — logistic ceiling for prey growth in the absence of predators. Default: 120. |
-| m (predator) | Predator self-limitation coefficient — intraspecific competition among predators. Default: 0.01. |
+| Dynamic preset | Named presets: Damped oscillations, Limit cycle, Predator collapse. All three share the same α/β/δ/γ; only K varies, isolating the effect of prey carrying capacity. |
+| K (prey) | Prey carrying capacity: logistic ceiling for prey growth in the absence of predators. Default: 120. |
+| m (predator) | Predator self-limitation coefficient: intraspecific competition among predators. Default: 0.01. |
 
-### Controls — competition mode
+### Controls: competition mode
 
 Replaces the predator-prey parameters with two-species competition parameters.
 
@@ -45,8 +59,8 @@ Replaces the predator-prey parameters with two-species competition parameters.
 | $r_2$ | Intrinsic growth rate of species 2. Default: 0.8. |
 | $K_1$ | Carrying capacity of species 1. Default: 75. |
 | $K_2$ | Carrying capacity of species 2. Default: 65. |
-| $\alpha_{12}$ | Effect of species 2 on species 1 — per-individual competitive impact. Default: 0.60. |
-| $\alpha_{21}$ | Effect of species 1 on species 2 — per-individual competitive impact. Default: 0.50. |
+| $\alpha_{12}$ | Effect of species 2 on species 1: per-individual competitive impact. Default: 0.60. |
+| $\alpha_{21}$ | Effect of species 1 on species 2: per-individual competitive impact. Default: 0.50. |
 
 ### Key symbols
 
@@ -64,18 +78,6 @@ Replaces the predator-prey parameters with two-species competition parameters.
 | $K_1, K_2$ | Species carrying capacities (competition mode). |
 | $\alpha_{12}, \alpha_{21}$ | Interspecific competition coefficients (competition mode). |
 | $\Delta t$ | RK4 integration time step. |
-
----
-
-## Overview
-
-Three two-species dynamical systems integrated via RK4, displayed as a live time series and phase-plane trajectory. The three modes are:
-
-- **Classic predator-prey** — the standard Lotka-Volterra system with no density dependence.
-- **Dynamic predator-prey** — adds logistic prey growth and predator self-limitation.
-- **Competition** — two-species Lotka-Volterra competition with carrying capacities and interaction coefficients.
-
-The visualisation shows both how populations change over time and how they trace paths through state space (the phase plane).
 
 ---
 
@@ -136,7 +138,7 @@ The simulation advances by a fixed number of RK4 steps per animation frame (`req
 | Normal | 2               |
 | Fast   | 6               |
 
-At Normal speed and default $\Delta t = 0.030$, the simulation advances by 0.060 model-time units per frame — approximately 3.6 model-time units per second at 60 fps.
+At Normal speed and default $\Delta t = 0.030$, the simulation advances by 0.060 model-time units per frame, approximately 3.6 model-time units per second at 60 fps.
 
 ---
 
@@ -209,13 +211,21 @@ $$
 
 This system can exhibit damped spirals, limit cycles, or collapse depending on parameter choice, unlike the neutral cycles of classic LV.
 
+The key stability criterion is whether $N^* > K/2$. When $N^* > K/2$, the interior equilibrium is stable and trajectories spiral inward (damped oscillations). When $N^* < K/2$, a limit cycle emerges (paradox of enrichment). When $K < N^* = \gamma/\delta$ (no $m$), the prey carrying capacity is too low to sustain predators and they collapse.
+
 #### Dynamic presets
 
-| Name                             | $\alpha$ | $\beta$ | $\delta$ | $\gamma$ | $K$ | $m$    | $N_0$ | $P_0$ | $\Delta t$ |
-| -------------------------------- | -------- | ------- | -------- | -------- | --- | ------ | ----- | ----- | ---------- |
-| Damped spiral                    | 1.00     | 0.035   | 0.020    | 0.80     | 150 | 0.050  | 80    | 18    | 0.030      |
-| Slow damping / predator collapse | 0.60     | 0.050   | 0.010    | 1.00     | 80  | 0.0001 | 80    | 12    | 0.030      |
-| Tight cycle                      | 0.90     | 0.030   | 0.020    | 0.75     | 120 | 0.020  | 50    | 14    | 0.030      |
+All three presets share the same $\alpha$, $\beta$, $\delta$, $\gamma$, so $N^* = \gamma/\delta = 35$ is fixed. Only $K$ varies, making the comparison clean.
+
+| Name                  | $\alpha$ | $\beta$ | $\delta$ | $\gamma$ | $K$ | $m$ | $N_0$ | $P_0$ | $\Delta t$ |
+| --------------------- | -------- | ------- | -------- | -------- | --- | --- | ----- | ----- | ---------- |
+| Damped oscillations   | 0.80     | 0.050   | 0.020    | 0.70     | 60  | 0   | 10    | 2     | 0.030      |
+| Limit cycle           | 0.80     | 0.050   | 0.020    | 0.70     | 200 | 0   | 50    | 3     | 0.020      |
+| Predator collapse     | 0.80     | 0.050   | 0.020    | 0.70     | 25  | 0   | 10    | 15    | 0.030      |
+
+Damped oscillations: $N^* = 35 > K/2 = 30$, so the equilibrium is stable.
+Limit cycle: $N^* = 35 \ll K/2 = 100$, so a limit cycle forms (paradox of enrichment).
+Predator collapse: $K = 25 < N^* = 35$, so prey carrying capacity is too low to sustain predators.
 
 ### Competition
 
@@ -293,7 +303,7 @@ if (!state.unboundedTime && state.t >= state.nextPauseAt) {
 
 ## Controls
 
-### Parameter sliders — behaviour on input vs change
+### Parameter sliders: behaviour on input vs change
 
 All parameter sliders use a two-event pattern:
 
@@ -309,7 +319,7 @@ Switching model type stops the simulation, applies the default preset for the ne
 ### Reset vs Reset Defaults
 
 - **Reset**: resets simulation time and populations to current initial conditions (`prey0`, `predator0`) without changing any parameters.
-- **Reset Defaults**: restores all parameters to the default preset for the active mode, then resets. For classic PP this is the "Balanced" preset; for dynamic PP the "Damped spiral" preset; for competition the "Coexistence" preset.
+- **Reset Defaults**: restores all parameters to the default preset for the active mode, then resets. For classic PP this is the "Balanced" preset; for dynamic PP the "Damped oscillations" preset; for competition the "Coexistence" preset.
 
 ### Speed buttons
 
@@ -339,7 +349,7 @@ Displays current $t$, current $N$ (prey), current $P$ (predators), and analytica
 
 ## Assumptions and limitations
 
-- The model is deterministic — there is no demographic stochasticity. Populations can reach fractional values.
+- The model is deterministic; there is no demographic stochasticity. Populations can reach fractional values.
 - Non-negativity is enforced by clamping, not by the ODEs. In particular, classic LV has no built-in carrying capacity on prey; prey grows without bound if predator density is very low.
 - In classic LV, the interior equilibrium is a centre (neutral stability). Integration with finite $\Delta t$ can produce slow orbital drift. Smaller $\Delta t$ reduces but does not eliminate this.
 - The 1600-point series cap means long runs lose early history. The phase plane shows only the retained window.

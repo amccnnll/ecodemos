@@ -204,13 +204,13 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#glossary" id="toc-glossary" class="nav-link active" data-scroll-target="#glossary">Glossary</a>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#glossary" id="toc-glossary" class="nav-link" data-scroll-target="#glossary">Glossary</a>
   <ul class="collapse">
   <li><a href="#controls" id="toc-controls" class="nav-link" data-scroll-target="#controls">Controls</a></li>
   <li><a href="#estimates-readout" id="toc-estimates-readout" class="nav-link" data-scroll-target="#estimates-readout">Estimates readout</a></li>
   <li><a href="#key-symbols" id="toc-key-symbols" class="nav-link" data-scroll-target="#key-symbols">Key symbols</a></li>
   </ul></li>
-  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a></li>
   <li><a href="#arena-geometry" id="toc-arena-geometry" class="nav-link" data-scroll-target="#arena-geometry">Arena geometry</a></li>
   <li><a href="#animal-placement" id="toc-animal-placement" class="nav-link" data-scroll-target="#animal-placement">Animal placement</a></li>
   <li><a href="#detector-placement" id="toc-detector-placement" class="nav-link" data-scroll-target="#detector-placement">Detector placement</a>
@@ -280,6 +280,18 @@ window.Quarto = {
 </header>
 
 
+<p><a href="./ecodemos/secr/">→ Open simulation</a></p>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>Animals move within a two-dimensional arena and are sampled by a fixed detector array across repeated occasions. Density is estimated from who was caught, at which detectors, and on which occasions, with no assumption of a fixed observable strip.</p>
+<p>Detection is spatial and imperfect:</p>
+<ul>
+<li>each individual has a latent activity centre that is never directly observed;</li>
+<li>detectors sample probabilistically around those centres over multiple occasions;</li>
+<li>the estimator infers density from capture histories and detector geometry alone.</li>
+</ul>
+<hr>
+</section>
 <section id="glossary" class="level2">
 <h2 class="anchored" data-anchor-id="glossary">Glossary</h2>
 <section id="controls" class="level3">
@@ -326,7 +338,7 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td>Movement</td>
-<td>Named movement preset (Typical resident / Sedentary / Wide-ranging / Nomad) — sets <span class="math inline">\(\tau\)</span> and <span class="math inline">\(f\)</span>.</td>
+<td>Named movement preset: Typical resident, Sedentary, Wide-ranging, or Nomad. Sets <span class="math inline">\(\tau\)</span> and <span class="math inline">\(f\)</span>.</td>
 </tr>
 <tr class="odd">
 <td>τ (mobility)</td>
@@ -334,7 +346,7 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td>f (fidelity)</td>
-<td>Site fidelity multiplier — tightens the effective home range around the activity centre. Higher = tighter. Default: 1.0×.</td>
+<td>Site fidelity multiplier: tightens the effective home range around the activity centre. Higher = tighter. Default: 1.0×.</td>
 </tr>
 <tr class="odd">
 <td>Detectors</td>
@@ -383,7 +395,7 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td>ESA</td>
-<td>Effective sampling area (km²) — <span class="math inline">\(\int\!\int p(x,y)\,dx\,dy\)</span> over the arena, given current <span class="math inline">\(g_0\)</span>, <span class="math inline">\(\sigma\)</span>, and detector layout.</td>
+<td>Effective sampling area (km²): <span class="math inline">\(\int\!\int p(x,y)\,dx\,dy\)</span> over the arena, given current <span class="math inline">\(g_0\)</span>, <span class="math inline">\(\sigma\)</span>, and detector layout.</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\hat{D}\)</span></td>
@@ -395,7 +407,7 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>Home range (<span class="math inline">\(\pi\sigma^2\)</span>)</td>
-<td>Area of a circle with radius <span class="math inline">\(\sigma\)</span> — approximate home range size (km²).</td>
+<td>Area of a circle with radius <span class="math inline">\(\sigma\)</span>: approximate home range size (km²).</td>
 </tr>
 <tr class="even">
 <td>Recapture rate</td>
@@ -432,7 +444,7 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\tau\)</span></td>
-<td>Mobility parameter — home range crossing time (occasions).</td>
+<td>Mobility parameter: home range crossing time (occasions).</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(f\)</span></td>
@@ -464,7 +476,7 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>Activity centre</td>
-<td>Latent centre of an individual’s home range — never directly observed.</td>
+<td>Latent centre of an individual’s home range; never directly observed.</td>
 </tr>
 <tr class="even">
 <td>Capture history</td>
@@ -474,17 +486,6 @@ window.Quarto = {
 </table>
 <hr>
 </section>
-</section>
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>Animals move within a two-dimensional arena and are sampled by a fixed detector array across repeated occasions. Density is estimated from who was caught, at which detectors, and on which occasions — with no assumption of a fixed observable strip.</p>
-<p>Detection is spatial and imperfect:</p>
-<ul>
-<li>each individual has a latent activity centre that is never directly observed;</li>
-<li>detectors sample probabilistically around those centres over multiple occasions;</li>
-<li>the estimator infers density from capture histories and detector geometry alone.</li>
-</ul>
-<hr>
 </section>
 <section id="arena-geometry" class="level2">
 <h2 class="anchored" data-anchor-id="arena-geometry">Arena geometry</h2>
@@ -625,8 +626,8 @@ if x &gt; arenaW:  x = 2*arenaW - x, vx = -vx
 </ul>
 <p>This gives:</p>
 <ul>
-<li><span class="math inline">\(\tau\)</span> (occasions) → controls position autocorrelation time (how long the animal takes to cross its home range).</li>
-<li>fidelity → controls noise amplitude → range tightness. Higher fidelity = smaller effective home range radius = <span class="math inline">\(\sigma / \sqrt{\mathrm{fidelity}}\)</span>.</li>
+<li><span class="math inline">\(\tau\)</span> (occasions): controls position autocorrelation time (how long the animal takes to cross its home range).</li>
+<li>fidelity: controls noise amplitude and range tightness. Higher fidelity = smaller effective home range radius = <span class="math inline">\(\sigma / \sqrt{\mathrm{fidelity}}\)</span>.</li>
 </ul>
 </section>
 <section id="speed-and-frames-per-occasion" class="level3">
@@ -705,7 +706,7 @@ dy_new = dy + 0.15 * (y - dy)</code></pre>
 <td>Nomad</td>
 <td>1.0</td>
 <td>0.2</td>
-<td>Very fast, large range — barely constrained to a centre.</td>
+<td>Very fast, large range; barely constrained to a centre.</td>
 </tr>
 </tbody>
 </table>
@@ -725,7 +726,7 @@ dy_new = dy + 0.15 * (y - dy)</code></pre>
 <li><p>If detected: record <code>{ animalId, detectorId }</code>.</p></li>
 </ol>
 <p>Each animal can be detected by <strong>multiple detectors on the same occasion</strong>. Each (animal, detector, occasion) triple produces one capture event. The capture history therefore records the detector index too, not just presence/absence.</p>
-<p>Detection is based on <code>(cx, cy)</code> (the latent activity centre) — not on the display position <code>(dx, dy)</code> or the physics position <code>(x, y)</code>. This is consistent with the SECR model: the detection function <span class="math inline">\(g(d)\)</span> is a marginalised home-range detection function, integrating over all locations within the home range that a centre at <span class="math inline">\((c_x, c_y)\)</span> implies.</p>
+<p>Detection is based on <code>(cx, cy)</code> (the latent activity centre), not on the display position <code>(dx, dy)</code> or the physics position <code>(x, y)</code>. This is consistent with the SECR model: the detection function <span class="math inline">\(g(d)\)</span> is a marginalised home-range detection function, integrating over all locations within the home range that a centre at <span class="math inline">\((c_x, c_y)\)</span> implies.</p>
 <section id="effective-detection-σ" class="level3">
 <h3 class="anchored" data-anchor-id="effective-detection-σ">Effective detection σ</h3>
 <pre><code>sigmaEff = sigma / sqrt(fidelity)</code></pre>
@@ -819,7 +820,7 @@ p_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k
 <li><span class="math inline">\(\mathrm{ESA}(k)\)</span> = <span class="math inline">\(K\)</span>-occasion ESA using <code>sigmaEff</code> and the current detector layout.</li>
 </ul>
 <p><span class="math inline">\(\hat{D}\)</span> is plotted at each completed occasion as a convergence trace. True density is <code>N / ARENA_KM²</code>.</p>
-<p>This is an <strong>educational estimator only</strong> — it uses the true <span class="math inline">\(g_0\)</span> and <span class="math inline">\(\sigma\)</span> parameters and does not fit a likelihood model to the capture histories. A full SECR MLE would estimate <span class="math inline">\(g_0\)</span>, <span class="math inline">\(\sigma\)</span>, and <span class="math inline">\(D\)</span> from the data.</p>
+<p>This is an educational estimator only: it uses the true <span class="math inline">\(g_0\)</span> and <span class="math inline">\(\sigma\)</span> parameters and does not fit a likelihood model to the capture histories. A full SECR MLE would estimate <span class="math inline">\(g_0\)</span>, <span class="math inline">\(\sigma\)</span>, and <span class="math inline">\(D\)</span> from the data.</p>
 <hr>
 </section>
 <section id="analytics-panels" class="level2">
@@ -828,7 +829,7 @@ p_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k
 <section id="detection-surface-heatmap" class="level3">
 <h3 class="anchored" data-anchor-id="detection-surface-heatmap">1. Detection surface heatmap</h3>
 <p>Shows the single-occasion detection probability <span class="math inline">\(p_1(c_x, c_y)\)</span> over the full arena as a 50 × 50 colour grid using the YlOrRd D3 colour scale. A cell is transparent if <span class="math inline">\(p &lt; 0.001\)</span>.</p>
-<p>The heatmap redraws whenever <code>g0</code>, <code>sigma</code>/<code>sigmaEff</code>, or the detector layout changes. It is skipped entirely when the “Show detection surface” overlay is not visible — this avoids expensive grid computation on every occasion tick.</p>
+<p>The heatmap redraws whenever <code>g0</code>, <code>sigma</code>/<code>sigmaEff</code>, or the detector layout changes. It is skipped entirely when the “Show detection surface” overlay is not visible; this avoids expensive grid computation on every occasion tick.</p>
 <p>The inner study area boundary is overlaid as a dashed blue rectangle. Detector positions are overlaid as small blue dots.</p>
 </section>
 <section id="capture-history-matrix" class="level3">
@@ -918,7 +919,7 @@ p_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k
 </tr>
 </tbody>
 </table>
-<p>“Run again” (pressed when complete) adds another <code>K</code> occasions to <code>targetK</code> and continues on the same population — it does <strong>not</strong> reset the animals or detectors.</p>
+<p>“Run again” (pressed when complete) adds another <code>K</code> occasions to <code>targetK</code> and continues on the same population; it does <strong>not</strong> reset the animals or detectors.</p>
 <hr>
 </section>
 <section id="control-taxonomy" class="level2">
@@ -1013,9 +1014,9 @@ p_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k
 <ul>
 <li>The density estimator uses known true <span class="math inline">\(g_0\)</span> and <span class="math inline">\(\sigma\)</span>. A real SECR analysis would estimate these from the capture histories.</li>
 <li><span class="math inline">\(g(d)\)</span> is half-normal only. No other detection function is implemented.</li>
-<li>The movement model is the same for all individuals — there is no individual variation in <span class="math inline">\(\tau\)</span> or fidelity.</li>
+<li>The movement model is the same for all individuals; there is no individual variation in <span class="math inline">\(\tau\)</span> or fidelity.</li>
 <li>The arena has reflecting boundaries. In reality, populations extend beyond any study area.</li>
-<li>Multiple detections of the same individual by the same detector on different occasions are tracked independently. The capture history records every (animal, detector, occasion) event — not just first capture.</li>
+<li>Multiple detections of the same individual by the same detector on different occasions are tracked independently. The capture history records every (animal, detector, occasion) event, not just first capture.</li>
 <li>Habitat is uniform; <code>habitatFn = () =&gt; 1</code> throughout.</li>
 </ul>
 <hr>

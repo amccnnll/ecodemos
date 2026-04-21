@@ -204,13 +204,13 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#glossary" id="toc-glossary" class="nav-link active" data-scroll-target="#glossary">Glossary</a>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#glossary" id="toc-glossary" class="nav-link" data-scroll-target="#glossary">Glossary</a>
   <ul class="collapse">
   <li><a href="#controls" id="toc-controls" class="nav-link" data-scroll-target="#controls">Controls</a></li>
   <li><a href="#estimates-readout" id="toc-estimates-readout" class="nav-link" data-scroll-target="#estimates-readout">Estimates readout</a></li>
   <li><a href="#key-symbols" id="toc-key-symbols" class="nav-link" data-scroll-target="#key-symbols">Key symbols</a></li>
   </ul></li>
-  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a></li>
   <li><a href="#arena-geometry" id="toc-arena-geometry" class="nav-link" data-scroll-target="#arena-geometry">Arena geometry</a></li>
   <li><a href="#animal-placement" id="toc-animal-placement" class="nav-link" data-scroll-target="#animal-placement">Animal placement</a>
   <ul class="collapse">
@@ -296,6 +296,17 @@ window.Quarto = {
 </header>
 
 
+<p><a href="./ecodemos/ds/">→ Open simulation</a></p>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>An observer traverses a fixed straight transect. Animals within a strip around the transect are detected with probability that declines with perpendicular distance. The recorded distances are then used to estimate detectability and, from that, density.</p>
+<p>The simulation shows two concurrent views of the same scene:</p>
+<ul>
+<li>the omniscient view: all animal positions visible on screen, detected animals in red, missed animals in grey;</li>
+<li>the method’s view: only the perpendicular distances of detected animals are available to the estimator.</li>
+</ul>
+<hr>
+</section>
 <section id="glossary" class="level2">
 <h2 class="anchored" data-anchor-id="glossary">Glossary</h2>
 <section id="controls" class="level3">
@@ -314,7 +325,7 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td>Speed</td>
-<td>Playback speed: Slow / Normal / Fast. Affects only how fast the observer traverses the transect — does not change what gets detected.</td>
+<td>Playback speed: Slow / Normal / Fast. Affects only how fast the observer traverses the transect; does not change what gets detected.</td>
 </tr>
 <tr class="even">
 <td>Seed</td>
@@ -350,7 +361,7 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td>L</td>
-<td>Transect length (km) — sets the width of the arena. Takes effect on Reset. Default: 4.0 km.</td>
+<td>Transect length (km). Sets the width of the arena. Takes effect on Reset. Default: 4.0 km.</td>
 </tr>
 <tr class="odd">
 <td>Distribution</td>
@@ -395,7 +406,7 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>ESW</td>
-<td>Effective strip width (km) — <span class="math inline">\(\int_0^W g(x)\,dx\)</span>. Computed from <span class="math inline">\(\hat\sigma\)</span> (or true <span class="math inline">\(\sigma\)</span> if fewer than 3 detections).</td>
+<td>Effective strip width (km): <span class="math inline">\(\int_0^W g(x)\,dx\)</span>. Computed from <span class="math inline">\(\hat\sigma\)</span> (or true <span class="math inline">\(\sigma\)</span> if fewer than 3 detections).</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\hat\sigma\)</span></td>
@@ -432,7 +443,7 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\(g(x)\)</span></td>
-<td>Detection function — probability of detecting an animal at perpendicular distance <span class="math inline">\(x\)</span> from the transect.</td>
+<td>Detection function: probability of detecting an animal at perpendicular distance <span class="math inline">\(x\)</span> from the transect.</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\sigma\)</span></td>
@@ -475,16 +486,6 @@ window.Quarto = {
 <hr>
 </section>
 </section>
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>An observer traverses a fixed straight transect. Animals within a strip around the transect are detected with probability that declines with perpendicular distance. The recorded distances are then used to estimate detectability and, from that, density.</p>
-<p>The simulation shows two concurrent views of the same scene:</p>
-<ul>
-<li>the omniscient view — all animal positions visible on screen, detected animals in red, missed animals in grey;</li>
-<li>the method’s view — only the perpendicular distances of detected animals are available to the estimator.</li>
-</ul>
-<hr>
-</section>
 <section id="arena-geometry" class="level2">
 <h2 class="anchored" data-anchor-id="arena-geometry">Arena geometry</h2>
 <p>The simulation canvas maps directly to a rectangle in kilometre coordinates. All positions used by the engine are stored and computed in km; pixel positions are computed only for rendering.</p>
@@ -519,7 +520,7 @@ y = rng() * arenaH</code></pre>
 <p>A two-level process. Parameters: <code>clumpScale</code> (slider default 0.10).</p>
 <ol type="1">
 <li><p><strong>Number of clusters</strong>: <code>nClusters = Math.max(3, Math.round(n / 6))</code>.</p></li>
-<li><p><strong>Cluster centres</strong>: each placed at <code>(rng()*arenaW, rng()*arenaH)</code> using the seeded RNG — uniform independently in each axis.</p></li>
+<li><p><strong>Cluster centres</strong>: each placed at <code>(rng()*arenaW, rng()*arenaH)</code> using the seeded RNG, uniform independently in each axis.</p></li>
 <li><p><strong>Animal scatter</strong>: for each animal, a cluster is chosen uniformly at random (seeded), then a displacement is drawn using the Box–Muller transform:</p>
 <pre><code>u1    = rng(),   u2 = rng()
 mag   = sigmaCluster * sqrt(-2 * log(u1))
@@ -546,8 +547,8 @@ y = (row + 0.5 + (rng() - 0.5) * regularity) * dy</code></pre>
 </ol>
 <p>The <code>regularity</code> parameter spans two extremes:</p>
 <ul>
-<li><code>regularity = 0</code>: no jitter — animals sit exactly at grid cell centres.</li>
-<li><code>regularity = 1</code>: maximum jitter — each animal is displaced by up to ±0.5 cell widths in each axis independently. This makes spacing variable but still non-Poisson (the grid skeleton persists in expectation).</li>
+<li><code>regularity = 0</code>: no jitter; animals sit exactly at grid cell centres.</li>
+<li><code>regularity = 1</code>: maximum jitter; each animal is displaced by up to ±0.5 cell widths in each axis independently. This makes spacing variable but still non-Poisson (the grid skeleton persists in expectation).</li>
 </ul>
 <p>Values in between produce intermediate over-dispersion relative to a Poisson process.</p>
 <hr>
@@ -570,7 +571,7 @@ y = (row + 0.5 + (rng() - 0.5) * regularity) * dy</code></pre>
 <h3 class="anchored" data-anchor-id="seed-value">Seed value</h3>
 <ul>
 <li>Range: 0–99999 (five-digit integer).</li>
-<li>On page load: <code>seed = Math.floor(Math.random() * 100000)</code> — random for each browser session.</li>
+<li>On page load: <code>seed = Math.floor(Math.random() * 100000)</code>, random for each browser session.</li>
 <li>Seed input field: type a value, press Enter or click away. The field strips non-digit characters and clamps to [0, 99999]. Any invalid entry reverts to the current seed.</li>
 <li>New Population button: draws a completely new random seed, then calls <code>initSim()</code>.</li>
 <li>Reset button: reads the current seed-input value and calls <code>initSim()</code>.</li>
@@ -605,7 +606,7 @@ y = (row + 0.5 + (rng() - 0.5) * regularity) * dy</code></pre>
 </tr>
 </tbody>
 </table>
-<p>At 60 fps, Normal speed traverses a 4 km transect in approximately 13 seconds of real time. The speed setting affects only playback rate; it does not change what gets detected (because of the one-shot detection rule — see §Detection below).</p>
+<p>At 60 fps, Normal speed traverses a 4 km transect in approximately 13 seconds of real time. The speed setting affects only playback rate; it does not change what gets detected (because of the one-shot detection rule; see §Detection below).</p>
 <p>Each frame when <code>running = true</code>, <code>advanceBoat()</code> adds the current speed increment to <code>boatX</code>. When <code>boatX &gt;= arenaWKm</code>, the run stops and the play button switches to “↺ Run again”.</p>
 <hr>
 </section>
@@ -641,7 +642,7 @@ y = (row + 0.5 + (rng() - 0.5) * regularity) * dy</code></pre>
 g(x,\sigma) = \exp\!\left(-\frac{x^2}{2\sigma^2}\right)
 \]</span></p>
 <ul>
-<li><span class="math inline">\(g(0,\sigma) = 1\)</span> for all <span class="math inline">\(\sigma\)</span> — perfect detectability on the transect line.</li>
+<li><span class="math inline">\(g(0,\sigma) = 1\)</span> for all <span class="math inline">\(\sigma\)</span>: perfect detectability on the transect line.</li>
 <li><span class="math inline">\(\sigma\)</span> (km) is the distance at which detection probability falls to <span class="math inline">\(e^{-1/2} \approx 0.607\)</span>.</li>
 <li>Slider range: 0.05–0.50 km, step 0.01, default 0.25 km.</li>
 </ul>
@@ -663,8 +664,8 @@ g(x,\sigma,b) = 1 - \exp\!\left[-\left(\frac{\sigma}{x}\right)^b\right]
 <h2 class="anchored" data-anchor-id="state-recording">State recording</h2>
 <p>When a detection fires, <code>recordDetection(perpDist, boatX)</code> is called:</p>
 <ul>
-<li><code>perpDist</code> — perpendicular distance in km (raw, not yet filtered by W).</li>
-<li><code>boatX</code> — observer x-position in km <strong>at the moment of detection</strong>.</li>
+<li><code>perpDist</code>: perpendicular distance in km (raw, not yet filtered by W).</li>
+<li><code>boatX</code>: observer x-position in km <strong>at the moment of detection</strong>.</li>
 </ul>
 <p>Both values are appended to parallel arrays in the shared state singleton (<code>ds/state.js</code>):</p>
 <pre><code>state.detectedDistances[]   // perpendicular distances, all raw detections
@@ -679,7 +680,7 @@ state.detectedEfforts[]     // boatX at each detection</code></pre>
 <li><p><strong>Hard truncation during detection</strong>: <code>tryDetect</code> returns false when <code>perpDist &gt; W</code>. No draw is made; the animal is never recorded.</p></li>
 <li><p><strong>Post-hoc filtering in analytics</strong>: the analytics layer refilters stored distances on every state change:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>filteredDists <span class="op">=</span> detectedDistances<span class="op">.</span><span class="fu">filter</span>((d) <span class="kw">=&gt;</span> d <span class="op">&lt;=</span> W)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This means if <span class="math inline">\(W\)</span> is decreased after some detections have been stored, those beyond-W distances are excluded from the histogram, MLE, and D̂ history — even though they were recorded. If <span class="math inline">\(W\)</span> is increased, detections from earlier in the run that were beyond the old W (but within the new W) will not appear, because they were never recorded in the first place.</p></li>
+<p>This means if <span class="math inline">\(W\)</span> is decreased after some detections have been stored, those beyond-W distances are excluded from the histogram, MLE, and D̂ history, even though they were recorded. If <span class="math inline">\(W\)</span> is increased, detections from earlier in the run that were beyond the old W (but within the new W) will not appear, because they were never recorded in the first place.</p></li>
 </ol>
 <p>The consequence is asymmetric: lowering <span class="math inline">\(W\)</span> live re-analyses with a smaller sample; raising <span class="math inline">\(W\)</span> live has no effect on data already collected.</p>
 <hr>
@@ -706,7 +707,7 @@ state.detectedEfforts[]     // boatX at each detection</code></pre>
 <section id="mle-fitting" class="level2">
 <h2 class="anchored" data-anchor-id="mle-fitting">MLE fitting</h2>
 <p><code>fitSigmaMLE</code> in <code>src/stats.js</code> finds the <span class="math inline">\(\hat{\sigma}\)</span> that minimises the negative log-likelihood. The analytics layer calls it when there are <strong>at least 3</strong> within-W detections; fewer returns <code>null</code> and <code>σ̂</code> is shown as “—”.</p>
-<p>The search uses <strong>golden-section</strong> over a fixed interval <span class="math inline">\([\sigma_{\min}, \sigma_{\max}]\)</span>. The shape parameter <span class="math inline">\(b\)</span> is <strong>not optimised</strong> — it is held at the current slider value throughout.</p>
+<p>The search uses <strong>golden-section</strong> over a fixed interval <span class="math inline">\([\sigma_{\min}, \sigma_{\max}]\)</span>. The shape parameter <span class="math inline">\(b\)</span> is <strong>not optimised</strong>; it is held at the current slider value throughout.</p>
 <section id="nll-for-half-normal" class="level3">
 <h3 class="anchored" data-anchor-id="nll-for-half-normal">NLL for half-normal</h3>
 <p><span class="math display">\[
@@ -774,7 +775,7 @@ barHeight[i] = binCount[i] / scale</code></pre>
 </tr>
 <tr class="even">
 <td>Effort</td>
-<td><code>boatX</code> progress (km); updates <code>state.transectLength</code> on each detection from <code>detectedEfforts[last]</code> — see note below</td>
+<td><code>boatX</code> progress (km); updates <code>state.transectLength</code> on each detection from <code>detectedEfforts[last]</code> (see note below)</td>
 </tr>
 <tr class="odd">
 <td>ESW</td>
@@ -806,14 +807,14 @@ barHeight[i] = binCount[i] / scale</code></pre>
 <li><strong>Green line</strong>: D̂ vs cumulative within-W detections for the current run.</li>
 <li><strong>Red dashed horizontal line</strong>: true D.</li>
 <li><strong>Ghost traces</strong>: previous runs overlaid as faded green lines (same cap and fade logic as detection function ghosts).</li>
-<li>Axes use expand-only domain tracking — they grow when data goes outside the current range but never contract mid-run. On hard reset (no data, no ghosts) the axes snap back to their initial defaults.</li>
+<li>Axes use expand-only domain tracking; they grow when data goes outside the current range but never contract mid-run. On hard reset (no data, no ghosts) the axes snap back to their initial defaults.</li>
 </ul>
 <hr>
 </section>
 </section>
 <section id="ghost-keep-runs-mechanic" class="level2">
 <h2 class="anchored" data-anchor-id="ghost-keep-runs-mechanic">Ghost / keep-runs mechanic</h2>
-<p>The “Keep previous runs” checkbox controls ghost retention. Ghosts are managed entirely within <code>analytics.js</code> — they are not stored in the shared state singleton.</p>
+<p>The “Keep previous runs” checkbox controls ghost retention. Ghosts are managed entirely within <code>analytics.js</code>; they are not stored in the shared state singleton.</p>
 <p>When a reset is detected (state goes from <span class="math inline">\(n &gt; 0\)</span> to <span class="math inline">\(n = 0\)</span>):</p>
 <ul>
 <li>If the checkbox is checked, the current run’s D̂ history and fitted <span class="math inline">\(\hat\sigma\)</span> are saved as a ghost object: <code>{ dhatHistory, sigmaHat, trueD, modelFn, b }</code>.</li>
@@ -974,7 +975,7 @@ barHeight[i] = binCount[i] / scale</code></pre>
 <li><span class="math inline">\(g(0) = 1\)</span> holds in both half-normal and hazard-rate modes.</li>
 <li>The MLE holds <span class="math inline">\(b\)</span> fixed; joint optimisation of <span class="math inline">\((\sigma, b)\)</span> is not implemented.</li>
 <li>The hazard-rate ESW uses a fixed 200-step numerical integration; for very small <span class="math inline">\(b\)</span> or extreme parameter combinations, this approximation may be imprecise.</li>
-<li>The detector sees <strong>perpendicular distance only</strong> — no forward detection angle or acoustic range model.</li>
+<li>The detector sees <strong>perpendicular distance only</strong>: no forward detection angle or acoustic range model.</li>
 <li>There is no measurement error; recorded distances are exact.</li>
 </ul>
 <hr>

@@ -2,6 +2,20 @@
 title: "SECR"
 ---
 
+[→ Open simulation](/ecodemos/secr/)
+
+## Overview
+
+Animals move within a two-dimensional arena and are sampled by a fixed detector array across repeated occasions. Density is estimated from who was caught, at which detectors, and on which occasions, with no assumption of a fixed observable strip.
+
+Detection is spatial and imperfect:
+
+- each individual has a latent activity centre that is never directly observed;
+- detectors sample probabilistically around those centres over multiple occasions;
+- the estimator infers density from capture histories and detector geometry alone.
+
+---
+
 ## Glossary
 
 ### Controls
@@ -15,9 +29,9 @@ title: "SECR"
 | $\sigma$ | Home range / detection scale (km). Controls how steeply detection probability drops with distance from the activity centre. Updates live. Default: 0.20 km. |
 | N | Number of animals in the arena. Takes effect on Reset. Default: 10. |
 | K | Number of sampling occasions per run. Takes effect on Reset. Default: 10. |
-| Movement | Named movement preset (Typical resident / Sedentary / Wide-ranging / Nomad) — sets $\tau$ and $f$. |
+| Movement | Named movement preset: Typical resident, Sedentary, Wide-ranging, or Nomad. Sets $\tau$ and $f$. |
 | τ (mobility) | Home range crossing time in occasions. Low $\tau$ = restless / fast-moving; high $\tau$ = sedentary. Takes effect immediately. Default: 5 occ. |
-| f (fidelity) | Site fidelity multiplier — tightens the effective home range around the activity centre. Higher = tighter. Default: 1.0×. |
+| f (fidelity) | Site fidelity multiplier: tightens the effective home range around the activity centre. Higher = tighter. Default: 1.0×. |
 | Detectors | Detector layout: Grid (regular array), Random (random placement), or Click to place (interactive). Takes effect on Reset. |
 | n_grid | Grid dimension ($N \times N$). Visible when Detectors = Grid (3–7, default 4). Takes effect on Reset. |
 | Show detection surface | Overlays the spatial detection probability surface $p(x,y)$ on the simulation canvas. Updates live when $g_0$, $\sigma$, or detectors change. |
@@ -30,10 +44,10 @@ title: "SECR"
 | Occasion ($k$) | Current occasion index. |
 | Individuals ($M$) | Number of distinct animals detected at least once so far. |
 | Captures | Total capture events across all individuals and occasions. |
-| ESA | Effective sampling area (km²) — $\int\!\int p(x,y)\,dx\,dy$ over the arena, given current $g_0$, $\sigma$, and detector layout. |
+| ESA | Effective sampling area (km²): $\int\!\int p(x,y)\,dx\,dy$ over the arena, given current $g_0$, $\sigma$, and detector layout. |
 | $\hat{D}$ | Estimated density: $M / \mathrm{ESA}$. |
 | True $D$ | True density = $N / \text{arena area}$. |
-| Home range ($\pi\sigma^2$) | Area of a circle with radius $\sigma$ — approximate home range size (km²). |
+| Home range ($\pi\sigma^2$) | Area of a circle with radius $\sigma$: approximate home range size (km²). |
 | Recapture rate | Proportion of capture events involving a previously-detected individual. |
 | Coverage ($M/N$) | Proportion of the true population detected at least once. |
 
@@ -43,7 +57,7 @@ title: "SECR"
 |---|---|
 | $g_0$ | Baseline detection probability at zero distance (dimensionless, 0–1). |
 | $\sigma$ | Detection / home range scale (km). |
-| $\tau$ | Mobility parameter — home range crossing time (occasions). |
+| $\tau$ | Mobility parameter: home range crossing time (occasions). |
 | $f$ | Site fidelity multiplier (dimensionless). |
 | $K$ | Number of occasions. |
 | $N$ | True number of animals. |
@@ -51,20 +65,8 @@ title: "SECR"
 | $\mathrm{ESA}$ | Effective sampling area (km²). |
 | $\hat{D}$ | Estimated density (animals per km²). |
 | $D$ | True density (animals per km²). |
-| Activity centre | Latent centre of an individual's home range — never directly observed. |
+| Activity centre | Latent centre of an individual's home range; never directly observed. |
 | Capture history | Record of which individual was detected at which detector on which occasion. |
-
----
-
-## Overview
-
-Animals move within a two-dimensional arena and are sampled by a fixed detector array across repeated occasions. Density is estimated from who was caught, at which detectors, and on which occasions — with no assumption of a fixed observable strip.
-
-Detection is spatial and imperfect:
-
-- each individual has a latent activity centre that is never directly observed;
-- detectors sample probabilistically around those centres over multiple occasions;
-- the estimator infers density from capture histories and detector geometry alone.
 
 ---
 
@@ -202,8 +204,8 @@ The derivation comes from the overdamped continuous-time Langevin equation:
 
 This gives:
 
-- $\tau$ (occasions) → controls position autocorrelation time (how long the animal takes to cross its home range).
-- fidelity → controls noise amplitude → range tightness. Higher fidelity = smaller effective home range radius = $\sigma / \sqrt{\mathrm{fidelity}}$.
+- $\tau$ (occasions): controls position autocorrelation time (how long the animal takes to cross its home range).
+- fidelity: controls noise amplitude and range tightness. Higher fidelity = smaller effective home range radius = $\sigma / \sqrt{\mathrm{fidelity}}$.
 
 ### Speed and frames per occasion
 
@@ -237,7 +239,7 @@ Presets set $\tau$ and fidelity simultaneously.
 | Resident     | 5.0                | 1.0      | Default. Moderate range size, moderate return.           |
 | Sedentary    | 6.0                | 3.0      | Tighter home range (radius ÷ √3). Slower crossing time.  |
 | Wide-ranging | 2.0                | 0.4      | Larger effective range (radius × √2.5). Faster crossing. |
-| Nomad        | 1.0                | 0.2      | Very fast, large range — barely constrained to a centre. |
+| Nomad        | 1.0                | 0.2      | Very fast, large range; barely constrained to a centre.  |
 
 ---
 
@@ -261,7 +263,7 @@ For every (animal $i$, detector $j$) pair:
 
 Each animal can be detected by **multiple detectors on the same occasion**. Each (animal, detector, occasion) triple produces one capture event. The capture history therefore records the detector index too, not just presence/absence.
 
-Detection is based on `(cx, cy)` (the latent activity centre) — not on the display position `(dx, dy)` or the physics position `(x, y)`. This is consistent with the SECR model: the detection function $g(d)$ is a marginalised home-range detection function, integrating over all locations within the home range that a centre at $(c_x, c_y)$ implies.
+Detection is based on `(cx, cy)` (the latent activity centre), not on the display position `(dx, dy)` or the physics position `(x, y)`. This is consistent with the SECR model: the detection function $g(d)$ is a marginalised home-range detection function, integrating over all locations within the home range that a centre at $(c_x, c_y)$ implies.
 
 ### Effective detection σ
 
@@ -338,7 +340,7 @@ where:
 
 $\hat{D}$ is plotted at each completed occasion as a convergence trace. True density is `N / ARENA_KM²`.
 
-This is an **educational estimator only** — it uses the true $g_0$ and $\sigma$ parameters and does not fit a likelihood model to the capture histories. A full SECR MLE would estimate $g_0$, $\sigma$, and $D$ from the data.
+This is an educational estimator only: it uses the true $g_0$ and $\sigma$ parameters and does not fit a likelihood model to the capture histories. A full SECR MLE would estimate $g_0$, $\sigma$, and $D$ from the data.
 
 ---
 
@@ -350,7 +352,7 @@ Four panels rendered by `secr/analytics.js` using D3. They subscribe to the shar
 
 Shows the single-occasion detection probability $p_1(c_x, c_y)$ over the full arena as a 50 × 50 colour grid using the YlOrRd D3 colour scale. A cell is transparent if $p < 0.001$.
 
-The heatmap redraws whenever `g0`, `sigma`/`sigmaEff`, or the detector layout changes. It is skipped entirely when the "Show detection surface" overlay is not visible — this avoids expensive grid computation on every occasion tick.
+The heatmap redraws whenever `g0`, `sigma`/`sigmaEff`, or the detector layout changes. It is skipped entirely when the "Show detection surface" overlay is not visible; this avoids expensive grid computation on every occasion tick.
 
 The inner study area boundary is overlaid as a dashed blue rectangle. Detector positions are overlaid as small blue dots.
 
@@ -393,7 +395,7 @@ The simulation has four phases, tracked in `phase`:
 | `paused`   | ▶ Resume    | After Pause press                         |
 | `complete` | ↺ Run again | After `currentK >= targetK`               |
 
-"Run again" (pressed when complete) adds another `K` occasions to `targetK` and continues on the same population — it does **not** reset the animals or detectors.
+"Run again" (pressed when complete) adds another `K` occasions to `targetK` and continues on the same population; it does **not** reset the animals or detectors.
 
 ---
 
@@ -429,9 +431,9 @@ Add/remove detectors in custom mode is the one exception: detector changes take 
 
 - The density estimator uses known true $g_0$ and $\sigma$. A real SECR analysis would estimate these from the capture histories.
 - $g(d)$ is half-normal only. No other detection function is implemented.
-- The movement model is the same for all individuals — there is no individual variation in $\tau$ or fidelity.
+- The movement model is the same for all individuals; there is no individual variation in $\tau$ or fidelity.
 - The arena has reflecting boundaries. In reality, populations extend beyond any study area.
-- Multiple detections of the same individual by the same detector on different occasions are tracked independently. The capture history records every (animal, detector, occasion) event — not just first capture.
+- Multiple detections of the same individual by the same detector on different occasions are tracked independently. The capture history records every (animal, detector, occasion) event, not just first capture.
 - Habitat is uniform; `habitatFn = () => 1` throughout.
 
 ---
