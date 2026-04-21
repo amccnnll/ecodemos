@@ -1,10 +1,12 @@
-# Spatially Explicit Capture-Recapture (SECR)
+---
+title: "SECR"
+---
 
-## What this demo shows
+## Overview
 
-This simulation demonstrates SECR using repeated detector occasions. Animals move within a two-dimensional arena and are sampled by a fixed detector array. Density is estimated from who was caught, at which detectors, and on which occasions — with no assumption of a fixed observable strip.
+Animals move within a two-dimensional arena and are sampled by a fixed detector array across repeated occasions. Density is estimated from who was caught, at which detectors, and on which occasions — with no assumption of a fixed observable strip.
 
-The central teaching point is that detection is spatial and imperfect:
+Detection is spatial and imperfect:
 
 - each individual has a latent activity centre that is never directly observed;
 - detectors sample probabilistically around those centres over multiple occasions;

@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ecology Methods — Interactive Demos</title>
+  <title>Ecological Simulations</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <nav class="navbar">
-    <span class="nav-title">Ecology Demos</span>
+    <span class="nav-title">ecodemos</span>
     <a href="/ecodemos/">Home</a>
     <a href="/ecodemos/ds/">Distance Sampling</a>
     <a href="/ecodemos/secr/">SECR</a>
@@ -19,28 +19,17 @@
 
   <main class="landing-page">
     <section class="landing-hero">
-      <p class="landing-eyebrow">Interactive teaching demos for quantitative ecology</p>
-      <h1>Ecology Methods — Interactive Demos</h1>
-      <p class="landing-intro">
-        Explore three core ecological modelling and survey methods in the browser.
-        Each module pairs a live simulation with analytics, controls, and supporting documentation
-        so students can move between intuition, mechanism, and interpretation.
-      </p>
-      <div class="landing-actions">
-        <a class="btn-primary landing-button" href="/ecodemos/ds/">Open Distance Sampling</a>
-        <a class="btn-secondary landing-button" href="/ecodemos/docs/">Browse documentation</a>
-      </div>
+      <h1>Ecological simulations</h1>
     </section>
 
     <section class="landing-section">
       <div class="landing-section-heading">
-        <h2>Main demos</h2>
-        <p>Each card includes a preview slot ready for a short looping GIF once you have captures worth showing.</p>
+        <h2>Simulations</h2>
       </div>
 
       <div class="demo-grid">
         <article class="demo-card">
-          <a class="demo-card-preview demo-card-preview--ds" href="/ecodemos/ds/" aria-label="Open Distance Sampling demo">
+          <a class="demo-card-preview demo-card-preview--ds" href="/ecodemos/ds/" aria-label="Open Distance Sampling simulation">
             <span class="demo-card-preview-label">Preview slot</span>
             <strong>Line transect, detections, and fitted detection function</strong>
           </a>
@@ -50,8 +39,9 @@
               <span class="demo-card-tag">Survey design</span>
             </div>
             <p>
-              Show how detectability declines with perpendicular distance from a transect,
-              then connect those detections to estimated sigma, effective strip width, and density.
+              Line-transect distance sampling: an observer traverses a transect and detects animals
+              with probability declining with perpendicular distance. Detected distances are used to
+              fit a detection function and estimate density.
             </p>
             <ul class="demo-card-points">
               <li>Live observer traversal and one-shot detections</li>
@@ -59,14 +49,14 @@
               <li>Running density estimates and model-mismatch experiments</li>
             </ul>
             <div class="demo-card-actions">
-              <a class="btn-primary landing-button" href="/ecodemos/ds/">Launch demo</a>
-              <a class="demo-card-link" href="/ecodemos/docs/ds.md">Read docs</a>
+              <a class="btn-primary landing-button" href="/ecodemos/ds/">Open</a>
+              <a class="demo-card-link" href="/ecodemos/docs/ds.html">Read docs</a>
             </div>
           </div>
         </article>
 
         <article class="demo-card">
-          <a class="demo-card-preview demo-card-preview--secr" href="/ecodemos/secr/" aria-label="Open SECR demo">
+          <a class="demo-card-preview demo-card-preview--secr" href="/ecodemos/secr/" aria-label="Open SECR simulation">
             <span class="demo-card-preview-label">Preview slot</span>
             <strong>Trap array, activity centres, and capture histories over occasions</strong>
           </a>
@@ -76,8 +66,9 @@
               <span class="demo-card-tag">Capture-recapture</span>
             </div>
             <p>
-              Visualise how latent activity centres, movement, and detector spacing combine to generate
-              spatial capture histories and density estimates across repeated occasions.
+              Spatially explicit capture-recapture: a detector array samples animals whose latent
+              activity centres drive detection probability across repeated occasions. Density is
+              estimated from the resulting spatial capture histories.
             </p>
             <ul class="demo-card-points">
               <li>Detector arrays and activity-centre-based detection</li>
@@ -85,14 +76,14 @@
               <li>Surface, convergence, and capture-history analytics</li>
             </ul>
             <div class="demo-card-actions">
-              <a class="btn-primary landing-button" href="/ecodemos/secr/">Launch demo</a>
-              <a class="demo-card-link" href="/ecodemos/docs/secr.md">Read docs</a>
+              <a class="btn-primary landing-button" href="/ecodemos/secr/">Open</a>
+              <a class="demo-card-link" href="/ecodemos/docs/secr.html">Read docs</a>
             </div>
           </div>
         </article>
 
         <article class="demo-card">
-          <a class="demo-card-preview demo-card-preview--lv" href="/ecodemos/lv/" aria-label="Open Lotka-Volterra demo">
+          <a class="demo-card-preview demo-card-preview--lv" href="/ecodemos/lv/" aria-label="Open Lotka-Volterra simulation">
             <span class="demo-card-preview-label">Preview slot</span>
             <strong>Time series and phase-plane trajectories for interacting populations</strong>
           </a>
@@ -102,8 +93,9 @@
               <span class="demo-card-tag">Dynamics</span>
             </div>
             <p>
-              Compare classic predator-prey cycles, density-dependent dynamics, and two-species competition
-              using the same interface and live RK4 integration.
+              Three two-species dynamical systems integrated via RK4: classic predator-prey,
+              dynamic predator-prey with logistic prey growth and predator self-limitation,
+              and two-species competition.
             </p>
             <ul class="demo-card-points">
               <li>Classic, dynamic, and competition model variants</li>
@@ -111,56 +103,11 @@
               <li>Preset-driven exploration of contrasting behaviours</li>
             </ul>
             <div class="demo-card-actions">
-              <a class="btn-primary landing-button" href="/ecodemos/lv/">Launch demo</a>
-              <a class="demo-card-link" href="/ecodemos/docs/lv.md">Read docs</a>
+              <a class="btn-primary landing-button" href="/ecodemos/lv/">Open</a>
+              <a class="demo-card-link" href="/ecodemos/docs/lv.html">Read docs</a>
             </div>
           </div>
         </article>
-      </div>
-    </section>
-
-    <section class="landing-section landing-section--compact">
-      <div class="landing-section-heading">
-        <h2>How the modules differ</h2>
-      </div>
-      <div class="compare-grid" role="list">
-        <article class="compare-card" role="listitem">
-          <h3>Distance Sampling</h3>
-          <p>Best for teaching detectability from line-transect distances and the move from sightings to density estimation.</p>
-        </article>
-        <article class="compare-card" role="listitem">
-          <h3>SECR</h3>
-          <p>Best for teaching spatial capture histories, repeated occasions, and the role of latent activity centres.</p>
-        </article>
-        <article class="compare-card" role="listitem">
-          <h3>Lotka-Volterra</h3>
-          <p>Best for teaching mechanism-driven population dynamics, equilibria, cycles, and competitive exclusion.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="landing-section landing-section--compact">
-      <div class="landing-section-heading">
-        <h2>Documentation</h2>
-        <p>Reference material, glossaries, assumptions, and equations are available as separate pages for now.</p>
-      </div>
-      <div class="docs-link-row">
-        <a class="docs-link-card" href="/ecodemos/docs/ds.md">
-          <strong>DS docs</strong>
-          <span>Controls, equations, assumptions, and implementation notes</span>
-        </a>
-        <a class="docs-link-card" href="/ecodemos/docs/secr.md">
-          <strong>SECR docs</strong>
-          <span>Capture histories, spatial detection structure, and model choices</span>
-        </a>
-        <a class="docs-link-card" href="/ecodemos/docs/lv.md">
-          <strong>LV docs</strong>
-          <span>ODE systems, RK4 integration, presets, and equilibrium interpretation</span>
-        </a>
-        <a class="docs-link-card" href="/ecodemos/docs/glossary.md">
-          <strong>Glossary</strong>
-          <span>Parameter meanings and units across all modules</span>
-        </a>
       </div>
     </section>
   </main>

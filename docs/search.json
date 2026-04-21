@@ -1,0 +1,576 @@
+[
+  {
+    "objectID": "glossary.html",
+    "href": "glossary.html",
+    "title": "Glossary",
+    "section": "",
+    "text": "\\(D\\): true density (animals per square kilometre)\n\\(\\hat{D}\\): estimated density\n\\(\\sigma\\): detection-scale parameter controlling distance falloff\n\\(\\hat{\\sigma}\\): estimated \\(\\sigma\\) from data\n\\(W\\): truncation distance in DS\n\\(\\mathrm{ESW}\\): effective strip width in DS\n\\(g_0\\): baseline detection probability at zero distance in SECR\n\\(K\\): number of occasions in SECR\n\\(\\mathrm{ESA}\\): effective sampling area\n\n\n\n\n\nTransect: survey line traversed by the observer.\nPerpendicular distance: shortest distance from animal to transect.\n\\(g(0)=1\\) assumption: certainty of detection exactly on the transect line.\n\n\n\n\n\nActivity centre: latent centre of an individual’s home range.\nDetector layout: placement pattern for detectors (grid/random/custom).\nCapture history: record of who was detected, where, and when.\n\n\n\n\n\nPrey: resource species in predator-prey modes.\nPredator: consumer species in predator-prey modes.\nCompetition coefficients (\\(\\alpha_{12}, \\alpha_{21}\\)): strength of inter-species crowding in competition mode.\nCarrying capacity: population ceiling from density dependence.",
+    "crumbs": [
+      "Glossary"
+    ]
+  },
+  {
+    "objectID": "glossary.html#core-symbols",
+    "href": "glossary.html#core-symbols",
+    "title": "Glossary",
+    "section": "",
+    "text": "\\(D\\): true density (animals per square kilometre)\n\\(\\hat{D}\\): estimated density\n\\(\\sigma\\): detection-scale parameter controlling distance falloff\n\\(\\hat{\\sigma}\\): estimated \\(\\sigma\\) from data\n\\(W\\): truncation distance in DS\n\\(\\mathrm{ESW}\\): effective strip width in DS\n\\(g_0\\): baseline detection probability at zero distance in SECR\n\\(K\\): number of occasions in SECR\n\\(\\mathrm{ESA}\\): effective sampling area",
+    "crumbs": [
+      "Glossary"
+    ]
+  },
+  {
+    "objectID": "glossary.html#ds-terms",
+    "href": "glossary.html#ds-terms",
+    "title": "Glossary",
+    "section": "",
+    "text": "Transect: survey line traversed by the observer.\nPerpendicular distance: shortest distance from animal to transect.\n\\(g(0)=1\\) assumption: certainty of detection exactly on the transect line.",
+    "crumbs": [
+      "Glossary"
+    ]
+  },
+  {
+    "objectID": "glossary.html#secr-terms",
+    "href": "glossary.html#secr-terms",
+    "title": "Glossary",
+    "section": "",
+    "text": "Activity centre: latent centre of an individual’s home range.\nDetector layout: placement pattern for detectors (grid/random/custom).\nCapture history: record of who was detected, where, and when.",
+    "crumbs": [
+      "Glossary"
+    ]
+  },
+  {
+    "objectID": "glossary.html#lv-terms",
+    "href": "glossary.html#lv-terms",
+    "title": "Glossary",
+    "section": "",
+    "text": "Prey: resource species in predator-prey modes.\nPredator: consumer species in predator-prey modes.\nCompetition coefficients (\\(\\alpha_{12}, \\alpha_{21}\\)): strength of inter-species crowding in competition mode.\nCarrying capacity: population ceiling from density dependence.",
+    "crumbs": [
+      "Glossary"
+    ]
+  },
+  {
+    "objectID": "secr.html",
+    "href": "secr.html",
+    "title": "SECR",
+    "section": "",
+    "text": "Animals move within a two-dimensional arena and are sampled by a fixed detector array across repeated occasions. Density is estimated from who was caught, at which detectors, and on which occasions — with no assumption of a fixed observable strip.\nDetection is spatial and imperfect:\n\neach individual has a latent activity centre that is never directly observed;\ndetectors sample probabilistically around those centres over multiple occasions;\nthe estimator infers density from capture histories and detector geometry alone.",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#overview",
+    "href": "secr.html#overview",
+    "title": "SECR",
+    "section": "",
+    "text": "Animals move within a two-dimensional arena and are sampled by a fixed detector array across repeated occasions. Density is estimated from who was caught, at which detectors, and on which occasions — with no assumption of a fixed observable strip.\nDetection is spatial and imperfect:\n\neach individual has a latent activity centre that is never directly observed;\ndetectors sample probabilistically around those centres over multiple occasions;\nthe estimator infers density from capture histories and detector geometry alone.",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#arena-geometry",
+    "href": "secr.html#arena-geometry",
+    "title": "SECR",
+    "section": "Arena geometry",
+    "text": "Arena geometry\nThe arena is a square with side length ARENA_KM = 2.0 km. It is divided into two zones:\n\n\n\nZone\nVariable\nValue\n\n\n\n\nInner study area\nINNER_KM\n1.2 km × 1.2 km\n\n\nBuffer zone (each side)\nBUFFER_KM\n0.4 km\n\n\n\nThe buffer is = 2σ at the default σ = 0.20 km. This is a standard SECR convention: animals whose activity centres lie within ~2σ of the detector array contribute meaningfully to detections. Animals further out are effectively invisible.\nThe canvas is a square. PX_PER_KM = canvasSize / ARENA_KM. All world coordinates are in km; pixel coordinates are computed for display only using worldToPx(wx, wy).\nInner study area corners: (innerX0, innerY0) = (BUFFER_KM, BUFFER_KM) = (0.4, 0.4).",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#animal-placement",
+    "href": "secr.html#animal-placement",
+    "title": "SECR",
+    "section": "Animal placement",
+    "text": "Animal placement\nplaceAnimals(N, ARENA_KM, ARENA_KM, placementRng) in src/secr-engine.js.\nEach of the \\(N\\) animals is placed by drawing activity-centre coordinates uniformly:\ncx = rng() * arenaW\ncy = rng() * arenaH\nThe animal starts exactly at its activity centre: x = cx, y = cy. Velocity is initialised to zero: vx = 0, vy = 0.\nActivity centres span the full arena (inner + buffer), not just the inner study area. This is correct: real populations extend beyond any detector array, and some of those individuals can still be detected.\nThe true density is trueD = N / (ARENA_KM²) = N / 4.0 animals/km².",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#detector-placement",
+    "href": "secr.html#detector-placement",
+    "title": "SECR",
+    "section": "Detector placement",
+    "text": "Detector placement\nplaceDetectors(layout, innerW, innerH, innerX0, innerY0, rng, gridN, nRandom) in src/secr-engine.js.\nAll detectors are placed within the inner study area only.\n\nGrid layout\ngridN × gridN detectors on a regular grid. Cell size dx = innerW / gridN, dy = innerH / gridN. Each detector at:\nx = innerX0 + (col + 0.5) * dx\ny = innerY0 + (row + 0.5) * dy\nDefault gridN = 4 → 16 detectors. Range: 3–7, giving 9–49 detectors.\n\n\nRandom layout\n16 detectors placed by independent uniform draws within the inner study area:\nx = innerX0 + rng() * innerW\ny = innerY0 + rng() * innerH\nUses the seeded placement RNG.\n\n\nCustom layout\nDetectors are managed directly by sketch.js. Clicking within the inner study area places a new detector; clicking an existing detector removes it. Pressing “Remove all” calls clearDetectorsFn() which empties the array and notifies analytics. Custom detectors are preserved through Reset (the positions are re-indexed but not regenerated).",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#seed-and-rng-architecture",
+    "href": "secr.html#seed-and-rng-architecture",
+    "title": "SECR",
+    "section": "Seed and RNG architecture",
+    "text": "Seed and RNG architecture\nThree separate RNGs are used:\n\n\n\n\n\n\n\n\nRNG\nSeeding\nPurpose\n\n\n\n\nplacementRng = createRng(seed)\nSeeded (Alea PRNG)\nAnimal centres, grid/random detector positions\n\n\nmovementRng = new Math.seedrandom()\nFresh unseeded each initSim()\nPer-frame OUV movement steps\n\n\ndetectionRng = new Math.seedrandom()\nFresh unseeded each initSim()\nBernoulli detection draws each occasion\n\n\n\nSame seed → same animal and detector layout. Movement paths and detection outcomes vary on every replay, even with the same seed.\nSeed range: 0–99999. Each browser session starts with a random seed. Entering and committing a seed value in the input field immediately calls initSim().",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#movement-model-ouv",
+    "href": "secr.html#movement-model-ouv",
+    "title": "SECR",
+    "section": "Movement model (OUV)",
+    "text": "Movement model (OUV)\nEach frame during a run, every animal takes one stepAnimal() call from src/secr-engine.js. The model is Ornstein-Uhlenbeck in velocity space (OUV), also called an Ornstein-Uhlenbeck process in position via second-order Langevin dynamics.\n\nFrame-level update\nu1 = max(rng(), 1e-10),   u2 = rng()\nr  = sqrt(-2 * log(u1)),  θ = 2π * u2\nnx = r * cos(θ) * noiseScale          // Box-Muller N(0, noiseScale²)\nny = r * sin(θ) * noiseScale\n\nvx_new = vx * (1 - drag) + springStr * (cx - x) + nx\nvy_new = vy * (1 - drag) + springStr * (cy - y) + ny\nx_new  = x + vx_new\ny_new  = y + vy_new\nwhere drag = 0.08 is a fixed constant.\n\n\nWall reflection\nIf an animal would exit the arena, its position is reflected and the outward velocity component is negated:\nif x &lt; 0:       x = -x,           vx = -vx\nif x &gt; arenaW:  x = 2*arenaW - x, vx = -vx\n(same for y)\n\n\nParameter derivation\nspringStr and noiseScale are computed each frame from the slider values:\nconst fpk = FRAMES_PER_OCC[speed]; // frames per occasion\nconst drag = 0.08;\nconst springStr = drag / (tau * fpk);\nconst noiseScale = sigma * drag * sqrt(2 / (fidelity * tau * fpk));\nThe derivation comes from the overdamped continuous-time Langevin equation:\n\nPosition autocorrelation time \\(\\tau_x = \\mathrm{drag} / K_s\\), so \\(K_s = \\mathrm{drag}/(\\tau \\cdot \\mathrm{fpk})\\).\nEquilibrium variance: \\(\\mathrm{Var}(x) = \\mathrm{noiseScale}^2 / (2 K_s \\cdot \\mathrm{drag}) = \\sigma^2 / \\mathrm{fidelity}\\).\n\nThis gives:\n\n\\(\\tau\\) (occasions) → controls position autocorrelation time (how long the animal takes to cross its home range).\nfidelity → controls noise amplitude → range tightness. Higher fidelity = smaller effective home range radius = \\(\\sigma / \\sqrt{\\mathrm{fidelity}}\\).\n\n\n\nSpeed and frames per occasion\n\n\n\nLabel\nFrames per occasion\n\n\n\n\nSlow\n120\n\n\nNormal\n60\n\n\nFast\n15\n\n\n\nAt 60 fps and Normal speed, each occasion takes 1 second of real time.\n\n\nDisplay smoothing\nThe physics simulation runs at true positions (x, y). A separate display position (dx, dy) is lerped toward the true position each frame:\ndx_new = dx + 0.15 * (x - dx)\ndy_new = dy + 0.15 * (y - dy)\nThe DISPLAY_LERP = 0.15 factor creates smooth animation without affecting the detection computation. Detection uses (cx, cy), not (dx, dy).",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#movement-presets",
+    "href": "secr.html#movement-presets",
+    "title": "SECR",
+    "section": "Movement presets",
+    "text": "Movement presets\nPresets set \\(\\tau\\) and fidelity simultaneously.\n\n\n\n\n\n\n\n\n\nPreset\n\\(\\tau\\) (occasions)\nFidelity\nEffect\n\n\n\n\nResident\n5.0\n1.0\nDefault. Moderate range size, moderate return.\n\n\nSedentary\n6.0\n3.0\nTighter home range (radius ÷ √3). Slower crossing time.\n\n\nWide-ranging\n2.0\n0.4\nLarger effective range (radius × √2.5). Faster crossing.\n\n\nNomad\n1.0\n0.2\nVery fast, large range — barely constrained to a centre.",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#detection-function",
+    "href": "secr.html#detection-function",
+    "title": "SECR",
+    "section": "Detection function",
+    "text": "Detection function\nOne occasion = one call to tryDetectsOnOccasion(animals, detectors, g0, sigmaEff, rng).\nFor every (animal \\(i\\), detector \\(j\\)) pair:\n\nDistance from the animal’s activity centre to the detector:\nd_ij = hypot(animal.cx - detector.x, animal.cy - detector.y)\nDetection probability:\ng_ij = g0 * halfNormal(d_ij, sigmaEff)\n     = g0 * exp(-d_ij² / (2 * sigmaEff²))\nBernoulli draw: detected = detectionRng() &lt; g_ij.\nIf detected: record { animalId, detectorId }.\n\nEach animal can be detected by multiple detectors on the same occasion. Each (animal, detector, occasion) triple produces one capture event. The capture history therefore records the detector index too, not just presence/absence.\nDetection is based on (cx, cy) (the latent activity centre) — not on the display position (dx, dy) or the physics position (x, y). This is consistent with the SECR model: the detection function \\(g(d)\\) is a marginalised home-range detection function, integrating over all locations within the home range that a centre at \\((c_x, c_y)\\) implies.\n\nEffective detection σ\nsigmaEff = sigma / sqrt(fidelity)\nHigher fidelity compresses the home range. sigmaEff is passed to tryDetectsOnOccasion and to all ESA computations. The UI slider reads sigma; the underlying detection range is automatically adjusted.\n\n\nDetector type presets\nThese set g0 and sigma simultaneously.\n\n\n\n\n\n\n\n\n\nPreset\n\\(g_0\\)\n\\(\\sigma\\) (km)\nInterpretation\n\n\n\n\nDefault\n0.40\n0.20\nBalanced starting point\n\n\nCamera trap\n0.45\n0.08\nHigh detection within narrow field\n\n\nLive trap\n0.60\n0.05\nVery localised, high if animal passes\n\n\nAcoustic\n0.20\n0.40\nWide detection radius, moderate probability",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#effective-sample-area-esa",
+    "href": "secr.html#effective-sample-area-esa",
+    "title": "SECR",
+    "section": "Effective sample area (ESA)",
+    "text": "Effective sample area (ESA)\n\nSingle-occasion \\(p_1(x, y)\\)\nThe probability that an animal with activity centre at \\((c_x, c_y)\\) is detected by at least one detector on a single occasion:\n\\[\np_1(c_x, c_y) = 1 - \\prod_{j=1}^{J} \\bigl(1 - g_0 \\cdot g(d_j)\\bigr)\n\\]\nwhere \\(d_j = \\|(c_x, c_y) - \\text{det}_j\\|\\) and \\(g(d) = \\exp(-d^2 / 2\\sigma_{\\rm eff}^2)\\).\nThis is computed as a log-sum for numerical stability:\nlogNonDetect += log(1 - g0 * halfNormal(d, sigma) + 1e-15);\np1 = 1 - exp(logNonDetect);\n\n\n\\(K\\)-occasion ESA\nThe probability of being caught at least once across \\(k\\) independent occasions:\n\\[\np_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k\n\\]\nESA is then the numerical integral over the full arena:\n\\[\n\\mathrm{ESA}(k) = \\sum_{\\rm cells} \\bigl[1 - (1 - p_1)^k\\bigr] \\cdot \\Delta A\n\\]\nThe arena is discretised into 60 × 60 = 3600 cells for ESA computation (both in the analytics D̂ historical series and in the estimates strip). cellArea = arenaW * arenaH / (60 * 60).\nFor the D̂ convergence chart, the detection surface (p_1 for each cell) is computed once and reused for all \\(k = 1, 2, \\ldots, k_{\\rm current}\\), by applying the \\(k\\)-exponent formula cell-by-cell. This avoids recomputing the surface \\(k\\) times.\nThe estimates strip uses computeESA_K from src/secr-engine.js, which is equivalent: a grid reduction over the surface.",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#density-estimator",
+    "href": "secr.html#density-estimator",
+    "title": "SECR",
+    "section": "Density estimator",
+    "text": "Density estimator\n\\[\n\\hat{D}(k) = \\frac{M(k)}{\\mathrm{ESA}(k)}\n\\]\nwhere:\n\n\\(M(k)\\) = number of unique animal IDs in captures with occasion \\(\\leq k\\).\n\\(\\mathrm{ESA}(k)\\) = \\(K\\)-occasion ESA using sigmaEff and the current detector layout.\n\n\\(\\hat{D}\\) is plotted at each completed occasion as a convergence trace. True density is N / ARENA_KM².\nThis is an educational estimator only — it uses the true \\(g_0\\) and \\(\\sigma\\) parameters and does not fit a likelihood model to the capture histories. A full SECR MLE would estimate \\(g_0\\), \\(\\sigma\\), and \\(D\\) from the data.",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#analytics-panels",
+    "href": "secr.html#analytics-panels",
+    "title": "SECR",
+    "section": "Analytics panels",
+    "text": "Analytics panels\nFour panels rendered by secr/analytics.js using D3. They subscribe to the shared state and re-render on every notification (detector change, parameter change, or occasion completion). Position updates do not trigger re-renders.\n\n1. Detection surface heatmap\nShows the single-occasion detection probability \\(p_1(c_x, c_y)\\) over the full arena as a 50 × 50 colour grid using the YlOrRd D3 colour scale. A cell is transparent if \\(p &lt; 0.001\\).\nThe heatmap redraws whenever g0, sigma/sigmaEff, or the detector layout changes. It is skipped entirely when the “Show detection surface” overlay is not visible — this avoids expensive grid computation on every occasion tick.\nThe inner study area boundary is overlaid as a dashed blue rectangle. Detector positions are overlaid as small blue dots.\n\n\n2. Capture history matrix\nOne row per captured animal (in order of first capture), one column per completed occasion. Cells show a coloured background and the detector IDs (comma-separated) for all detectors that caught the animal on that occasion. Empty occasions show a grey cell.\nRow labels are coloured boxes A–J matching the per-animal colours used in the simulation display.\n\n\n3. D̂ convergence chart\nGreen line: \\(\\hat{D}(k)\\) for \\(k = 1, \\ldots, k_{\\rm current}\\). Red dashed horizontal line: true \\(D\\). X-axis: occasion index. Y-axis has expand-only tracking as in the DS module.\n\n\n4. Running estimates strip\n\n\n\nField\nValue\n\n\n\n\n\\(k\\)\nCurrent / target occasions\n\n\n\\(M\\)\nUnique individuals caught\n\n\nTotal captures\nCount of all (animal, detector, occasion) events\n\n\nESA\n\\(k\\)-occasion ESA (km²) at current \\(k\\)\n\n\n\\(\\hat{D}\\)\n\\(M / \\mathrm{ESA}(k)\\)\n\n\nTrue \\(D\\)\n\\(N / \\mathrm{ARENA\\_KM}^2\\)\n\n\n\nAdditional derived quantities shown below the table:\n\nEstimated home-range area: \\(\\pi \\sigma_{\\rm eff}^2\\) (km²).\nMean recapture rate: total captures / (\\(M \\times k\\)), computed only when \\(M &gt; 0\\) and \\(k &gt; 0\\).",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#phase-states",
+    "href": "secr.html#phase-states",
+    "title": "SECR",
+    "section": "Phase states",
+    "text": "Phase states\nThe simulation has four phases, tracked in phase:\n\n\n\nState\nLabel\nTransition\n\n\n\n\nidle\n▶ Run\nAfter initSim(), before first Run press\n\n\nrunning\n⏸ Pause\nWhile occasions are ticking\n\n\npaused\n▶ Resume\nAfter Pause press\n\n\ncomplete\n↺ Run again\nAfter currentK &gt;= targetK\n\n\n\n“Run again” (pressed when complete) adds another K occasions to targetK and continues on the same population — it does not reset the animals or detectors.",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#control-taxonomy",
+    "href": "secr.html#control-taxonomy",
+    "title": "SECR",
+    "section": "Control taxonomy",
+    "text": "Control taxonomy\n\nLive update (no reset required)\n\n\n\n\n\n\n\nControl\nEffect\n\n\n\n\n\\(g_0\\) slider\nUpdates detection probability and surface immediately\n\n\n\\(\\sigma\\) slider\nUpdates sigmaEff, detection surface, and ESA immediately\n\n\nFidelity \\(f\\) slider\nUpdates sigmaEff (via sigma / √f) and surface\n\n\nDetector type preset\nSets \\(g_0\\) and \\(\\sigma\\); same as moving those two sliders\n\n\nShow detection surface checkbox\nToggles heatmap visibility; triggers redraw\n\n\nShow activity centres checkbox\nToggles centroid overlay\n\n\n\n\n\nReset required\n\n\n\n\n\n\n\nControl\nEffect\n\n\n\n\n\\(N\\) slider\nNumber of animals (placement regenerated)\n\n\n\\(K\\) slider\nOccasions per run\n\n\n\\(\\tau\\) slider\nMovement timescale (affects movement physics)\n\n\nDistribution layout\nGrid / random / custom\n\n\nGrid size \\(n_{\\rm grid}\\)\nOnly applicable in grid mode\n\n\nSeed\nEntirely new placement\n\n\n\nAdd/remove detectors in custom mode is the one exception: detector changes take effect immediately without a full reset, because updateDetectors() notifies the analytics and the surface redraws.",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#assumptions-and-limitations",
+    "href": "secr.html#assumptions-and-limitations",
+    "title": "SECR",
+    "section": "Assumptions and limitations",
+    "text": "Assumptions and limitations\n\nThe density estimator uses known true \\(g_0\\) and \\(\\sigma\\). A real SECR analysis would estimate these from the capture histories.\n\\(g(d)\\) is half-normal only. No other detection function is implemented.\nThe movement model is the same for all individuals — there is no individual variation in \\(\\tau\\) or fidelity.\nThe arena has reflecting boundaries. In reality, populations extend beyond any study area.\nMultiple detections of the same individual by the same detector on different occasions are tracked independently. The capture history records every (animal, detector, occasion) event — not just first capture.\nHabitat is uniform; habitatFn = () =&gt; 1 throughout.",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "secr.html#external-references",
+    "href": "secr.html#external-references",
+    "title": "SECR",
+    "section": "External references",
+    "text": "External references\n\nBorchers and Efford (2008), DOI: https://api.crossref.org/works/10.1111/j.1541-0420.2007.00927.x\nDistance Sampling project resources: https://distancesampling.org/resources/citations.html",
+    "crumbs": [
+      "Simulations",
+      "SECR"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Documentation",
+    "section": "",
+    "text": "Reference documentation for all current simulations.\n\n\n\nDistance Sampling (DS)\nSpatially Explicit Capture-Recapture (SECR)\nLotka-Volterra (LV)\n\n\n\n\n\nGlossary\n\n\n\n\nEach simulation page includes:\n\nBrief overview\nKey equations\nParameter and control definitions\nImplementation choices that affect behaviour\nAssumptions and limitations\nExternal links for deeper reading",
+    "crumbs": [
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#simulations",
+    "href": "index.html#simulations",
+    "title": "Documentation",
+    "section": "",
+    "text": "Distance Sampling (DS)\nSpatially Explicit Capture-Recapture (SECR)\nLotka-Volterra (LV)",
+    "crumbs": [
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#shared-references",
+    "href": "index.html#shared-references",
+    "title": "Documentation",
+    "section": "",
+    "text": "Glossary",
+    "crumbs": [
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#scope",
+    "href": "index.html#scope",
+    "title": "Documentation",
+    "section": "",
+    "text": "Each simulation page includes:\n\nBrief overview\nKey equations\nParameter and control definitions\nImplementation choices that affect behaviour\nAssumptions and limitations\nExternal links for deeper reading",
+    "crumbs": [
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "ds.html",
+    "href": "ds.html",
+    "title": "Distance Sampling (DS)",
+    "section": "",
+    "text": "An observer traverses a fixed straight transect. Animals within a strip around the transect are detected with probability that declines with perpendicular distance. The recorded distances are then used to estimate detectability and, from that, density.\nThe simulation shows two concurrent views of the same scene:\n\nthe omniscient view — all animal positions visible on screen, detected animals in red, missed animals in grey;\nthe method’s view — only the perpendicular distances of detected animals are available to the estimator.",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#overview",
+    "href": "ds.html#overview",
+    "title": "Distance Sampling (DS)",
+    "section": "",
+    "text": "An observer traverses a fixed straight transect. Animals within a strip around the transect are detected with probability that declines with perpendicular distance. The recorded distances are then used to estimate detectability and, from that, density.\nThe simulation shows two concurrent views of the same scene:\n\nthe omniscient view — all animal positions visible on screen, detected animals in red, missed animals in grey;\nthe method’s view — only the perpendicular distances of detected animals are available to the estimator.",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#arena-geometry",
+    "href": "ds.html#arena-geometry",
+    "title": "Distance Sampling (DS)",
+    "section": "Arena geometry",
+    "text": "Arena geometry\nThe simulation canvas maps directly to a rectangle in kilometre coordinates. All positions used by the engine are stored and computed in km; pixel positions are computed only for rendering.\n\nTransect length (\\(L\\), km) is set by the transect slider. This is the x-dimension of the arena: arenaWKm = sliderValue.\nArena height (\\(H\\), km) is derived from the canvas dimensions so that one pixel represents the same distance in both axes: arenaH = canvasHeight / (canvasWidth / arenaWKm).\nTransect runs horizontally along the centreline of the canvas: \\(y = H/2\\) in km coordinates. It is a fixed line; the observer moves along it.\nPixel scale: PX_PER_KM = canvasWidth / arenaWKm. Recomputed on every reset (canvas width is fixed; a different transect length changes the scale).\nObserver x-position (boatX) runs from 0 to arenaWKm in km. The observer icon is drawn at boatX * PX_PER_KM pixels from the left edge.",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#animal-placement",
+    "href": "ds.html#animal-placement",
+    "title": "Distance Sampling (DS)",
+    "section": "Animal placement",
+    "text": "Animal placement\nAll three distribution modes call into src/ds-engine.js. All use the seeded placement RNG (see §RNG below). All coordinates are in km.\n\nAnimal count\nareaN = Math.round(density * arenaWKm * arenaH)\nAfter rounding, the realised true density fed to the analytics is:\ntrueD = areaN / (arenaWKm * arenaH)\nThis will differ slightly from the slider value when rounding is non-trivial.\n\n\nUniform distribution (placeAnimals)\nEach of the \\(n\\) animals is placed by two independent draws:\nx = rng() * arenaW\ny = rng() * arenaH\nwhere rng() returns a value in \\([0, 1)\\) from the seeded placement RNG. The result is a realisation of a homogeneous Poisson process with no spatial structure beyond the arena boundary.\n\n\nClustered distribution (placeAnimalsClumped)\nA two-level process. Parameters: clumpScale (slider default 0.10).\n\nNumber of clusters: nClusters = Math.max(3, Math.round(n / 6)).\nCluster centres: each placed at (rng()*arenaW, rng()*arenaH) using the seeded RNG — uniform independently in each axis.\nAnimal scatter: for each animal, a cluster is chosen uniformly at random (seeded), then a displacement is drawn using the Box–Muller transform:\nu1    = rng(),   u2 = rng()\nmag   = sigmaCluster * sqrt(-2 * log(u1))\nangle = 2π * u2\ndx    = mag * cos(angle),   dy = mag * sin(angle)\nwhere sigmaCluster = arenaW * clumpScale. The angular direction is isotropic (circular Gaussian scatter around the cluster centre).\nWrap-around: animals that scatter beyond the arena edge are wrapped using modular arithmetic:\nx = ((cx + dx) % arenaW + arenaW) % arenaW\ny = ((cy + dy) % arenaH + arenaH) % arenaH\nThis preserves the total count and keeps all animals inside the arena.\n\nThe clumpScale slider controls sigmaCluster as a fraction of transect length. At clumpScale = 0.10 (default), the cluster spread is 10% of the transect length.\n\n\nRegular distribution (placeAnimalsRegular)\nA perturbed grid. Parameters: regularity (slider default 0.50).\n\nGrid dimensions: nCols = Math.round(sqrt(n * arenaW / arenaH)), nRows = Math.ceil(n / nCols). The aspect ratio of the grid matches the arena.\nCell size: dx = arenaW / nCols, dy = arenaH / nRows.\nAnimal position: for the \\(i\\)-th animal, col = i % nCols, row = floor(i / nCols):\nx = (col + 0.5 + (rng() - 0.5) * regularity) * dx\ny = (row + 0.5 + (rng() - 0.5) * regularity) * dy\nThe jitter term (rng() - 0.5) * regularity is drawn from the seeded RNG.\n\nThe regularity parameter spans two extremes:\n\nregularity = 0: no jitter — animals sit exactly at grid cell centres.\nregularity = 1: maximum jitter — each animal is displaced by up to ±0.5 cell widths in each axis independently. This makes spacing variable but still non-Poisson (the grid skeleton persists in expectation).\n\nValues in between produce intermediate over-dispersion relative to a Poisson process.",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#seed-and-rng-architecture",
+    "href": "ds.html#seed-and-rng-architecture",
+    "title": "Distance Sampling (DS)",
+    "section": "Seed and RNG architecture",
+    "text": "Seed and RNG architecture\nThe simulation uses two separate random number generators with different seeding strategies. This is a deliberate design choice.\n\nPlacement RNG (seeded)\nplacementRng = createRng(seed); // src/rng.js — Alea PRNG\nAll animal positions (uniform draws, cluster centres, cluster assignments, scatter displacements, grid jitter) are generated by this seeded generator. Fixing the seed and pressing Reset reproduces the exact same spatial layout of animals.\n\n\nDetection RNG (unseeded)\ndetectionRng = new Math.seedrandom(); // fresh random seed each initSim() call\nAll Bernoulli detection draws (whether a given animal is detected when the observer passes) use this fresh, unseeded generator. Consequence: the same population can yield different detected sets on each replay, reflecting genuine sampling variability rather than just seed choice.\n\n\nSeed value\n\nRange: 0–99999 (five-digit integer).\nOn page load: seed = Math.floor(Math.random() * 100000) — random for each browser session.\nSeed input field: type a value, press Enter or click away. The field strips non-digit characters and clamps to [0, 99999]. Any invalid entry reverts to the current seed.\nNew Population button: draws a completely new random seed, then calls initSim().\nReset button: reads the current seed-input value and calls initSim().",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#observer-mechanics",
+    "href": "ds.html#observer-mechanics",
+    "title": "Distance Sampling (DS)",
+    "section": "Observer mechanics",
+    "text": "Observer mechanics\nThe observer moves at constant speed along the transect (y = arenaH / 2) from boatX = 0 to boatX = arenaWKm.\n\nSpeed settings\n\n\n\nLabel\nkm per frame\n\n\n\n\nSlow\n0.0025\n\n\nNormal\n0.005\n\n\nFast\n0.015\n\n\n\nAt 60 fps, Normal speed traverses a 4 km transect in approximately 13 seconds of real time. The speed setting affects only playback rate; it does not change what gets detected (because of the one-shot detection rule — see §Detection below).\nEach frame when running = true, advanceBoat() adds the current speed increment to boatX. When boatX &gt;= arenaWKm, the run stops and the play button switches to “↺ Run again”.",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#detection-mechanism",
+    "href": "ds.html#detection-mechanism",
+    "title": "Distance Sampling (DS)",
+    "section": "Detection mechanism",
+    "text": "Detection mechanism\nAll detection logic is in src/ds-engine.js (tryDetect). The key properties are:\n\nOne-shot rule\nDetection is attempted exactly once per animal per run. The trigger condition is:\nboatX - animal.x ∈ [0, boatSpeed)\nIn words: the observer’s current x-position has just crossed the animal’s x-position this frame. If boatX - animal.x &lt; 0 (not yet reached) or &gt;= boatSpeed (already passed), the function returns false immediately and no draw is made. This ensures each animal gets precisely one Bernoulli trial per traversal, regardless of playback speed.\n\n\nPerpendicular distance\nperpDist = |animal.y - arenaH / 2|   (km)\nIf perpDist &gt; W, the animal is outside the truncation strip and tryDetect returns false without a draw.\n\n\nBernoulli draw\nIf the one-shot condition is met and perpDist &lt;= W, a single uniform draw u = detectionRng() is compared to the detection probability:\ndetected = u &lt; g(perpDist, sigma)\nwhere g is either halfNormal or hazardRate depending on the field truth function setting.",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#detection-functions",
+    "href": "ds.html#detection-functions",
+    "title": "Distance Sampling (DS)",
+    "section": "Detection functions",
+    "text": "Detection functions\nBoth functions are implemented in src/stats.js.\n\nHalf-normal\n\\[\ng(x,\\sigma) = \\exp\\!\\left(-\\frac{x^2}{2\\sigma^2}\\right)\n\\]\n\n\\(g(0,\\sigma) = 1\\) for all \\(\\sigma\\) — perfect detectability on the transect line.\n\\(\\sigma\\) (km) is the distance at which detection probability falls to \\(e^{-1/2} \\approx 0.607\\).\nSlider range: 0.05–0.50 km, step 0.01, default 0.25 km.\n\n\n\nHazard-rate\n\\[\ng(x,\\sigma,b) = 1 - \\exp\\!\\left[-\\left(\\frac{\\sigma}{x}\\right)^b\\right]\n\\]\n\nAt \\(x = 0\\): hazardRate returns 1 (special-cased to avoid division by zero).\n\\(b\\) controls the shape of the “shoulder” near the transect. Higher \\(b\\) gives a wider flat shoulder followed by a sharper drop.\n\\(b\\) slider range: 1.0–10.0, step 0.1, default 2.5.",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#state-recording",
+    "href": "ds.html#state-recording",
+    "title": "Distance Sampling (DS)",
+    "section": "State recording",
+    "text": "State recording\nWhen a detection fires, recordDetection(perpDist, boatX) is called:\n\nperpDist — perpendicular distance in km (raw, not yet filtered by W).\nboatX — observer x-position in km at the moment of detection.\n\nBoth values are appended to parallel arrays in the shared state singleton (ds/state.js):\nstate.detectedDistances[]   // perpendicular distances, all raw detections\nstate.detectedEfforts[]     // boatX at each detection\nThese arrays grow monotonically during a run. They are cleared on reset (resetState()).",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#truncation-and-w-post-hoc-filtering",
+    "href": "ds.html#truncation-and-w-post-hoc-filtering",
+    "title": "Distance Sampling (DS)",
+    "section": "Truncation and W post-hoc filtering",
+    "text": "Truncation and W post-hoc filtering\nThe truncation distance \\(W\\) has two roles:\n\nHard truncation during detection: tryDetect returns false when perpDist &gt; W. No draw is made; the animal is never recorded.\nPost-hoc filtering in analytics: the analytics layer refilters stored distances on every state change:\nfilteredDists = detectedDistances.filter((d) =&gt; d &lt;= W);\nThis means if \\(W\\) is decreased after some detections have been stored, those beyond-W distances are excluded from the histogram, MLE, and D̂ history — even though they were recorded. If \\(W\\) is increased, detections from earlier in the run that were beyond the old W (but within the new W) will not appear, because they were never recorded in the first place.\n\nThe consequence is asymmetric: lowering \\(W\\) live re-analyses with a smaller sample; raising \\(W\\) live has no effect on data already collected.",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#esw-computation",
+    "href": "ds.html#esw-computation",
+    "title": "Distance Sampling (DS)",
+    "section": "ESW computation",
+    "text": "ESW computation\n\nHalf-normal (analytical)\n\\[\n\\mathrm{ESW}(\\sigma, W) = \\sigma\\sqrt{\\frac{\\pi}{2}}\\;\\mathrm{erf}\\!\\left(\\frac{W}{\\sigma\\sqrt{2}}\\right)\n\\]\nThe error function is computed via the Abramowitz & Stegun polynomial approximation (max error \\(1.5 \\times 10^{-7}\\)).\n\n\nHazard-rate (numerical)\n200-step trapezoid rule over \\([0, W]\\):\n\\[\n\\mathrm{ESW}(\\sigma, b, W) \\approx \\sum_{i=0}^{199} \\frac{g(x_i) + g(x_{i+1})}{2}\\,\\Delta x, \\quad \\Delta x = W/200\n\\]\nwhere \\(g\\) is hazardRate(x, sigma, b).",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#mle-fitting",
+    "href": "ds.html#mle-fitting",
+    "title": "Distance Sampling (DS)",
+    "section": "MLE fitting",
+    "text": "MLE fitting\nfitSigmaMLE in src/stats.js finds the \\(\\hat{\\sigma}\\) that minimises the negative log-likelihood. The analytics layer calls it when there are at least 3 within-W detections; fewer returns null and σ̂ is shown as “—”.\nThe search uses golden-section over a fixed interval \\([\\sigma_{\\min}, \\sigma_{\\max}]\\). The shape parameter \\(b\\) is not optimised — it is held at the current slider value throughout.\n\nNLL for half-normal\n\\[\n\\mathrm{NLL}(\\sigma) = n\\log\\bigl[\\mathrm{ESW}(\\sigma,W)\\bigr] + \\sum_{i=1}^{n}\\frac{d_i^2}{2\\sigma^2}\n\\]\n\n\nNLL for hazard-rate\n\\[\n\\mathrm{NLL}(\\sigma) = n\\log\\bigl[\\mathrm{ESW}(\\sigma,b,W)\\bigr] - \\sum_{i=1}^{n}\\log\\bigl[g_{\\mathrm{HR}}(d_i,\\sigma,b)\\bigr]\n\\]\nIn both cases, \\(d_i\\) are the within-W perpendicular distances and ESW is computed by the respective method above.",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#density-estimator",
+    "href": "ds.html#density-estimator",
+    "title": "Distance Sampling (DS)",
+    "section": "Density estimator",
+    "text": "Density estimator\nestimateDensity(n, L, sigma, W, modelFn, b) in src/stats.js returns:\n\\[\n\\hat{D} = \\frac{n}{2L\\,\\mathrm{ESW}(\\hat\\sigma, W)}\n\\]\nwhere \\(L\\) is effort in km, \\(n\\) is the count of within-W detections, and ESW uses \\(\\hat\\sigma\\) if fitted, or the true \\(\\sigma\\) slider value if fewer than 3 detections are available.\n\nPer-detection effort in the convergence chart\nThe D̂ convergence chart does not use the final transect length as effort. Instead, for each successive within-W detection, the chart plots the density estimate using effort = boatX at the moment that detection was made. For the \\(k\\)-th within-W detection, \\(L_k\\) = observer x-position (km) when the \\(k\\)-th animal was detected.\nThis means the convergence trace shows how \\(\\hat{D}\\) evolves as data accumulates during the survey, including the effect of early noise when \\(n\\) is small.\nThe full D̂ history array is rebuilt from scratch on every state-change event (each detection, and whenever W, σ, b, or model function changes).",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#analytics-panels",
+    "href": "ds.html#analytics-panels",
+    "title": "Distance Sampling (DS)",
+    "section": "Analytics panels",
+    "text": "Analytics panels\nThree panels are drawn by ds/analytics.js using D3. They subscribe to state and re-render on every change.\n\n1. Detection function chart\n\nBlue solid curve: the field truth detection function \\(g(x, \\sigma_{\\rm true})\\), drawn with the currently selected field truth function and the true \\(\\sigma\\) value.\nPink dashed curve: the MLE-fitted function \\(g(x, \\hat\\sigma)\\), drawn with the model function when \\(\\hat\\sigma\\) is available (\\(n \\geq 3\\)).\nHistogram bars (light blue, 10 equal bins over \\([0, W]\\)): observed within-W distances. Bar heights are normalised to the \\(g(x)\\) scale using the formula:\nscale = n * binWidth / ESW_truth\nbarHeight[i] = binCount[i] / scale\nso that a perfect half-normal detection function would make the histogram lie on the true curve.\nGhost fitted curves: if “Keep previous runs” is checked, past fitted curves are shown as progressively more transparent pink dashed lines (up to 8 past runs retained, oldest most faded).\nThe x-axis domain updates to the current W value; the y-axis domain expands if bar heights exceed 1.1.\n\n\n\n2. Running estimates strip\nDisplays six values updated live:\n\n\n\n\n\n\n\nField\nValue\n\n\n\n\n\\(n\\)\ncount of within-W detections\n\n\nEffort\nboatX progress (km); updates state.transectLength on each detection from detectedEfforts[last] — see note below\n\n\nESW\ncomputed from \\(\\hat\\sigma\\) (or true \\(\\sigma\\) if no fit) and current W\n\n\n\\(\\hat\\sigma\\)\nMLE estimate (km), or “—” if \\(n &lt; 3\\)\n\n\nTrue \\(\\sigma\\)\nslider value\n\n\n\\(\\hat{D}\\)\nlast entry in the D̂ history\n\n\nTrue \\(D\\)\ntrueD = areaN / (arenaWKm * arenaH)\n\n\n\nThe “Effort” readout is the boatX at the time of the last detection, not the total traversed distance. During a run, it thus reflects distance surveyed up to the most recent animal found.\n\n\n3. D̂ convergence chart\n\nGreen line: D̂ vs cumulative within-W detections for the current run.\nRed dashed horizontal line: true D.\nGhost traces: previous runs overlaid as faded green lines (same cap and fade logic as detection function ghosts).\nAxes use expand-only domain tracking — they grow when data goes outside the current range but never contract mid-run. On hard reset (no data, no ghosts) the axes snap back to their initial defaults.",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#ghost-keep-runs-mechanic",
+    "href": "ds.html#ghost-keep-runs-mechanic",
+    "title": "Distance Sampling (DS)",
+    "section": "Ghost / keep-runs mechanic",
+    "text": "Ghost / keep-runs mechanic\nThe “Keep previous runs” checkbox controls ghost retention. Ghosts are managed entirely within analytics.js — they are not stored in the shared state singleton.\nWhen a reset is detected (state goes from \\(n &gt; 0\\) to \\(n = 0\\)):\n\nIf the checkbox is checked, the current run’s D̂ history and fitted \\(\\hat\\sigma\\) are saved as a ghost object: { dhatHistory, sigmaHat, trueD, modelFn, b }.\nThe ghost list is capped at 8 entries (oldest removed when limit is exceeded).\nGhost curves on the detection function chart record the model function active at the time of that run, so a run fitted with hazard-rate is always displayed with hazard-rate even if the model is later changed.\n\n“Clear runs” empties the ghost list immediately and forces a redraw.",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#control-taxonomy",
+    "href": "ds.html#control-taxonomy",
+    "title": "Distance Sampling (DS)",
+    "section": "Control taxonomy",
+    "text": "Control taxonomy\n\nLive update (takes effect without reset)\nThese controls change simulation parameters immediately. Analytics are rebuilt from stored detections on the next state notification.\n\n\n\n\n\n\n\n\nControl\nVariable\nEffect\n\n\n\n\n\\(\\sigma\\) slider\nsigma\nChanges both the truth curve and MLE fitting\n\n\n\\(W\\) slider\nW\nRestricts or expands the truncation strip; all stored detections are refiltered\n\n\nField truth function\ntruthFn\nChanges which \\(g(x)\\) governs future detection draws and the blue truth curve\n\n\nModel function\nmodelFn\nChanges which \\(g(x)\\) is fitted by MLE and shown as the pink curve\n\n\nShape \\(b\\)\nb\nAffects hazard-rate detection and MLE (only visible when truth or model is hazard-rate)\n\n\n\nNote: changing sigma or truthFn live affects future detections for the current run (if still in progress), not past ones that are already stored.\n\n\nReset required (takes effect on next Reset or New Population)\n\n\n\nControl\nVariable\n\n\n\n\nDensity \\(D\\)\ndensity\n\n\nTransect length \\(L\\)\narenaWKm\n\n\nDistribution type\ndistribution\n\n\nClump scale \\(s_{\\rm clump}\\)\nclumpScale\n\n\nRegularity \\(\\rho\\)\nregularity\n\n\nSeed\nseed\n\n\n\nChanging these updates the displayed readout immediately but the population is only regenerated when initSim() is called (via Reset, New Population, or Run Again after completion).\n\n\nReset Defaults\nResets all controls to their factory defaults, then calls Reset:\n\n\n\nParameter\nDefault\n\n\n\n\n\\(\\sigma\\)\n0.25 km\n\n\n\\(W\\)\n0.40 km\n\n\nDensity\n50 /km²\n\n\nTransect length\n4.0 km\n\n\n\\(b\\)\n2.5\n\n\nField truth function\nHalf-normal\n\n\nModel function\nHalf-normal\n\n\nDistribution\nUniform\n\n\nClump scale\n0.10\n\n\nRegularity\n0.50",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#assumptions-and-limitations",
+    "href": "ds.html#assumptions-and-limitations",
+    "title": "Distance Sampling (DS)",
+    "section": "Assumptions and limitations",
+    "text": "Assumptions and limitations\n\nAnimals are static throughout a run. There is no movement model.\nThe transect is a fixed straight line through the centre of the arena.\nEach animal receives exactly one Bernoulli trial per traversal. Multiple passes are not modelled.\n\\(g(0) = 1\\) holds in both half-normal and hazard-rate modes.\nThe MLE holds \\(b\\) fixed; joint optimisation of \\((\\sigma, b)\\) is not implemented.\nThe hazard-rate ESW uses a fixed 200-step numerical integration; for very small \\(b\\) or extreme parameter combinations, this approximation may be imprecise.\nThe detector sees perpendicular distance only — no forward detection angle or acoustic range model.\nThere is no measurement error; recorded distances are exact.",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "ds.html#external-references",
+    "href": "ds.html#external-references",
+    "title": "Distance Sampling (DS)",
+    "section": "External references",
+    "text": "External references\n\nDistance Sampling methods: https://distancesampling.org\nResources and background: https://distancesampling.org/about.html",
+    "crumbs": [
+      "Simulations",
+      "Distance Sampling"
+    ]
+  },
+  {
+    "objectID": "lv.html",
+    "href": "lv.html",
+    "title": "Lotka-Volterra (LV)",
+    "section": "",
+    "text": "Three two-species dynamical systems integrated via RK4, displayed as a live time series and phase-plane trajectory. The three modes are:\n\nClassic predator-prey — the standard Lotka-Volterra system with no density dependence.\nDynamic predator-prey — adds logistic prey growth and predator self-limitation.\nCompetition — two-species Lotka-Volterra competition with carrying capacities and interaction coefficients.\n\nThe visualisation shows both how populations change over time and how they trace paths through state space (the phase plane).",
+    "crumbs": [
+      "Simulations",
+      "Lotka-Volterra"
+    ]
+  },
+  {
+    "objectID": "lv.html#overview",
+    "href": "lv.html#overview",
+    "title": "Lotka-Volterra (LV)",
+    "section": "",
+    "text": "Three two-species dynamical systems integrated via RK4, displayed as a live time series and phase-plane trajectory. The three modes are:\n\nClassic predator-prey — the standard Lotka-Volterra system with no density dependence.\nDynamic predator-prey — adds logistic prey growth and predator self-limitation.\nCompetition — two-species Lotka-Volterra competition with carrying capacities and interaction coefficients.\n\nThe visualisation shows both how populations change over time and how they trace paths through state space (the phase plane).",
+    "crumbs": [
+      "Simulations",
+      "Lotka-Volterra"
+    ]
+  },
+  {
+    "objectID": "lv.html#numerical-integration",
+    "href": "lv.html#numerical-integration",
+    "title": "Lotka-Volterra (LV)",
+    "section": "Numerical integration",
+    "text": "Numerical integration\nAll three modes are integrated using RK4 (classical fourth-order Runge-Kutta). The integration is in src/lv-engine.js.\n\nRK4 step\nFor a state vector \\((N, P)\\) at time \\(t\\) with step size \\(\\Delta t\\):\n\\[\nk_1 = f(N, P)\n\\]\n\\[\nk_2 = f\\!\\left(N + \\tfrac{\\Delta t}{2} k_{1,N},\\ P + \\tfrac{\\Delta t}{2} k_{1,P}\\right)\n\\]\n\\[\nk_3 = f\\!\\left(N + \\tfrac{\\Delta t}{2} k_{2,N},\\ P + \\tfrac{\\Delta t}{2} k_{2,P}\\right)\n\\]\n\\[\nk_4 = f\\!\\left(N + \\Delta t\\, k_{3,N},\\ P + \\Delta t\\, k_{3,P}\\right)\n\\]\n\\[\nN_{t+\\Delta t} = N + \\frac{\\Delta t}{6}(k_{1,N} + 2k_{2,N} + 2k_{3,N} + k_{4,N})\n\\]\n\\[\nP_{t+\\Delta t} = P + \\frac{\\Delta t}{6}(k_{1,P} + 2k_{2,P} + 2k_{3,P} + k_{4,P})\n\\]\nAfter each step, both populations are clamped to zero from below:\nreturn {\n  prey: Math.max(0, nextPrey),\n  predator: Math.max(0, nextPred),\n};\nThis prevents negative populations from numerical overshoot. In classic LV with large \\(\\beta\\) or small initial populations, trajectories can approach zero and this clamp becomes relevant.\n\n\nTime step \\(\\Delta t\\)\nSlider range: 0.005 to 0.080, step 0.001, default 0.030. This is the integration step size in units of model time. Decreasing \\(\\Delta t\\) improves numerical accuracy at the cost of more computation per second of real time. Changing \\(\\Delta t\\) triggers a Reset.\n\n\nSpeed and steps per frame\nThe simulation advances by a fixed number of RK4 steps per animation frame (requestAnimationFrame):\n\n\n\nSpeed\nSteps per frame\n\n\n\n\nSlow\n1\n\n\nNormal\n2\n\n\nFast\n6\n\n\n\nAt Normal speed and default \\(\\Delta t = 0.030\\), the simulation advances by 0.060 model-time units per frame — approximately 3.6 model-time units per second at 60 fps.",
+    "crumbs": [
+      "Simulations",
+      "Lotka-Volterra"
+    ]
+  },
+  {
+    "objectID": "lv.html#mode-equations",
+    "href": "lv.html#mode-equations",
+    "title": "Lotka-Volterra (LV)",
+    "section": "Mode equations",
+    "text": "Mode equations\n\nClassic predator-prey\n\\[\n\\frac{dN}{dt} = \\alpha N - \\beta N P\n\\]\n\\[\n\\frac{dP}{dt} = \\delta N P - \\gamma P\n\\]\nParameters:\n\n\n\n\n\n\n\n\n\n\nSymbol\nRole\nDefault\nRange\nStep\n\n\n\n\n\\(\\alpha\\)\nPrey intrinsic growth rate\n1.10\n0.2–2.0\n0.01\n\n\n\\(\\beta\\)\nPredation rate coefficient\n0.06\n0.01–0.20\n0.001\n\n\n\\(\\delta\\)\nPredator conversion efficiency\n0.03\n0.005–0.10\n0.001\n\n\n\\(\\gamma\\)\nPredator mortality rate\n0.70\n0.1–2.0\n0.01\n\n\n\nThe system has two equilibria. The trivial one is \\((0, 0)\\). The non-trivial one is:\n\\[\nN^* = \\frac{\\gamma}{\\delta}, \\quad P^* = \\frac{\\alpha}{\\beta}\n\\]\nIn the ideal system (no numerical error, no clamping) trajectories are closed neutral cycles around \\((N^*, P^*)\\). In practice, RK4 at finite \\(\\Delta t\\) introduces small orbital drift.\n\nClassic presets\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\n\\(\\alpha\\)\n\\(\\beta\\)\n\\(\\delta\\)\n\\(\\gamma\\)\n\\(N_0\\)\n\\(P_0\\)\n\\(\\Delta t\\)\n\n\n\n\nBalanced cycles\n1.10\n0.060\n0.030\n0.70\n40\n9\n0.030\n\n\nPredator crash\n0.30\n0.010\n0.003\n1.30\n55\n22\n0.020\n\n\nPrey crash\n0.45\n0.160\n0.060\n0.40\n22\n26\n0.020\n\n\nHigh-amplitude cycles\n1.30\n0.080\n0.028\n0.75\n55\n7\n0.020\n\n\n\n\n\n\nDynamic predator-prey\nAdds logistic prey growth and predator self-limitation:\n\\[\n\\frac{dN}{dt} = \\alpha N\\!\\left(1 - \\frac{N}{K}\\right) - \\beta N P\n\\]\n\\[\n\\frac{dP}{dt} = \\delta N P - \\gamma P - m P^2\n\\]\nAdditional parameters:\n\n\n\nSymbol\nRole\nDefault\nRange\nStep\n\n\n\n\n\\(K\\)\nPrey carrying capacity\n120\n20–250\n1\n\n\n\\(m\\)\nPredator self-limitation\n0.010\n0.000–0.200\n0.001\n\n\n\nIn the engine, \\(K\\) is guarded: kSafe = max(1e-6, Kdyn) and mSafe = max(0, mPred) to prevent division by zero or negative values.\nInterior equilibrium (when \\(m &gt; 0\\)):\nThe analytics panel computes this numerically. For \\(m &gt; 0\\):\n\\[\nN^* = \\frac{\\gamma + m \\alpha / \\beta}{\\delta + m \\alpha / (\\beta K)}, \\quad P^* = \\max\\!\\left(0,\\ \\frac{\\delta N^* - \\gamma}{m}\\right)\n\\]\nThis system can exhibit damped spirals, limit cycles, or collapse depending on parameter choice, unlike the neutral cycles of classic LV.\n\nDynamic presets\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\n\\(\\alpha\\)\n\\(\\beta\\)\n\\(\\delta\\)\n\\(\\gamma\\)\n\\(K\\)\n\\(m\\)\n\\(N_0\\)\n\\(P_0\\)\n\\(\\Delta t\\)\n\n\n\n\nDamped spiral\n1.00\n0.035\n0.020\n0.80\n150\n0.050\n80\n18\n0.030\n\n\nSlow damping / predator collapse\n0.60\n0.050\n0.010\n1.00\n80\n0.0001\n80\n12\n0.030\n\n\nTight cycle\n0.90\n0.030\n0.020\n0.75\n120\n0.020\n50\n14\n0.030\n\n\n\n\n\n\nCompetition\n\\[\n\\frac{dN_1}{dt} = r_1 N_1\\!\\left(1 - \\frac{N_1 + \\alpha_{12} N_2}{K_1}\\right)\n\\]\n\\[\n\\frac{dN_2}{dt} = r_2 N_2\\!\\left(1 - \\frac{N_2 + \\alpha_{21} N_1}{K_2}\\right)\n\\]\nParameters:\n\n\n\n\n\n\n\n\n\n\nSymbol\nRole\nDefault\nRange\nStep\n\n\n\n\n\\(r_1\\)\nSpecies 1 growth rate\n0.90\n0.1–2.0\n0.01\n\n\n\\(r_2\\)\nSpecies 2 growth rate\n0.80\n0.1–2.0\n0.01\n\n\n\\(K_1\\)\nSpecies 1 carrying capacity\n75\n10–200\n1\n\n\n\\(K_2\\)\nSpecies 2 carrying capacity\n65\n10–200\n1\n\n\n\\(\\alpha_{12}\\)\nEffect of species 2 on species 1\n0.60\n0.00–2.00\n0.01\n\n\n\\(\\alpha_{21}\\)\nEffect of species 1 on species 2\n0.50\n0.00–2.00\n0.01\n\n\n\nIn the engine, both \\(K\\) values are guarded: max(1e-6, K1) and max(1e-6, K2).\nCoexistence equilibrium (when \\(1 - \\alpha_{12}\\alpha_{21} \\neq 0\\)):\n\\[\nN_1^* = \\frac{K_1 - \\alpha_{12} K_2}{1 - \\alpha_{12}\\alpha_{21}}, \\quad N_2^* = \\frac{K_2 - \\alpha_{21} K_1}{1 - \\alpha_{12}\\alpha_{21}}\n\\]\nThe analytics panel computes and displays these values live. The condition for stable coexistence is \\(\\alpha_{12} &lt; K_1/K_2\\) and \\(\\alpha_{21} &lt; K_2/K_1\\).\n\nCompetition presets\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nName\n\\(r_1\\)\n\\(r_2\\)\n\\(K_1\\)\n\\(K_2\\)\n\\(\\alpha_{12}\\)\n\\(\\alpha_{21}\\)\n\\(N_{1,0}\\)\n\\(N_{2,0}\\)\n\\(\\Delta t\\)\n\n\n\n\nCoexistence\n0.90\n0.80\n75\n65\n0.60\n0.50\n40\n35\n0.030\n\n\nSpecies 1 wins\n1.00\n0.70\n85\n60\n0.45\n1.35\n55\n45\n0.030\n\n\nSpecies 2 wins\n0.70\n1.00\n60\n85\n1.30\n0.45\n45\n55\n0.030",
+    "crumbs": [
+      "Simulations",
+      "Lotka-Volterra"
+    ]
+  },
+  {
+    "objectID": "lv.html#state-and-time-series",
+    "href": "lv.html#state-and-time-series",
+    "title": "Lotka-Volterra (LV)",
+    "section": "State and time series",
+    "text": "State and time series\nThe state singleton (lv/state.js) holds current population values, the full integration parameters, and a rolling series buffer.\n\nseries: array of { t, prey, predator } records, capped at 1600 points by state.series.shift() when the cap is exceeded. The oldest point is removed first (FIFO). At Normal speed and default \\(\\Delta t\\), 1600 points corresponds to approximately 48 model-time units of history.\nt: current simulation time. Cumulative across runs until a Reset.\nrunning: boolean.",
+    "crumbs": [
+      "Simulations",
+      "Lotka-Volterra"
+    ]
+  },
+  {
+    "objectID": "lv.html#checkpoint-auto-pause",
+    "href": "lv.html#checkpoint-auto-pause",
+    "title": "Lotka-Volterra (LV)",
+    "section": "Checkpoint auto-pause",
+    "text": "Checkpoint auto-pause\nBy default, the simulation pauses automatically every 50 model-time units. This gives users a chance to observe the state before it evolves further.\n\npauseInterval = 50 (fixed).\nnextPauseAt is advanced by pauseInterval each time a pause triggers.\nWhen paused by checkpoint, autoPausedAt is set and the play button changes to “▶ Resume”.\nUnbounded time checkbox disables the checkpoint: setUnboundedTime(true) clears autoPausedAt and prevents the pause check.\nToggling unbounded time off during a run advances nextPauseAt to the next 50-boundary above the current t.\n\nThe exact pause logic in advanceSimulation:\nif (!state.unboundedTime && state.t &gt;= state.nextPauseAt) {\n  state.running = false;\n  state.autoPausedAt = state.nextPauseAt;\n  state.nextPauseAt += state.pauseInterval;\n  break;  // stop the step loop for this frame\n}",
+    "crumbs": [
+      "Simulations",
+      "Lotka-Volterra"
+    ]
+  },
+  {
+    "objectID": "lv.html#controls",
+    "href": "lv.html#controls",
+    "title": "Lotka-Volterra (LV)",
+    "section": "Controls",
+    "text": "Controls\n\nParameter sliders — behaviour on input vs change\nAll parameter sliders use a two-event pattern:\n\ninput event: updates the parameter value and display label immediately (live preview of the number).\nchange event (fires when slider drag ends): sets running = false and calls resetState().\n\nThis means moving a slider always resets the simulation when you release it. There is no live-update mode for parameters in LV.\n\n\nModel type\nSwitching model type stops the simulation, applies the default preset for the new mode, and resets. The Complications panel shows only the section relevant to the active mode.\n\n\nReset vs Reset Defaults\n\nReset: resets simulation time and populations to current initial conditions (prey0, predator0) without changing any parameters.\nReset Defaults: restores all parameters to the default preset for the active mode, then resets. For classic PP this is the “Balanced” preset; for dynamic PP the “Damped spiral” preset; for competition the “Coexistence” preset.\n\n\n\nSpeed buttons\nSpeed change does not reset the simulation. It changes SPEED_TO_STEPS selection for the next animation frame.",
+    "crumbs": [
+      "Simulations",
+      "Lotka-Volterra"
+    ]
+  },
+  {
+    "objectID": "lv.html#analytics-panels",
+    "href": "lv.html#analytics-panels",
+    "title": "Lotka-Volterra (LV)",
+    "section": "Analytics panels",
+    "text": "Analytics panels\nlv/analytics.js subscribes to state and re-renders both charts on every notification (which fires after each advanceSimulation call, after resets, and after parameter changes).\n\nTime series chart\nBlue line: prey (species 1 in competition mode). Red line: predators (species 2). X-axis: time window over the visible series buffer (scrolling). Y-axis: maximum population across both series, with 5% headroom. The chart is rebuilt from scratch each frame (no incremental D3 update).\nThe series scrolls naturally because old points are dropped from series when the cap is hit: the x-axis domain always spans [min(t), max(t)] of the current buffer.\n\n\nPhase-plane chart\nX-axis: prey (or species 1). Y-axis: predators (or species 2). The trajectory is drawn as a single path through all points in the current series buffer. A filled black dot marks the current position (last point). The chart is also rebuilt from scratch each frame. Axes expand to fit the current trajectory extent with 5% headroom.\n\n\nEstimates strip\nDisplays current \\(t\\), current \\(N\\) (prey), current \\(P\\) (predators), and analytical equilibrium values (\\(N^*\\), \\(P^*\\)). The equilibria are recomputed on every state notification from the current parameter values using the closed-form expressions above.",
+    "crumbs": [
+      "Simulations",
+      "Lotka-Volterra"
+    ]
+  },
+  {
+    "objectID": "lv.html#assumptions-and-limitations",
+    "href": "lv.html#assumptions-and-limitations",
+    "title": "Lotka-Volterra (LV)",
+    "section": "Assumptions and limitations",
+    "text": "Assumptions and limitations\n\nThe model is deterministic — there is no demographic stochasticity. Populations can reach fractional values.\nNon-negativity is enforced by clamping, not by the ODEs. In particular, classic LV has no built-in carrying capacity on prey; prey grows without bound if predator density is very low.\nIn classic LV, the interior equilibrium is a centre (neutral stability). Integration with finite \\(\\Delta t\\) can produce slow orbital drift. Smaller \\(\\Delta t\\) reduces but does not eliminate this.\nThe 1600-point series cap means long runs lose early history. The phase plane shows only the retained window.\nParameters update live in the display but always trigger a full reset when the slider is released.",
+    "crumbs": [
+      "Simulations",
+      "Lotka-Volterra"
+    ]
+  },
+  {
+    "objectID": "lv.html#external-references",
+    "href": "lv.html#external-references",
+    "title": "Lotka-Volterra (LV)",
+    "section": "External references",
+    "text": "External references\n\nLotka-Volterra equations: https://en.wikipedia.org/wiki/Lotka%E2%80%93Volterra_equations\nLogistic growth in ecology: https://en.wikipedia.org/wiki/Logistic_function#In_ecology:_modeling_population_growth",
+    "crumbs": [
+      "Simulations",
+      "Lotka-Volterra"
+    ]
+  }
+]

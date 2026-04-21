@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Distance Sampling (DS) – ecodemos docs</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-2be10d9e998f81ff6e49e26833438aa5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./ds.html">Simulations</a></li><li class="breadcrumb-item"><a href="./ds.html">Distance Sampling</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">ecodemos docs</a> 
+    </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Simulations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ds.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Distance Sampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./secr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SECR</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lv.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lotka-Volterra</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Glossary</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#arena-geometry" id="toc-arena-geometry" class="nav-link" data-scroll-target="#arena-geometry">Arena geometry</a></li>
+  <li><a href="#animal-placement" id="toc-animal-placement" class="nav-link" data-scroll-target="#animal-placement">Animal placement</a>
+  <ul class="collapse">
+  <li><a href="#animal-count" id="toc-animal-count" class="nav-link" data-scroll-target="#animal-count">Animal count</a></li>
+  <li><a href="#uniform-distribution-placeanimals" id="toc-uniform-distribution-placeanimals" class="nav-link" data-scroll-target="#uniform-distribution-placeanimals">Uniform distribution (<code>placeAnimals</code>)</a></li>
+  <li><a href="#clustered-distribution-placeanimalsclumped" id="toc-clustered-distribution-placeanimalsclumped" class="nav-link" data-scroll-target="#clustered-distribution-placeanimalsclumped">Clustered distribution (<code>placeAnimalsClumped</code>)</a></li>
+  <li><a href="#regular-distribution-placeanimalsregular" id="toc-regular-distribution-placeanimalsregular" class="nav-link" data-scroll-target="#regular-distribution-placeanimalsregular">Regular distribution (<code>placeAnimalsRegular</code>)</a></li>
+  </ul></li>
+  <li><a href="#seed-and-rng-architecture" id="toc-seed-and-rng-architecture" class="nav-link" data-scroll-target="#seed-and-rng-architecture">Seed and RNG architecture</a>
+  <ul class="collapse">
+  <li><a href="#placement-rng-seeded" id="toc-placement-rng-seeded" class="nav-link" data-scroll-target="#placement-rng-seeded">Placement RNG (seeded)</a></li>
+  <li><a href="#detection-rng-unseeded" id="toc-detection-rng-unseeded" class="nav-link" data-scroll-target="#detection-rng-unseeded">Detection RNG (unseeded)</a></li>
+  <li><a href="#seed-value" id="toc-seed-value" class="nav-link" data-scroll-target="#seed-value">Seed value</a></li>
+  </ul></li>
+  <li><a href="#observer-mechanics" id="toc-observer-mechanics" class="nav-link" data-scroll-target="#observer-mechanics">Observer mechanics</a>
+  <ul class="collapse">
+  <li><a href="#speed-settings" id="toc-speed-settings" class="nav-link" data-scroll-target="#speed-settings">Speed settings</a></li>
+  </ul></li>
+  <li><a href="#detection-mechanism" id="toc-detection-mechanism" class="nav-link" data-scroll-target="#detection-mechanism">Detection mechanism</a>
+  <ul class="collapse">
+  <li><a href="#one-shot-rule" id="toc-one-shot-rule" class="nav-link" data-scroll-target="#one-shot-rule">One-shot rule</a></li>
+  <li><a href="#perpendicular-distance" id="toc-perpendicular-distance" class="nav-link" data-scroll-target="#perpendicular-distance">Perpendicular distance</a></li>
+  <li><a href="#bernoulli-draw" id="toc-bernoulli-draw" class="nav-link" data-scroll-target="#bernoulli-draw">Bernoulli draw</a></li>
+  </ul></li>
+  <li><a href="#detection-functions" id="toc-detection-functions" class="nav-link" data-scroll-target="#detection-functions">Detection functions</a>
+  <ul class="collapse">
+  <li><a href="#half-normal" id="toc-half-normal" class="nav-link" data-scroll-target="#half-normal">Half-normal</a></li>
+  <li><a href="#hazard-rate" id="toc-hazard-rate" class="nav-link" data-scroll-target="#hazard-rate">Hazard-rate</a></li>
+  </ul></li>
+  <li><a href="#state-recording" id="toc-state-recording" class="nav-link" data-scroll-target="#state-recording">State recording</a></li>
+  <li><a href="#truncation-and-w-post-hoc-filtering" id="toc-truncation-and-w-post-hoc-filtering" class="nav-link" data-scroll-target="#truncation-and-w-post-hoc-filtering">Truncation and W post-hoc filtering</a></li>
+  <li><a href="#esw-computation" id="toc-esw-computation" class="nav-link" data-scroll-target="#esw-computation">ESW computation</a>
+  <ul class="collapse">
+  <li><a href="#half-normal-analytical" id="toc-half-normal-analytical" class="nav-link" data-scroll-target="#half-normal-analytical">Half-normal (analytical)</a></li>
+  <li><a href="#hazard-rate-numerical" id="toc-hazard-rate-numerical" class="nav-link" data-scroll-target="#hazard-rate-numerical">Hazard-rate (numerical)</a></li>
+  </ul></li>
+  <li><a href="#mle-fitting" id="toc-mle-fitting" class="nav-link" data-scroll-target="#mle-fitting">MLE fitting</a>
+  <ul class="collapse">
+  <li><a href="#nll-for-half-normal" id="toc-nll-for-half-normal" class="nav-link" data-scroll-target="#nll-for-half-normal">NLL for half-normal</a></li>
+  <li><a href="#nll-for-hazard-rate" id="toc-nll-for-hazard-rate" class="nav-link" data-scroll-target="#nll-for-hazard-rate">NLL for hazard-rate</a></li>
+  </ul></li>
+  <li><a href="#density-estimator" id="toc-density-estimator" class="nav-link" data-scroll-target="#density-estimator">Density estimator</a>
+  <ul class="collapse">
+  <li><a href="#per-detection-effort-in-the-convergence-chart" id="toc-per-detection-effort-in-the-convergence-chart" class="nav-link" data-scroll-target="#per-detection-effort-in-the-convergence-chart">Per-detection effort in the convergence chart</a></li>
+  </ul></li>
+  <li><a href="#analytics-panels" id="toc-analytics-panels" class="nav-link" data-scroll-target="#analytics-panels">Analytics panels</a>
+  <ul class="collapse">
+  <li><a href="#detection-function-chart" id="toc-detection-function-chart" class="nav-link" data-scroll-target="#detection-function-chart">1. Detection function chart</a></li>
+  <li><a href="#running-estimates-strip" id="toc-running-estimates-strip" class="nav-link" data-scroll-target="#running-estimates-strip">2. Running estimates strip</a></li>
+  <li><a href="#d-convergence-chart" id="toc-d-convergence-chart" class="nav-link" data-scroll-target="#d-convergence-chart">3. D̂ convergence chart</a></li>
+  </ul></li>
+  <li><a href="#ghost-keep-runs-mechanic" id="toc-ghost-keep-runs-mechanic" class="nav-link" data-scroll-target="#ghost-keep-runs-mechanic">Ghost / keep-runs mechanic</a></li>
+  <li><a href="#control-taxonomy" id="toc-control-taxonomy" class="nav-link" data-scroll-target="#control-taxonomy">Control taxonomy</a>
+  <ul class="collapse">
+  <li><a href="#live-update-takes-effect-without-reset" id="toc-live-update-takes-effect-without-reset" class="nav-link" data-scroll-target="#live-update-takes-effect-without-reset">Live update (takes effect without reset)</a></li>
+  <li><a href="#reset-required-takes-effect-on-next-reset-or-new-population" id="toc-reset-required-takes-effect-on-next-reset-or-new-population" class="nav-link" data-scroll-target="#reset-required-takes-effect-on-next-reset-or-new-population">Reset required (takes effect on next Reset or New Population)</a></li>
+  <li><a href="#reset-defaults" id="toc-reset-defaults" class="nav-link" data-scroll-target="#reset-defaults">Reset Defaults</a></li>
+  </ul></li>
+  <li><a href="#assumptions-and-limitations" id="toc-assumptions-and-limitations" class="nav-link" data-scroll-target="#assumptions-and-limitations">Assumptions and limitations</a></li>
+  <li><a href="#external-references" id="toc-external-references" class="nav-link" data-scroll-target="#external-references">External references</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./ds.html">Simulations</a></li><li class="breadcrumb-item"><a href="./ds.html">Distance Sampling</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Distance Sampling (DS)</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>An observer traverses a fixed straight transect. Animals within a strip around the transect are detected with probability that declines with perpendicular distance. The recorded distances are then used to estimate detectability and, from that, density.</p>
+<p>The simulation shows two concurrent views of the same scene:</p>
+<ul>
+<li>the omniscient view — all animal positions visible on screen, detected animals in red, missed animals in grey;</li>
+<li>the method’s view — only the perpendicular distances of detected animals are available to the estimator.</li>
+</ul>
+<hr>
+</section>
+<section id="arena-geometry" class="level2">
+<h2 class="anchored" data-anchor-id="arena-geometry">Arena geometry</h2>
+<p>The simulation canvas maps directly to a rectangle in kilometre coordinates. All positions used by the engine are stored and computed in km; pixel positions are computed only for rendering.</p>
+<ul>
+<li><strong>Transect length</strong> (<span class="math inline">\(L\)</span>, km) is set by the transect slider. This is the x-dimension of the arena: <code>arenaWKm = sliderValue</code>.</li>
+<li><strong>Arena height</strong> (<span class="math inline">\(H\)</span>, km) is derived from the canvas dimensions so that one pixel represents the same distance in both axes: <code>arenaH = canvasHeight / (canvasWidth / arenaWKm)</code>.</li>
+<li><strong>Transect</strong> runs horizontally along the centreline of the canvas: <span class="math inline">\(y = H/2\)</span> in km coordinates. It is a fixed line; the observer moves along it.</li>
+<li><strong>Pixel scale</strong>: <code>PX_PER_KM = canvasWidth / arenaWKm</code>. Recomputed on every reset (canvas width is fixed; a different transect length changes the scale).</li>
+<li><strong>Observer x-position</strong> (<code>boatX</code>) runs from 0 to <code>arenaWKm</code> in km. The observer icon is drawn at <code>boatX * PX_PER_KM</code> pixels from the left edge.</li>
+</ul>
+<hr>
+</section>
+<section id="animal-placement" class="level2">
+<h2 class="anchored" data-anchor-id="animal-placement">Animal placement</h2>
+<p>All three distribution modes call into <code>src/ds-engine.js</code>. All use the seeded placement RNG (see §RNG below). All coordinates are in km.</p>
+<section id="animal-count" class="level3">
+<h3 class="anchored" data-anchor-id="animal-count">Animal count</h3>
+<pre><code>areaN = Math.round(density * arenaWKm * arenaH)</code></pre>
+<p>After rounding, the realised true density fed to the analytics is:</p>
+<pre><code>trueD = areaN / (arenaWKm * arenaH)</code></pre>
+<p>This will differ slightly from the slider value when rounding is non-trivial.</p>
+</section>
+<section id="uniform-distribution-placeanimals" class="level3">
+<h3 class="anchored" data-anchor-id="uniform-distribution-placeanimals">Uniform distribution (<code>placeAnimals</code>)</h3>
+<p>Each of the <span class="math inline">\(n\)</span> animals is placed by two independent draws:</p>
+<pre><code>x = rng() * arenaW
+y = rng() * arenaH</code></pre>
+<p>where <code>rng()</code> returns a value in <span class="math inline">\([0, 1)\)</span> from the seeded placement RNG. The result is a realisation of a homogeneous Poisson process with no spatial structure beyond the arena boundary.</p>
+</section>
+<section id="clustered-distribution-placeanimalsclumped" class="level3">
+<h3 class="anchored" data-anchor-id="clustered-distribution-placeanimalsclumped">Clustered distribution (<code>placeAnimalsClumped</code>)</h3>
+<p>A two-level process. Parameters: <code>clumpScale</code> (slider default 0.10).</p>
+<ol type="1">
+<li><p><strong>Number of clusters</strong>: <code>nClusters = Math.max(3, Math.round(n / 6))</code>.</p></li>
+<li><p><strong>Cluster centres</strong>: each placed at <code>(rng()*arenaW, rng()*arenaH)</code> using the seeded RNG — uniform independently in each axis.</p></li>
+<li><p><strong>Animal scatter</strong>: for each animal, a cluster is chosen uniformly at random (seeded), then a displacement is drawn using the Box–Muller transform:</p>
+<pre><code>u1    = rng(),   u2 = rng()
+mag   = sigmaCluster * sqrt(-2 * log(u1))
+angle = 2π * u2
+dx    = mag * cos(angle),   dy = mag * sin(angle)</code></pre>
+<p>where <code>sigmaCluster = arenaW * clumpScale</code>. The angular direction is isotropic (circular Gaussian scatter around the cluster centre).</p></li>
+<li><p><strong>Wrap-around</strong>: animals that scatter beyond the arena edge are wrapped using modular arithmetic:</p>
+<pre><code>x = ((cx + dx) % arenaW + arenaW) % arenaW
+y = ((cy + dy) % arenaH + arenaH) % arenaH</code></pre>
+<p>This preserves the total count and keeps all animals inside the arena.</p></li>
+</ol>
+<p>The <code>clumpScale</code> slider controls <code>sigmaCluster</code> as a fraction of transect length. At <code>clumpScale = 0.10</code> (default), the cluster spread is 10% of the transect length.</p>
+</section>
+<section id="regular-distribution-placeanimalsregular" class="level3">
+<h3 class="anchored" data-anchor-id="regular-distribution-placeanimalsregular">Regular distribution (<code>placeAnimalsRegular</code>)</h3>
+<p>A perturbed grid. Parameters: <code>regularity</code> (slider default 0.50).</p>
+<ol type="1">
+<li><p><strong>Grid dimensions</strong>: <code>nCols = Math.round(sqrt(n * arenaW / arenaH))</code>, <code>nRows = Math.ceil(n / nCols)</code>. The aspect ratio of the grid matches the arena.</p></li>
+<li><p><strong>Cell size</strong>: <code>dx = arenaW / nCols</code>, <code>dy = arenaH / nRows</code>.</p></li>
+<li><p><strong>Animal position</strong>: for the <span class="math inline">\(i\)</span>-th animal, <code>col = i % nCols</code>, <code>row = floor(i / nCols)</code>:</p>
+<pre><code>x = (col + 0.5 + (rng() - 0.5) * regularity) * dx
+y = (row + 0.5 + (rng() - 0.5) * regularity) * dy</code></pre>
+<p>The jitter term <code>(rng() - 0.5) * regularity</code> is drawn from the seeded RNG.</p></li>
+</ol>
+<p>The <code>regularity</code> parameter spans two extremes:</p>
+<ul>
+<li><code>regularity = 0</code>: no jitter — animals sit exactly at grid cell centres.</li>
+<li><code>regularity = 1</code>: maximum jitter — each animal is displaced by up to ±0.5 cell widths in each axis independently. This makes spacing variable but still non-Poisson (the grid skeleton persists in expectation).</li>
+</ul>
+<p>Values in between produce intermediate over-dispersion relative to a Poisson process.</p>
+<hr>
+</section>
+</section>
+<section id="seed-and-rng-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="seed-and-rng-architecture">Seed and RNG architecture</h2>
+<p>The simulation uses <strong>two separate random number generators</strong> with different seeding strategies. This is a deliberate design choice.</p>
+<section id="placement-rng-seeded" class="level3">
+<h3 class="anchored" data-anchor-id="placement-rng-seeded">Placement RNG (seeded)</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>placementRng <span class="op">=</span> <span class="fu">createRng</span>(seed)<span class="op">;</span> <span class="co">// src/rng.js — Alea PRNG</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>All animal positions (uniform draws, cluster centres, cluster assignments, scatter displacements, grid jitter) are generated by this seeded generator. Fixing the seed and pressing Reset reproduces the exact same spatial layout of animals.</p>
+</section>
+<section id="detection-rng-unseeded" class="level3">
+<h3 class="anchored" data-anchor-id="detection-rng-unseeded">Detection RNG (unseeded)</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>detectionRng <span class="op">=</span> <span class="kw">new</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">seedrandom</span>()<span class="op">;</span> <span class="co">// fresh random seed each initSim() call</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>All Bernoulli detection draws (whether a given animal is detected when the observer passes) use this fresh, unseeded generator. Consequence: the same population can yield different detected sets on each replay, reflecting genuine sampling variability rather than just seed choice.</p>
+</section>
+<section id="seed-value" class="level3">
+<h3 class="anchored" data-anchor-id="seed-value">Seed value</h3>
+<ul>
+<li>Range: 0–99999 (five-digit integer).</li>
+<li>On page load: <code>seed = Math.floor(Math.random() * 100000)</code> — random for each browser session.</li>
+<li>Seed input field: type a value, press Enter or click away. The field strips non-digit characters and clamps to [0, 99999]. Any invalid entry reverts to the current seed.</li>
+<li>New Population button: draws a completely new random seed, then calls <code>initSim()</code>.</li>
+<li>Reset button: reads the current seed-input value and calls <code>initSim()</code>.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="observer-mechanics" class="level2">
+<h2 class="anchored" data-anchor-id="observer-mechanics">Observer mechanics</h2>
+<p>The observer moves at constant speed along the transect (<code>y = arenaH / 2</code>) from <code>boatX = 0</code> to <code>boatX = arenaWKm</code>.</p>
+<section id="speed-settings" class="level3">
+<h3 class="anchored" data-anchor-id="speed-settings">Speed settings</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Label</th>
+<th>km per frame</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Slow</td>
+<td>0.0025</td>
+</tr>
+<tr class="even">
+<td>Normal</td>
+<td>0.005</td>
+</tr>
+<tr class="odd">
+<td>Fast</td>
+<td>0.015</td>
+</tr>
+</tbody>
+</table>
+<p>At 60 fps, Normal speed traverses a 4 km transect in approximately 13 seconds of real time. The speed setting affects only playback rate; it does not change what gets detected (because of the one-shot detection rule — see §Detection below).</p>
+<p>Each frame when <code>running = true</code>, <code>advanceBoat()</code> adds the current speed increment to <code>boatX</code>. When <code>boatX &gt;= arenaWKm</code>, the run stops and the play button switches to “↺ Run again”.</p>
+<hr>
+</section>
+</section>
+<section id="detection-mechanism" class="level2">
+<h2 class="anchored" data-anchor-id="detection-mechanism">Detection mechanism</h2>
+<p>All detection logic is in <code>src/ds-engine.js</code> (<code>tryDetect</code>). The key properties are:</p>
+<section id="one-shot-rule" class="level3">
+<h3 class="anchored" data-anchor-id="one-shot-rule">One-shot rule</h3>
+<p>Detection is attempted <strong>exactly once</strong> per animal per run. The trigger condition is:</p>
+<pre><code>boatX - animal.x ∈ [0, boatSpeed)</code></pre>
+<p>In words: the observer’s current x-position has just crossed the animal’s x-position this frame. If <code>boatX - animal.x &lt; 0</code> (not yet reached) or <code>&gt;= boatSpeed</code> (already passed), the function returns false immediately and no draw is made. This ensures each animal gets precisely one Bernoulli trial per traversal, regardless of playback speed.</p>
+</section>
+<section id="perpendicular-distance" class="level3">
+<h3 class="anchored" data-anchor-id="perpendicular-distance">Perpendicular distance</h3>
+<pre><code>perpDist = |animal.y - arenaH / 2|   (km)</code></pre>
+<p>If <code>perpDist &gt; W</code>, the animal is outside the truncation strip and <code>tryDetect</code> returns false without a draw.</p>
+</section>
+<section id="bernoulli-draw" class="level3">
+<h3 class="anchored" data-anchor-id="bernoulli-draw">Bernoulli draw</h3>
+<p>If the one-shot condition is met and <code>perpDist &lt;= W</code>, a single uniform draw <code>u = detectionRng()</code> is compared to the detection probability:</p>
+<pre><code>detected = u &lt; g(perpDist, sigma)</code></pre>
+<p>where <code>g</code> is either <code>halfNormal</code> or <code>hazardRate</code> depending on the field truth function setting.</p>
+<hr>
+</section>
+</section>
+<section id="detection-functions" class="level2">
+<h2 class="anchored" data-anchor-id="detection-functions">Detection functions</h2>
+<p>Both functions are implemented in <code>src/stats.js</code>.</p>
+<section id="half-normal" class="level3">
+<h3 class="anchored" data-anchor-id="half-normal">Half-normal</h3>
+<p><span class="math display">\[
+g(x,\sigma) = \exp\!\left(-\frac{x^2}{2\sigma^2}\right)
+\]</span></p>
+<ul>
+<li><span class="math inline">\(g(0,\sigma) = 1\)</span> for all <span class="math inline">\(\sigma\)</span> — perfect detectability on the transect line.</li>
+<li><span class="math inline">\(\sigma\)</span> (km) is the distance at which detection probability falls to <span class="math inline">\(e^{-1/2} \approx 0.607\)</span>.</li>
+<li>Slider range: 0.05–0.50 km, step 0.01, default 0.25 km.</li>
+</ul>
+</section>
+<section id="hazard-rate" class="level3">
+<h3 class="anchored" data-anchor-id="hazard-rate">Hazard-rate</h3>
+<p><span class="math display">\[
+g(x,\sigma,b) = 1 - \exp\!\left[-\left(\frac{\sigma}{x}\right)^b\right]
+\]</span></p>
+<ul>
+<li>At <span class="math inline">\(x = 0\)</span>: <code>hazardRate</code> returns 1 (special-cased to avoid division by zero).</li>
+<li><span class="math inline">\(b\)</span> controls the shape of the “shoulder” near the transect. Higher <span class="math inline">\(b\)</span> gives a wider flat shoulder followed by a sharper drop.</li>
+<li><span class="math inline">\(b\)</span> slider range: 1.0–10.0, step 0.1, default 2.5.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="state-recording" class="level2">
+<h2 class="anchored" data-anchor-id="state-recording">State recording</h2>
+<p>When a detection fires, <code>recordDetection(perpDist, boatX)</code> is called:</p>
+<ul>
+<li><code>perpDist</code> — perpendicular distance in km (raw, not yet filtered by W).</li>
+<li><code>boatX</code> — observer x-position in km <strong>at the moment of detection</strong>.</li>
+</ul>
+<p>Both values are appended to parallel arrays in the shared state singleton (<code>ds/state.js</code>):</p>
+<pre><code>state.detectedDistances[]   // perpendicular distances, all raw detections
+state.detectedEfforts[]     // boatX at each detection</code></pre>
+<p>These arrays grow monotonically during a run. They are cleared on reset (<code>resetState()</code>).</p>
+<hr>
+</section>
+<section id="truncation-and-w-post-hoc-filtering" class="level2">
+<h2 class="anchored" data-anchor-id="truncation-and-w-post-hoc-filtering">Truncation and W post-hoc filtering</h2>
+<p>The truncation distance <span class="math inline">\(W\)</span> has two roles:</p>
+<ol type="1">
+<li><p><strong>Hard truncation during detection</strong>: <code>tryDetect</code> returns false when <code>perpDist &gt; W</code>. No draw is made; the animal is never recorded.</p></li>
+<li><p><strong>Post-hoc filtering in analytics</strong>: the analytics layer refilters stored distances on every state change:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>filteredDists <span class="op">=</span> detectedDistances<span class="op">.</span><span class="fu">filter</span>((d) <span class="kw">=&gt;</span> d <span class="op">&lt;=</span> W)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This means if <span class="math inline">\(W\)</span> is decreased after some detections have been stored, those beyond-W distances are excluded from the histogram, MLE, and D̂ history — even though they were recorded. If <span class="math inline">\(W\)</span> is increased, detections from earlier in the run that were beyond the old W (but within the new W) will not appear, because they were never recorded in the first place.</p></li>
+</ol>
+<p>The consequence is asymmetric: lowering <span class="math inline">\(W\)</span> live re-analyses with a smaller sample; raising <span class="math inline">\(W\)</span> live has no effect on data already collected.</p>
+<hr>
+</section>
+<section id="esw-computation" class="level2">
+<h2 class="anchored" data-anchor-id="esw-computation">ESW computation</h2>
+<section id="half-normal-analytical" class="level3">
+<h3 class="anchored" data-anchor-id="half-normal-analytical">Half-normal (analytical)</h3>
+<p><span class="math display">\[
+\mathrm{ESW}(\sigma, W) = \sigma\sqrt{\frac{\pi}{2}}\;\mathrm{erf}\!\left(\frac{W}{\sigma\sqrt{2}}\right)
+\]</span></p>
+<p>The error function is computed via the Abramowitz &amp; Stegun polynomial approximation (max error <span class="math inline">\(1.5 \times 10^{-7}\)</span>).</p>
+</section>
+<section id="hazard-rate-numerical" class="level3">
+<h3 class="anchored" data-anchor-id="hazard-rate-numerical">Hazard-rate (numerical)</h3>
+<p>200-step trapezoid rule over <span class="math inline">\([0, W]\)</span>:</p>
+<p><span class="math display">\[
+\mathrm{ESW}(\sigma, b, W) \approx \sum_{i=0}^{199} \frac{g(x_i) + g(x_{i+1})}{2}\,\Delta x, \quad \Delta x = W/200
+\]</span></p>
+<p>where <span class="math inline">\(g\)</span> is <code>hazardRate(x, sigma, b)</code>.</p>
+<hr>
+</section>
+</section>
+<section id="mle-fitting" class="level2">
+<h2 class="anchored" data-anchor-id="mle-fitting">MLE fitting</h2>
+<p><code>fitSigmaMLE</code> in <code>src/stats.js</code> finds the <span class="math inline">\(\hat{\sigma}\)</span> that minimises the negative log-likelihood. The analytics layer calls it when there are <strong>at least 3</strong> within-W detections; fewer returns <code>null</code> and <code>σ̂</code> is shown as “—”.</p>
+<p>The search uses <strong>golden-section</strong> over a fixed interval <span class="math inline">\([\sigma_{\min}, \sigma_{\max}]\)</span>. The shape parameter <span class="math inline">\(b\)</span> is <strong>not optimised</strong> — it is held at the current slider value throughout.</p>
+<section id="nll-for-half-normal" class="level3">
+<h3 class="anchored" data-anchor-id="nll-for-half-normal">NLL for half-normal</h3>
+<p><span class="math display">\[
+\mathrm{NLL}(\sigma) = n\log\bigl[\mathrm{ESW}(\sigma,W)\bigr] + \sum_{i=1}^{n}\frac{d_i^2}{2\sigma^2}
+\]</span></p>
+</section>
+<section id="nll-for-hazard-rate" class="level3">
+<h3 class="anchored" data-anchor-id="nll-for-hazard-rate">NLL for hazard-rate</h3>
+<p><span class="math display">\[
+\mathrm{NLL}(\sigma) = n\log\bigl[\mathrm{ESW}(\sigma,b,W)\bigr] - \sum_{i=1}^{n}\log\bigl[g_{\mathrm{HR}}(d_i,\sigma,b)\bigr]
+\]</span></p>
+<p>In both cases, <span class="math inline">\(d_i\)</span> are the within-W perpendicular distances and ESW is computed by the respective method above.</p>
+<hr>
+</section>
+</section>
+<section id="density-estimator" class="level2">
+<h2 class="anchored" data-anchor-id="density-estimator">Density estimator</h2>
+<p><code>estimateDensity(n, L, sigma, W, modelFn, b)</code> in <code>src/stats.js</code> returns:</p>
+<p><span class="math display">\[
+\hat{D} = \frac{n}{2L\,\mathrm{ESW}(\hat\sigma, W)}
+\]</span></p>
+<p>where <span class="math inline">\(L\)</span> is effort in km, <span class="math inline">\(n\)</span> is the count of within-W detections, and ESW uses <span class="math inline">\(\hat\sigma\)</span> if fitted, or the true <span class="math inline">\(\sigma\)</span> slider value if fewer than 3 detections are available.</p>
+<section id="per-detection-effort-in-the-convergence-chart" class="level3">
+<h3 class="anchored" data-anchor-id="per-detection-effort-in-the-convergence-chart">Per-detection effort in the convergence chart</h3>
+<p>The D̂ convergence chart does <strong>not</strong> use the final transect length as effort. Instead, for each successive within-W detection, the chart plots the density estimate using effort = <code>boatX</code> at the moment that detection was made. For the <span class="math inline">\(k\)</span>-th within-W detection, <span class="math inline">\(L_k\)</span> = observer x-position (km) when the <span class="math inline">\(k\)</span>-th animal was detected.</p>
+<p>This means the convergence trace shows how <span class="math inline">\(\hat{D}\)</span> evolves as data accumulates during the survey, including the effect of early noise when <span class="math inline">\(n\)</span> is small.</p>
+<p>The full D̂ history array is rebuilt from scratch on every state-change event (each detection, and whenever W, σ, b, or model function changes).</p>
+<hr>
+</section>
+</section>
+<section id="analytics-panels" class="level2">
+<h2 class="anchored" data-anchor-id="analytics-panels">Analytics panels</h2>
+<p>Three panels are drawn by <code>ds/analytics.js</code> using D3. They subscribe to state and re-render on every change.</p>
+<section id="detection-function-chart" class="level3">
+<h3 class="anchored" data-anchor-id="detection-function-chart">1. Detection function chart</h3>
+<ul>
+<li><p><strong>Blue solid curve</strong>: the field truth detection function <span class="math inline">\(g(x, \sigma_{\rm true})\)</span>, drawn with the currently selected field truth function and the true <span class="math inline">\(\sigma\)</span> value.</p></li>
+<li><p><strong>Pink dashed curve</strong>: the MLE-fitted function <span class="math inline">\(g(x, \hat\sigma)\)</span>, drawn with the model function when <span class="math inline">\(\hat\sigma\)</span> is available (<span class="math inline">\(n \geq 3\)</span>).</p></li>
+<li><p><strong>Histogram bars</strong> (light blue, 10 equal bins over <span class="math inline">\([0, W]\)</span>): observed within-W distances. Bar heights are normalised to the <span class="math inline">\(g(x)\)</span> scale using the formula:</p>
+<pre><code>scale = n * binWidth / ESW_truth
+barHeight[i] = binCount[i] / scale</code></pre>
+<p>so that a perfect half-normal detection function would make the histogram lie on the true curve.</p></li>
+<li><p><strong>Ghost fitted curves</strong>: if “Keep previous runs” is checked, past fitted curves are shown as progressively more transparent pink dashed lines (up to 8 past runs retained, oldest most faded).</p></li>
+<li><p>The x-axis domain updates to the current W value; the y-axis domain expands if bar heights exceed 1.1.</p></li>
+</ul>
+</section>
+<section id="running-estimates-strip" class="level3">
+<h3 class="anchored" data-anchor-id="running-estimates-strip">2. Running estimates strip</h3>
+<p>Displays six values updated live:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 90%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(n\)</span></td>
+<td>count of within-W detections</td>
+</tr>
+<tr class="even">
+<td>Effort</td>
+<td><code>boatX</code> progress (km); updates <code>state.transectLength</code> on each detection from <code>detectedEfforts[last]</code> — see note below</td>
+</tr>
+<tr class="odd">
+<td>ESW</td>
+<td>computed from <span class="math inline">\(\hat\sigma\)</span> (or true <span class="math inline">\(\sigma\)</span> if no fit) and current W</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat\sigma\)</span></td>
+<td>MLE estimate (km), or “—” if <span class="math inline">\(n &lt; 3\)</span></td>
+</tr>
+<tr class="odd">
+<td>True <span class="math inline">\(\sigma\)</span></td>
+<td>slider value</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat{D}\)</span></td>
+<td>last entry in the D̂ history</td>
+</tr>
+<tr class="odd">
+<td>True <span class="math inline">\(D\)</span></td>
+<td><code>trueD = areaN / (arenaWKm * arenaH)</code></td>
+</tr>
+</tbody>
+</table>
+<p>The “Effort” readout is the boatX at the time of the last detection, not the total traversed distance. During a run, it thus reflects distance surveyed up to the most recent animal found.</p>
+</section>
+<section id="d-convergence-chart" class="level3">
+<h3 class="anchored" data-anchor-id="d-convergence-chart">3. D̂ convergence chart</h3>
+<ul>
+<li><strong>Green line</strong>: D̂ vs cumulative within-W detections for the current run.</li>
+<li><strong>Red dashed horizontal line</strong>: true D.</li>
+<li><strong>Ghost traces</strong>: previous runs overlaid as faded green lines (same cap and fade logic as detection function ghosts).</li>
+<li>Axes use expand-only domain tracking — they grow when data goes outside the current range but never contract mid-run. On hard reset (no data, no ghosts) the axes snap back to their initial defaults.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="ghost-keep-runs-mechanic" class="level2">
+<h2 class="anchored" data-anchor-id="ghost-keep-runs-mechanic">Ghost / keep-runs mechanic</h2>
+<p>The “Keep previous runs” checkbox controls ghost retention. Ghosts are managed entirely within <code>analytics.js</code> — they are not stored in the shared state singleton.</p>
+<p>When a reset is detected (state goes from <span class="math inline">\(n &gt; 0\)</span> to <span class="math inline">\(n = 0\)</span>):</p>
+<ul>
+<li>If the checkbox is checked, the current run’s D̂ history and fitted <span class="math inline">\(\hat\sigma\)</span> are saved as a ghost object: <code>{ dhatHistory, sigmaHat, trueD, modelFn, b }</code>.</li>
+<li>The ghost list is capped at <strong>8 entries</strong> (oldest removed when limit is exceeded).</li>
+<li>Ghost curves on the detection function chart record the model function active at the time of that run, so a run fitted with hazard-rate is always displayed with hazard-rate even if the model is later changed.</li>
+</ul>
+<p>“Clear runs” empties the ghost list immediately and forces a redraw.</p>
+<hr>
+</section>
+<section id="control-taxonomy" class="level2">
+<h2 class="anchored" data-anchor-id="control-taxonomy">Control taxonomy</h2>
+<section id="live-update-takes-effect-without-reset" class="level3">
+<h3 class="anchored" data-anchor-id="live-update-takes-effect-without-reset">Live update (takes effect without reset)</h3>
+<p>These controls change simulation parameters immediately. Analytics are rebuilt from stored detections on the next state notification.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 7%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Variable</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\sigma\)</span> slider</td>
+<td><code>sigma</code></td>
+<td>Changes both the truth curve and MLE fitting</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(W\)</span> slider</td>
+<td><code>W</code></td>
+<td>Restricts or expands the truncation strip; all stored detections are refiltered</td>
+</tr>
+<tr class="odd">
+<td>Field truth function</td>
+<td><code>truthFn</code></td>
+<td>Changes which <span class="math inline">\(g(x)\)</span> governs future detection draws and the blue truth curve</td>
+</tr>
+<tr class="even">
+<td>Model function</td>
+<td><code>modelFn</code></td>
+<td>Changes which <span class="math inline">\(g(x)\)</span> is fitted by MLE and shown as the pink curve</td>
+</tr>
+<tr class="odd">
+<td>Shape <span class="math inline">\(b\)</span></td>
+<td><code>b</code></td>
+<td>Affects hazard-rate detection and MLE (only visible when truth or model is hazard-rate)</td>
+</tr>
+</tbody>
+</table>
+<p>Note: changing <code>sigma</code> or <code>truthFn</code> live affects future detections for the current run (if still in progress), not past ones that are already stored.</p>
+</section>
+<section id="reset-required-takes-effect-on-next-reset-or-new-population" class="level3">
+<h3 class="anchored" data-anchor-id="reset-required-takes-effect-on-next-reset-or-new-population">Reset required (takes effect on next Reset or New Population)</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Variable</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Density <span class="math inline">\(D\)</span></td>
+<td><code>density</code></td>
+</tr>
+<tr class="even">
+<td>Transect length <span class="math inline">\(L\)</span></td>
+<td><code>arenaWKm</code></td>
+</tr>
+<tr class="odd">
+<td>Distribution type</td>
+<td><code>distribution</code></td>
+</tr>
+<tr class="even">
+<td>Clump scale <span class="math inline">\(s_{\rm clump}\)</span></td>
+<td><code>clumpScale</code></td>
+</tr>
+<tr class="odd">
+<td>Regularity <span class="math inline">\(\rho\)</span></td>
+<td><code>regularity</code></td>
+</tr>
+<tr class="even">
+<td>Seed</td>
+<td><code>seed</code></td>
+</tr>
+</tbody>
+</table>
+<p>Changing these updates the displayed readout immediately but the population is only regenerated when <code>initSim()</code> is called (via Reset, New Population, or Run Again after completion).</p>
+</section>
+<section id="reset-defaults" class="level3">
+<h3 class="anchored" data-anchor-id="reset-defaults">Reset Defaults</h3>
+<p>Resets <strong>all</strong> controls to their factory defaults, then calls Reset:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\sigma\)</span></td>
+<td>0.25 km</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(W\)</span></td>
+<td>0.40 km</td>
+</tr>
+<tr class="odd">
+<td>Density</td>
+<td>50 /km²</td>
+</tr>
+<tr class="even">
+<td>Transect length</td>
+<td>4.0 km</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(b\)</span></td>
+<td>2.5</td>
+</tr>
+<tr class="even">
+<td>Field truth function</td>
+<td>Half-normal</td>
+</tr>
+<tr class="odd">
+<td>Model function</td>
+<td>Half-normal</td>
+</tr>
+<tr class="even">
+<td>Distribution</td>
+<td>Uniform</td>
+</tr>
+<tr class="odd">
+<td>Clump scale</td>
+<td>0.10</td>
+</tr>
+<tr class="even">
+<td>Regularity</td>
+<td>0.50</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="assumptions-and-limitations" class="level2">
+<h2 class="anchored" data-anchor-id="assumptions-and-limitations">Assumptions and limitations</h2>
+<ul>
+<li>Animals are <strong>static</strong> throughout a run. There is no movement model.</li>
+<li>The transect is a <strong>fixed straight line</strong> through the centre of the arena.</li>
+<li>Each animal receives <strong>exactly one Bernoulli trial</strong> per traversal. Multiple passes are not modelled.</li>
+<li><span class="math inline">\(g(0) = 1\)</span> holds in both half-normal and hazard-rate modes.</li>
+<li>The MLE holds <span class="math inline">\(b\)</span> fixed; joint optimisation of <span class="math inline">\((\sigma, b)\)</span> is not implemented.</li>
+<li>The hazard-rate ESW uses a fixed 200-step numerical integration; for very small <span class="math inline">\(b\)</span> or extreme parameter combinations, this approximation may be imprecise.</li>
+<li>The detector sees <strong>perpendicular distance only</strong> — no forward detection angle or acoustic range model.</li>
+<li>There is no measurement error; recorded distances are exact.</li>
+</ul>
+<hr>
+</section>
+<section id="external-references" class="level2">
+<h2 class="anchored" data-anchor-id="external-references">External references</h2>
+<ul>
+<li>Distance Sampling methods: https://distancesampling.org</li>
+<li>Resources and background: https://distancesampling.org/about.html</li>
+</ul>
+
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

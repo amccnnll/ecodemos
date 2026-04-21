@@ -1,0 +1,37 @@
+project:
+  type: website
+  output-dir: "."
+  render:
+    - index.md
+    - ds.md
+    - secr.md
+    - lv.md
+    - glossary.md
+
+website:
+  title: "ecodemos docs"
+  navbar: false
+  sidebar:
+    style: "docked"
+    search: false
+    contents:
+      - text: "Overview"
+        href: index.md
+      - section: "Simulations"
+        contents:
+          - text: "Distance Sampling"
+            href: ds.md
+          - text: "SECR"
+            href: secr.md
+          - text: "Lotka-Volterra"
+            href: lv.md
+      - text: "Glossary"
+        href: glossary.md
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    toc-title: "On this page"
+    math: true

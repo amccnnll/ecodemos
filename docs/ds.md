@@ -1,12 +1,14 @@
-# Distance Sampling (DS)
+---
+title: "Distance Sampling (DS)"
+---
 
-## What this demo shows
+## Overview
 
-This simulation demonstrates line-transect distance sampling. An observer traverses a fixed straight transect. Animals within a strip around the transect are detected with a probability that declines with perpendicular distance. The recorded distances are then used to estimate how detectable animals are and, from that, how dense the population is.
+An observer traverses a fixed straight transect. Animals within a strip around the transect are detected with probability that declines with perpendicular distance. The recorded distances are then used to estimate detectability and, from that, density.
 
-The central teaching point is the separation between two views of the same scene:
+The simulation shows two concurrent views of the same scene:
 
-- the simulator's omniscient view — all animal positions are visible on screen, detected animals shown in red, missed animals in grey;
+- the omniscient view — all animal positions visible on screen, detected animals in red, missed animals in grey;
 - the method's view — only the perpendicular distances of detected animals are available to the estimator.
 
 ---

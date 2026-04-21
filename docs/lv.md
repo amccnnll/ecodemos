@@ -1,10 +1,10 @@
-# Lotka-Volterra (LV)
+---
+title: "Lotka-Volterra (LV)"
+---
 
-# Lotka-Volterra (LV)
+## Overview
 
-## What this demo shows
-
-This module integrates three two-species dynamical systems in a single interface and displays the results as a live time series and a phase-plane trajectory. The three modes are:
+Three two-species dynamical systems integrated via RK4, displayed as a live time series and phase-plane trajectory. The three modes are:
 
 - **Classic predator-prey** — the standard Lotka-Volterra system with no density dependence.
 - **Dynamic predator-prey** — adds logistic prey growth and predator self-limitation.

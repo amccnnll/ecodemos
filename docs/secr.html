@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>SECR – ecodemos docs</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-2be10d9e998f81ff6e49e26833438aa5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./ds.html">Simulations</a></li><li class="breadcrumb-item"><a href="./secr.html">SECR</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">ecodemos docs</a> 
+    </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Simulations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Distance Sampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./secr.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">SECR</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lv.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lotka-Volterra</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Glossary</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#arena-geometry" id="toc-arena-geometry" class="nav-link" data-scroll-target="#arena-geometry">Arena geometry</a></li>
+  <li><a href="#animal-placement" id="toc-animal-placement" class="nav-link" data-scroll-target="#animal-placement">Animal placement</a></li>
+  <li><a href="#detector-placement" id="toc-detector-placement" class="nav-link" data-scroll-target="#detector-placement">Detector placement</a>
+  <ul class="collapse">
+  <li><a href="#grid-layout" id="toc-grid-layout" class="nav-link" data-scroll-target="#grid-layout">Grid layout</a></li>
+  <li><a href="#random-layout" id="toc-random-layout" class="nav-link" data-scroll-target="#random-layout">Random layout</a></li>
+  <li><a href="#custom-layout" id="toc-custom-layout" class="nav-link" data-scroll-target="#custom-layout">Custom layout</a></li>
+  </ul></li>
+  <li><a href="#seed-and-rng-architecture" id="toc-seed-and-rng-architecture" class="nav-link" data-scroll-target="#seed-and-rng-architecture">Seed and RNG architecture</a></li>
+  <li><a href="#movement-model-ouv" id="toc-movement-model-ouv" class="nav-link" data-scroll-target="#movement-model-ouv">Movement model (OUV)</a>
+  <ul class="collapse">
+  <li><a href="#frame-level-update" id="toc-frame-level-update" class="nav-link" data-scroll-target="#frame-level-update">Frame-level update</a></li>
+  <li><a href="#wall-reflection" id="toc-wall-reflection" class="nav-link" data-scroll-target="#wall-reflection">Wall reflection</a></li>
+  <li><a href="#parameter-derivation" id="toc-parameter-derivation" class="nav-link" data-scroll-target="#parameter-derivation">Parameter derivation</a></li>
+  <li><a href="#speed-and-frames-per-occasion" id="toc-speed-and-frames-per-occasion" class="nav-link" data-scroll-target="#speed-and-frames-per-occasion">Speed and frames per occasion</a></li>
+  <li><a href="#display-smoothing" id="toc-display-smoothing" class="nav-link" data-scroll-target="#display-smoothing">Display smoothing</a></li>
+  </ul></li>
+  <li><a href="#movement-presets" id="toc-movement-presets" class="nav-link" data-scroll-target="#movement-presets">Movement presets</a></li>
+  <li><a href="#detection-function" id="toc-detection-function" class="nav-link" data-scroll-target="#detection-function">Detection function</a>
+  <ul class="collapse">
+  <li><a href="#effective-detection-σ" id="toc-effective-detection-σ" class="nav-link" data-scroll-target="#effective-detection-σ">Effective detection σ</a></li>
+  <li><a href="#detector-type-presets" id="toc-detector-type-presets" class="nav-link" data-scroll-target="#detector-type-presets">Detector type presets</a></li>
+  </ul></li>
+  <li><a href="#effective-sample-area-esa" id="toc-effective-sample-area-esa" class="nav-link" data-scroll-target="#effective-sample-area-esa">Effective sample area (ESA)</a>
+  <ul class="collapse">
+  <li><a href="#single-occasion-p_1x-y" id="toc-single-occasion-p_1x-y" class="nav-link" data-scroll-target="#single-occasion-p_1x-y">Single-occasion <span class="math inline">\(p_1(x, y)\)</span></a></li>
+  <li><a href="#k-occasion-esa" id="toc-k-occasion-esa" class="nav-link" data-scroll-target="#k-occasion-esa"><span class="math inline">\(K\)</span>-occasion ESA</a></li>
+  </ul></li>
+  <li><a href="#density-estimator" id="toc-density-estimator" class="nav-link" data-scroll-target="#density-estimator">Density estimator</a></li>
+  <li><a href="#analytics-panels" id="toc-analytics-panels" class="nav-link" data-scroll-target="#analytics-panels">Analytics panels</a>
+  <ul class="collapse">
+  <li><a href="#detection-surface-heatmap" id="toc-detection-surface-heatmap" class="nav-link" data-scroll-target="#detection-surface-heatmap">1. Detection surface heatmap</a></li>
+  <li><a href="#capture-history-matrix" id="toc-capture-history-matrix" class="nav-link" data-scroll-target="#capture-history-matrix">2. Capture history matrix</a></li>
+  <li><a href="#d-convergence-chart" id="toc-d-convergence-chart" class="nav-link" data-scroll-target="#d-convergence-chart">3. D̂ convergence chart</a></li>
+  <li><a href="#running-estimates-strip" id="toc-running-estimates-strip" class="nav-link" data-scroll-target="#running-estimates-strip">4. Running estimates strip</a></li>
+  </ul></li>
+  <li><a href="#phase-states" id="toc-phase-states" class="nav-link" data-scroll-target="#phase-states">Phase states</a></li>
+  <li><a href="#control-taxonomy" id="toc-control-taxonomy" class="nav-link" data-scroll-target="#control-taxonomy">Control taxonomy</a>
+  <ul class="collapse">
+  <li><a href="#live-update-no-reset-required" id="toc-live-update-no-reset-required" class="nav-link" data-scroll-target="#live-update-no-reset-required">Live update (no reset required)</a></li>
+  <li><a href="#reset-required" id="toc-reset-required" class="nav-link" data-scroll-target="#reset-required">Reset required</a></li>
+  </ul></li>
+  <li><a href="#assumptions-and-limitations" id="toc-assumptions-and-limitations" class="nav-link" data-scroll-target="#assumptions-and-limitations">Assumptions and limitations</a></li>
+  <li><a href="#external-references" id="toc-external-references" class="nav-link" data-scroll-target="#external-references">External references</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./ds.html">Simulations</a></li><li class="breadcrumb-item"><a href="./secr.html">SECR</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">SECR</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>Animals move within a two-dimensional arena and are sampled by a fixed detector array across repeated occasions. Density is estimated from who was caught, at which detectors, and on which occasions — with no assumption of a fixed observable strip.</p>
+<p>Detection is spatial and imperfect:</p>
+<ul>
+<li>each individual has a latent activity centre that is never directly observed;</li>
+<li>detectors sample probabilistically around those centres over multiple occasions;</li>
+<li>the estimator infers density from capture histories and detector geometry alone.</li>
+</ul>
+<hr>
+</section>
+<section id="arena-geometry" class="level2">
+<h2 class="anchored" data-anchor-id="arena-geometry">Arena geometry</h2>
+<p>The arena is a square with side length <code>ARENA_KM = 2.0 km</code>. It is divided into two zones:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Zone</th>
+<th>Variable</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Inner study area</td>
+<td><code>INNER_KM</code></td>
+<td>1.2 km × 1.2 km</td>
+</tr>
+<tr class="even">
+<td>Buffer zone (each side)</td>
+<td><code>BUFFER_KM</code></td>
+<td>0.4 km</td>
+</tr>
+</tbody>
+</table>
+<p>The buffer is <code>= 2σ</code> at the default <code>σ = 0.20 km</code>. This is a standard SECR convention: animals whose activity centres lie within <code>~2σ</code> of the detector array contribute meaningfully to detections. Animals further out are effectively invisible.</p>
+<p>The canvas is a square. <code>PX_PER_KM = canvasSize / ARENA_KM</code>. All world coordinates are in km; pixel coordinates are computed for display only using <code>worldToPx(wx, wy)</code>.</p>
+<p>Inner study area corners: <code>(innerX0, innerY0) = (BUFFER_KM, BUFFER_KM) = (0.4, 0.4)</code>.</p>
+<hr>
+</section>
+<section id="animal-placement" class="level2">
+<h2 class="anchored" data-anchor-id="animal-placement">Animal placement</h2>
+<p><code>placeAnimals(N, ARENA_KM, ARENA_KM, placementRng)</code> in <code>src/secr-engine.js</code>.</p>
+<p>Each of the <span class="math inline">\(N\)</span> animals is placed by drawing activity-centre coordinates uniformly:</p>
+<pre><code>cx = rng() * arenaW
+cy = rng() * arenaH</code></pre>
+<p>The animal starts exactly at its activity centre: <code>x = cx</code>, <code>y = cy</code>. Velocity is initialised to zero: <code>vx = 0</code>, <code>vy = 0</code>.</p>
+<p>Activity centres span the <strong>full</strong> arena (inner + buffer), not just the inner study area. This is correct: real populations extend beyond any detector array, and some of those individuals can still be detected.</p>
+<p>The true density is <code>trueD = N / (ARENA_KM²) = N / 4.0</code> animals/km².</p>
+<hr>
+</section>
+<section id="detector-placement" class="level2">
+<h2 class="anchored" data-anchor-id="detector-placement">Detector placement</h2>
+<p><code>placeDetectors(layout, innerW, innerH, innerX0, innerY0, rng, gridN, nRandom)</code> in <code>src/secr-engine.js</code>.</p>
+<p>All detectors are placed <strong>within the inner study area</strong> only.</p>
+<section id="grid-layout" class="level3">
+<h3 class="anchored" data-anchor-id="grid-layout">Grid layout</h3>
+<p><code>gridN × gridN</code> detectors on a regular grid. Cell size <code>dx = innerW / gridN</code>, <code>dy = innerH / gridN</code>. Each detector at:</p>
+<pre><code>x = innerX0 + (col + 0.5) * dx
+y = innerY0 + (row + 0.5) * dy</code></pre>
+<p>Default <code>gridN = 4</code> → 16 detectors. Range: 3–7, giving 9–49 detectors.</p>
+</section>
+<section id="random-layout" class="level3">
+<h3 class="anchored" data-anchor-id="random-layout">Random layout</h3>
+<p>16 detectors placed by independent uniform draws within the inner study area:</p>
+<pre><code>x = innerX0 + rng() * innerW
+y = innerY0 + rng() * innerH</code></pre>
+<p>Uses the seeded placement RNG.</p>
+</section>
+<section id="custom-layout" class="level3">
+<h3 class="anchored" data-anchor-id="custom-layout">Custom layout</h3>
+<p>Detectors are managed directly by sketch.js. Clicking within the inner study area places a new detector; clicking an existing detector removes it. Pressing “Remove all” calls <code>clearDetectorsFn()</code> which empties the array and notifies analytics. Custom detectors are preserved through Reset (the positions are re-indexed but not regenerated).</p>
+<hr>
+</section>
+</section>
+<section id="seed-and-rng-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="seed-and-rng-architecture">Seed and RNG architecture</h2>
+<p>Three separate RNGs are used:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 26%">
+<col style="width: 40%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>RNG</th>
+<th>Seeding</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>placementRng = createRng(seed)</code></td>
+<td>Seeded (Alea PRNG)</td>
+<td>Animal centres, grid/random detector positions</td>
+</tr>
+<tr class="even">
+<td><code>movementRng = new Math.seedrandom()</code></td>
+<td>Fresh unseeded each <code>initSim()</code></td>
+<td>Per-frame OUV movement steps</td>
+</tr>
+<tr class="odd">
+<td><code>detectionRng = new Math.seedrandom()</code></td>
+<td>Fresh unseeded each <code>initSim()</code></td>
+<td>Bernoulli detection draws each occasion</td>
+</tr>
+</tbody>
+</table>
+<p>Same seed → same animal and detector layout. Movement paths and detection outcomes vary on every replay, even with the same seed.</p>
+<p>Seed range: 0–99999. Each browser session starts with a random seed. Entering and committing a seed value in the input field immediately calls <code>initSim()</code>.</p>
+<hr>
+</section>
+<section id="movement-model-ouv" class="level2">
+<h2 class="anchored" data-anchor-id="movement-model-ouv">Movement model (OUV)</h2>
+<p>Each frame during a run, every animal takes one <code>stepAnimal()</code> call from <code>src/secr-engine.js</code>. The model is Ornstein-Uhlenbeck in velocity space (OUV), also called an Ornstein-Uhlenbeck process in position via second-order Langevin dynamics.</p>
+<section id="frame-level-update" class="level3">
+<h3 class="anchored" data-anchor-id="frame-level-update">Frame-level update</h3>
+<pre><code>u1 = max(rng(), 1e-10),   u2 = rng()
+r  = sqrt(-2 * log(u1)),  θ = 2π * u2
+nx = r * cos(θ) * noiseScale          // Box-Muller N(0, noiseScale²)
+ny = r * sin(θ) * noiseScale
+
+vx_new = vx * (1 - drag) + springStr * (cx - x) + nx
+vy_new = vy * (1 - drag) + springStr * (cy - y) + ny
+x_new  = x + vx_new
+y_new  = y + vy_new</code></pre>
+<p>where <code>drag = 0.08</code> is a fixed constant.</p>
+</section>
+<section id="wall-reflection" class="level3">
+<h3 class="anchored" data-anchor-id="wall-reflection">Wall reflection</h3>
+<p>If an animal would exit the arena, its position is reflected and the outward velocity component is negated:</p>
+<pre><code>if x &lt; 0:       x = -x,           vx = -vx
+if x &gt; arenaW:  x = 2*arenaW - x, vx = -vx
+(same for y)</code></pre>
+</section>
+<section id="parameter-derivation" class="level3">
+<h3 class="anchored" data-anchor-id="parameter-derivation">Parameter derivation</h3>
+<p><code>springStr</code> and <code>noiseScale</code> are computed each frame from the slider values:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> fpk <span class="op">=</span> FRAMES_PER_OCC[speed]<span class="op">;</span> <span class="co">// frames per occasion</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> drag <span class="op">=</span> <span class="fl">0.08</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> springStr <span class="op">=</span> drag <span class="op">/</span> (tau <span class="op">*</span> fpk)<span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> noiseScale <span class="op">=</span> sigma <span class="op">*</span> drag <span class="op">*</span> <span class="fu">sqrt</span>(<span class="dv">2</span> <span class="op">/</span> (fidelity <span class="op">*</span> tau <span class="op">*</span> fpk))<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The derivation comes from the overdamped continuous-time Langevin equation:</p>
+<ul>
+<li>Position autocorrelation time <span class="math inline">\(\tau_x = \mathrm{drag} / K_s\)</span>, so <span class="math inline">\(K_s = \mathrm{drag}/(\tau \cdot \mathrm{fpk})\)</span>.</li>
+<li>Equilibrium variance: <span class="math inline">\(\mathrm{Var}(x) = \mathrm{noiseScale}^2 / (2 K_s \cdot \mathrm{drag}) = \sigma^2 / \mathrm{fidelity}\)</span>.</li>
+</ul>
+<p>This gives:</p>
+<ul>
+<li><span class="math inline">\(\tau\)</span> (occasions) → controls position autocorrelation time (how long the animal takes to cross its home range).</li>
+<li>fidelity → controls noise amplitude → range tightness. Higher fidelity = smaller effective home range radius = <span class="math inline">\(\sigma / \sqrt{\mathrm{fidelity}}\)</span>.</li>
+</ul>
+</section>
+<section id="speed-and-frames-per-occasion" class="level3">
+<h3 class="anchored" data-anchor-id="speed-and-frames-per-occasion">Speed and frames per occasion</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Label</th>
+<th>Frames per occasion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Slow</td>
+<td>120</td>
+</tr>
+<tr class="even">
+<td>Normal</td>
+<td>60</td>
+</tr>
+<tr class="odd">
+<td>Fast</td>
+<td>15</td>
+</tr>
+</tbody>
+</table>
+<p>At 60 fps and Normal speed, each occasion takes 1 second of real time.</p>
+</section>
+<section id="display-smoothing" class="level3">
+<h3 class="anchored" data-anchor-id="display-smoothing">Display smoothing</h3>
+<p>The physics simulation runs at <code>true</code> positions <code>(x, y)</code>. A separate display position <code>(dx, dy)</code> is lerped toward the true position each frame:</p>
+<pre><code>dx_new = dx + 0.15 * (x - dx)
+dy_new = dy + 0.15 * (y - dy)</code></pre>
+<p>The <code>DISPLAY_LERP = 0.15</code> factor creates smooth animation without affecting the detection computation. Detection uses <code>(cx, cy)</code>, not <code>(dx, dy)</code>.</p>
+<hr>
+</section>
+</section>
+<section id="movement-presets" class="level2">
+<h2 class="anchored" data-anchor-id="movement-presets">Movement presets</h2>
+<p>Presets set <span class="math inline">\(\tau\)</span> and fidelity simultaneously.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 19%">
+<col style="width: 8%">
+<col style="width: 59%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Preset</th>
+<th><span class="math inline">\(\tau\)</span> (occasions)</th>
+<th>Fidelity</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Resident</td>
+<td>5.0</td>
+<td>1.0</td>
+<td>Default. Moderate range size, moderate return.</td>
+</tr>
+<tr class="even">
+<td>Sedentary</td>
+<td>6.0</td>
+<td>3.0</td>
+<td>Tighter home range (radius ÷ √3). Slower crossing time.</td>
+</tr>
+<tr class="odd">
+<td>Wide-ranging</td>
+<td>2.0</td>
+<td>0.4</td>
+<td>Larger effective range (radius × √2.5). Faster crossing.</td>
+</tr>
+<tr class="even">
+<td>Nomad</td>
+<td>1.0</td>
+<td>0.2</td>
+<td>Very fast, large range — barely constrained to a centre.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="detection-function" class="level2">
+<h2 class="anchored" data-anchor-id="detection-function">Detection function</h2>
+<p>One occasion = one call to <code>tryDetectsOnOccasion(animals, detectors, g0, sigmaEff, rng)</code>.</p>
+<p>For every (animal <span class="math inline">\(i\)</span>, detector <span class="math inline">\(j\)</span>) pair:</p>
+<ol type="1">
+<li><p>Distance from the animal’s <strong>activity centre</strong> to the detector:</p>
+<pre><code>d_ij = hypot(animal.cx - detector.x, animal.cy - detector.y)</code></pre></li>
+<li><p>Detection probability:</p>
+<pre><code>g_ij = g0 * halfNormal(d_ij, sigmaEff)
+     = g0 * exp(-d_ij² / (2 * sigmaEff²))</code></pre></li>
+<li><p>Bernoulli draw: <code>detected = detectionRng() &lt; g_ij</code>.</p></li>
+<li><p>If detected: record <code>{ animalId, detectorId }</code>.</p></li>
+</ol>
+<p>Each animal can be detected by <strong>multiple detectors on the same occasion</strong>. Each (animal, detector, occasion) triple produces one capture event. The capture history therefore records the detector index too, not just presence/absence.</p>
+<p>Detection is based on <code>(cx, cy)</code> (the latent activity centre) — not on the display position <code>(dx, dy)</code> or the physics position <code>(x, y)</code>. This is consistent with the SECR model: the detection function <span class="math inline">\(g(d)\)</span> is a marginalised home-range detection function, integrating over all locations within the home range that a centre at <span class="math inline">\((c_x, c_y)\)</span> implies.</p>
+<section id="effective-detection-σ" class="level3">
+<h3 class="anchored" data-anchor-id="effective-detection-σ">Effective detection σ</h3>
+<pre><code>sigmaEff = sigma / sqrt(fidelity)</code></pre>
+<p>Higher fidelity compresses the home range. <code>sigmaEff</code> is passed to <code>tryDetectsOnOccasion</code> and to all ESA computations. The UI slider reads <code>sigma</code>; the underlying detection range is automatically adjusted.</p>
+</section>
+<section id="detector-type-presets" class="level3">
+<h3 class="anchored" data-anchor-id="detector-type-presets">Detector type presets</h3>
+<p>These set <code>g0</code> and <code>sigma</code> simultaneously.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 6%">
+<col style="width: 18%">
+<col style="width: 59%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Preset</th>
+<th><span class="math inline">\(g_0\)</span></th>
+<th><span class="math inline">\(\sigma\)</span> (km)</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Default</td>
+<td>0.40</td>
+<td>0.20</td>
+<td>Balanced starting point</td>
+</tr>
+<tr class="even">
+<td>Camera trap</td>
+<td>0.45</td>
+<td>0.08</td>
+<td>High detection within narrow field</td>
+</tr>
+<tr class="odd">
+<td>Live trap</td>
+<td>0.60</td>
+<td>0.05</td>
+<td>Very localised, high if animal passes</td>
+</tr>
+<tr class="even">
+<td>Acoustic</td>
+<td>0.20</td>
+<td>0.40</td>
+<td>Wide detection radius, moderate probability</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="effective-sample-area-esa" class="level2">
+<h2 class="anchored" data-anchor-id="effective-sample-area-esa">Effective sample area (ESA)</h2>
+<section id="single-occasion-p_1x-y" class="level3">
+<h3 class="anchored" data-anchor-id="single-occasion-p_1x-y">Single-occasion <span class="math inline">\(p_1(x, y)\)</span></h3>
+<p>The probability that an animal with activity centre at <span class="math inline">\((c_x, c_y)\)</span> is detected by at least one detector on a single occasion:</p>
+<p><span class="math display">\[
+p_1(c_x, c_y) = 1 - \prod_{j=1}^{J} \bigl(1 - g_0 \cdot g(d_j)\bigr)
+\]</span></p>
+<p>where <span class="math inline">\(d_j = \|(c_x, c_y) - \text{det}_j\|\)</span> and <span class="math inline">\(g(d) = \exp(-d^2 / 2\sigma_{\rm eff}^2)\)</span>.</p>
+<p>This is computed as a log-sum for numerical stability:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>logNonDetect <span class="op">+=</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="op">-</span> g0 <span class="op">*</span> <span class="fu">halfNormal</span>(d<span class="op">,</span> sigma) <span class="op">+</span> <span class="fl">1e-15</span>)<span class="op">;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>p1 <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> <span class="fu">exp</span>(logNonDetect)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="k-occasion-esa" class="level3">
+<h3 class="anchored" data-anchor-id="k-occasion-esa"><span class="math inline">\(K\)</span>-occasion ESA</h3>
+<p>The probability of being caught <strong>at least once</strong> across <span class="math inline">\(k\)</span> independent occasions:</p>
+<p><span class="math display">\[
+p_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k
+\]</span></p>
+<p>ESA is then the numerical integral over the full arena:</p>
+<p><span class="math display">\[
+\mathrm{ESA}(k) = \sum_{\rm cells} \bigl[1 - (1 - p_1)^k\bigr] \cdot \Delta A
+\]</span></p>
+<p>The arena is discretised into <strong>60 × 60 = 3600 cells</strong> for ESA computation (both in the analytics D̂ historical series and in the estimates strip). <code>cellArea = arenaW * arenaH / (60 * 60)</code>.</p>
+<p>For the D̂ convergence chart, the detection surface (<code>p_1</code> for each cell) is computed once and reused for all <span class="math inline">\(k = 1, 2, \ldots, k_{\rm current}\)</span>, by applying the <span class="math inline">\(k\)</span>-exponent formula cell-by-cell. This avoids recomputing the surface <span class="math inline">\(k\)</span> times.</p>
+<p>The estimates strip uses <code>computeESA_K</code> from <code>src/secr-engine.js</code>, which is equivalent: a grid reduction over the surface.</p>
+<hr>
+</section>
+</section>
+<section id="density-estimator" class="level2">
+<h2 class="anchored" data-anchor-id="density-estimator">Density estimator</h2>
+<p><span class="math display">\[
+\hat{D}(k) = \frac{M(k)}{\mathrm{ESA}(k)}
+\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(M(k)\)</span> = number of <strong>unique</strong> animal IDs in captures with occasion <span class="math inline">\(\leq k\)</span>.</li>
+<li><span class="math inline">\(\mathrm{ESA}(k)\)</span> = <span class="math inline">\(K\)</span>-occasion ESA using <code>sigmaEff</code> and the current detector layout.</li>
+</ul>
+<p><span class="math inline">\(\hat{D}\)</span> is plotted at each completed occasion as a convergence trace. True density is <code>N / ARENA_KM²</code>.</p>
+<p>This is an <strong>educational estimator only</strong> — it uses the true <span class="math inline">\(g_0\)</span> and <span class="math inline">\(\sigma\)</span> parameters and does not fit a likelihood model to the capture histories. A full SECR MLE would estimate <span class="math inline">\(g_0\)</span>, <span class="math inline">\(\sigma\)</span>, and <span class="math inline">\(D\)</span> from the data.</p>
+<hr>
+</section>
+<section id="analytics-panels" class="level2">
+<h2 class="anchored" data-anchor-id="analytics-panels">Analytics panels</h2>
+<p>Four panels rendered by <code>secr/analytics.js</code> using D3. They subscribe to the shared state and re-render on every notification (detector change, parameter change, or occasion completion). Position updates do not trigger re-renders.</p>
+<section id="detection-surface-heatmap" class="level3">
+<h3 class="anchored" data-anchor-id="detection-surface-heatmap">1. Detection surface heatmap</h3>
+<p>Shows the single-occasion detection probability <span class="math inline">\(p_1(c_x, c_y)\)</span> over the full arena as a 50 × 50 colour grid using the YlOrRd D3 colour scale. A cell is transparent if <span class="math inline">\(p &lt; 0.001\)</span>.</p>
+<p>The heatmap redraws whenever <code>g0</code>, <code>sigma</code>/<code>sigmaEff</code>, or the detector layout changes. It is skipped entirely when the “Show detection surface” overlay is not visible — this avoids expensive grid computation on every occasion tick.</p>
+<p>The inner study area boundary is overlaid as a dashed blue rectangle. Detector positions are overlaid as small blue dots.</p>
+</section>
+<section id="capture-history-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="capture-history-matrix">2. Capture history matrix</h3>
+<p>One row per captured animal (in order of first capture), one column per completed occasion. Cells show a coloured background and the detector IDs (comma-separated) for all detectors that caught the animal on that occasion. Empty occasions show a grey cell.</p>
+<p>Row labels are coloured boxes A–J matching the per-animal colours used in the simulation display.</p>
+</section>
+<section id="d-convergence-chart" class="level3">
+<h3 class="anchored" data-anchor-id="d-convergence-chart">3. D̂ convergence chart</h3>
+<p>Green line: <span class="math inline">\(\hat{D}(k)\)</span> for <span class="math inline">\(k = 1, \ldots, k_{\rm current}\)</span>. Red dashed horizontal line: true <span class="math inline">\(D\)</span>. X-axis: occasion index. Y-axis has expand-only tracking as in the DS module.</p>
+</section>
+<section id="running-estimates-strip" class="level3">
+<h3 class="anchored" data-anchor-id="running-estimates-strip">4. Running estimates strip</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(k\)</span></td>
+<td>Current / target occasions</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(M\)</span></td>
+<td>Unique individuals caught</td>
+</tr>
+<tr class="odd">
+<td>Total captures</td>
+<td>Count of all (animal, detector, occasion) events</td>
+</tr>
+<tr class="even">
+<td>ESA</td>
+<td><span class="math inline">\(k\)</span>-occasion ESA (km²) at current <span class="math inline">\(k\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\hat{D}\)</span></td>
+<td><span class="math inline">\(M / \mathrm{ESA}(k)\)</span></td>
+</tr>
+<tr class="even">
+<td>True <span class="math inline">\(D\)</span></td>
+<td><span class="math inline">\(N / \mathrm{ARENA\_KM}^2\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Additional derived quantities shown below the table:</p>
+<ul>
+<li>Estimated home-range area: <span class="math inline">\(\pi \sigma_{\rm eff}^2\)</span> (km²).</li>
+<li>Mean recapture rate: total captures / (<span class="math inline">\(M \times k\)</span>), computed only when <span class="math inline">\(M &gt; 0\)</span> and <span class="math inline">\(k &gt; 0\)</span>.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="phase-states" class="level2">
+<h2 class="anchored" data-anchor-id="phase-states">Phase states</h2>
+<p>The simulation has four phases, tracked in <code>phase</code>:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>State</th>
+<th>Label</th>
+<th>Transition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>idle</code></td>
+<td>▶ Run</td>
+<td>After <code>initSim()</code>, before first Run press</td>
+</tr>
+<tr class="even">
+<td><code>running</code></td>
+<td>⏸ Pause</td>
+<td>While occasions are ticking</td>
+</tr>
+<tr class="odd">
+<td><code>paused</code></td>
+<td>▶ Resume</td>
+<td>After Pause press</td>
+</tr>
+<tr class="even">
+<td><code>complete</code></td>
+<td>↺ Run again</td>
+<td>After <code>currentK &gt;= targetK</code></td>
+</tr>
+</tbody>
+</table>
+<p>“Run again” (pressed when complete) adds another <code>K</code> occasions to <code>targetK</code> and continues on the same population — it does <strong>not</strong> reset the animals or detectors.</p>
+<hr>
+</section>
+<section id="control-taxonomy" class="level2">
+<h2 class="anchored" data-anchor-id="control-taxonomy">Control taxonomy</h2>
+<section id="live-update-no-reset-required" class="level3">
+<h3 class="anchored" data-anchor-id="live-update-no-reset-required">Live update (no reset required)</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 65%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(g_0\)</span> slider</td>
+<td>Updates detection probability and surface immediately</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\sigma\)</span> slider</td>
+<td>Updates <code>sigmaEff</code>, detection surface, and ESA immediately</td>
+</tr>
+<tr class="odd">
+<td>Fidelity <span class="math inline">\(f\)</span> slider</td>
+<td>Updates <code>sigmaEff</code> (via <code>sigma / √f</code>) and surface</td>
+</tr>
+<tr class="even">
+<td>Detector type preset</td>
+<td>Sets <span class="math inline">\(g_0\)</span> and <span class="math inline">\(\sigma\)</span>; same as moving those two sliders</td>
+</tr>
+<tr class="odd">
+<td>Show detection surface checkbox</td>
+<td>Toggles heatmap visibility; triggers redraw</td>
+</tr>
+<tr class="even">
+<td>Show activity centres checkbox</td>
+<td>Toggles centroid overlay</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="reset-required" class="level3">
+<h3 class="anchored" data-anchor-id="reset-required">Reset required</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 65%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(N\)</span> slider</td>
+<td>Number of animals (placement regenerated)</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(K\)</span> slider</td>
+<td>Occasions per run</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\tau\)</span> slider</td>
+<td>Movement timescale (affects movement physics)</td>
+</tr>
+<tr class="even">
+<td>Distribution layout</td>
+<td>Grid / random / custom</td>
+</tr>
+<tr class="odd">
+<td>Grid size <span class="math inline">\(n_{\rm grid}\)</span></td>
+<td>Only applicable in grid mode</td>
+</tr>
+<tr class="even">
+<td>Seed</td>
+<td>Entirely new placement</td>
+</tr>
+</tbody>
+</table>
+<p>Add/remove detectors in custom mode is the one exception: detector changes take effect immediately without a full reset, because <code>updateDetectors()</code> notifies the analytics and the surface redraws.</p>
+<hr>
+</section>
+</section>
+<section id="assumptions-and-limitations" class="level2">
+<h2 class="anchored" data-anchor-id="assumptions-and-limitations">Assumptions and limitations</h2>
+<ul>
+<li>The density estimator uses known true <span class="math inline">\(g_0\)</span> and <span class="math inline">\(\sigma\)</span>. A real SECR analysis would estimate these from the capture histories.</li>
+<li><span class="math inline">\(g(d)\)</span> is half-normal only. No other detection function is implemented.</li>
+<li>The movement model is the same for all individuals — there is no individual variation in <span class="math inline">\(\tau\)</span> or fidelity.</li>
+<li>The arena has reflecting boundaries. In reality, populations extend beyond any study area.</li>
+<li>Multiple detections of the same individual by the same detector on different occasions are tracked independently. The capture history records every (animal, detector, occasion) event — not just first capture.</li>
+<li>Habitat is uniform; <code>habitatFn = () =&gt; 1</code> throughout.</li>
+</ul>
+<hr>
+</section>
+<section id="external-references" class="level2">
+<h2 class="anchored" data-anchor-id="external-references">External references</h2>
+<ul>
+<li>Borchers and Efford (2008), DOI: https://api.crossref.org/works/10.1111/j.1541-0420.2007.00927.x</li>
+<li>Distance Sampling project resources: https://distancesampling.org/resources/citations.html</li>
+</ul>
+
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

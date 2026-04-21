@@ -1,25 +1,28 @@
+---
+title: "Documentation"
+---
+
 # ecodemos documentation
 
-This folder contains working documentation for all current simulations.
+Reference documentation for all current simulations.
 
-## Module docs
+## Simulations
 
-- [Distance Sampling (DS)](./ds.md)
-- [Spatially Explicit Capture-Recapture (SECR)](./secr.md)
-- [Lotka-Volterra (LV)](./lv.md)
+- [Distance Sampling (DS)](./ds.html)
+- [Spatially Explicit Capture-Recapture (SECR)](./secr.html)
+- [Lotka-Volterra (LV)](./lv.html)
 
 ## Shared references
 
-- [Glossary](./glossary.md)
-- [Documentation notes](./README.md)
+- [Glossary](./glossary.html)
 
 ## Scope
 
-Each module page includes:
+Each simulation page includes:
 
-- Brief conceptual overview
+- Brief overview
 - Key equations
-- Parameter and control glossary
-- Engine/design choices used in this implementation
+- Parameter and control definitions
+- Implementation choices that affect behaviour
 - Assumptions and limitations
 - External links for deeper reading
