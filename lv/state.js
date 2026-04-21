@@ -5,6 +5,7 @@
 import { rk4Step } from "../src/lv-engine.js";
 
 const MAX_POINTS = 1600;
+const MAX_PHASE_POINTS = 200000;
 
 export const state = {
   modelType: "predatorPrey",
@@ -42,6 +43,7 @@ export const state = {
   autoPausedAt: null,
 
   series: [{ t: 0, prey: 40, predator: 9 }],
+  phaseSeries: [{ prey: 40, predator: 9 }],
 };
 
 const listeners = new Set();
@@ -75,6 +77,7 @@ export function resetState(next = {}) {
   state.nextPauseAt = state.pauseInterval;
   state.autoPausedAt = null;
   state.series = [{ t: 0, prey: state.prey0, predator: state.predator0 }];
+  state.phaseSeries = [{ prey: state.prey0, predator: state.predator0 }];
   notify();
 }
 
@@ -150,9 +153,13 @@ export function advanceSimulation(steps = 1) {
     state.prey = next.prey;
     state.predator = next.predator;
     state.series.push({ t: state.t, prey: state.prey, predator: state.predator });
+    state.phaseSeries.push({ prey: state.prey, predator: state.predator });
 
     if (state.series.length > MAX_POINTS) {
       state.series.shift();
+    }
+    if (state.phaseSeries.length > MAX_PHASE_POINTS) {
+      state.phaseSeries.shift();
     }
 
     if (!state.unboundedTime && state.t >= state.nextPauseAt) {

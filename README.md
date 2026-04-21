@@ -1,6 +1,6 @@
 # ecodemos
 
-Interactive, animated simulations of ecological models, built with vanilla JavaScript and hosted on GitHub Pages.
+Interactive, animated browser-based simulations of ecological models primarily using [p5.js](https://p5js.org) and [d3.js](https://d3js.org).
 
 Live site: https://amccnnll.github.io/ecodemos/
 

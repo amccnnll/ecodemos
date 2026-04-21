@@ -97,8 +97,9 @@ function drawPhasePlane(s) {
   const svg = host.append("svg").attr("width", W).attr("height", H);
   const g = svg.append("g").attr("transform", `translate(${m.l},${m.t})`);
 
-  const xMax = Math.max(1, d3.max(s.series, (d) => d.prey) || 1);
-  const yMax = Math.max(1, d3.max(s.series, (d) => d.predator) || 1);
+  const ps = s.phaseSeries;
+  const xMax = Math.max(1, d3.max(ps, (d) => d.prey) || 1);
+  const yMax = Math.max(1, d3.max(ps, (d) => d.predator) || 1);
 
   const x = d3.scaleLinear().domain([0, xMax * 1.05]).range([0, w]);
   const y = d3.scaleLinear().domain([0, yMax * 1.05]).range([h, 0]);
@@ -112,13 +113,13 @@ function drawPhasePlane(s) {
   g.append("g").attr("class", "axis").call(d3.axisLeft(y).ticks(5));
 
   g.append("path")
-    .datum(s.series)
+    .datum(ps)
     .attr("fill", "none")
     .attr("stroke", "#5d5d5d")
     .attr("stroke-width", 1.8)
     .attr("d", line);
 
-  const last = s.series[s.series.length - 1];
+  const last = ps[ps.length - 1];
   g.append("circle")
     .attr("cx", x(last.prey))
     .attr("cy", y(last.predator))

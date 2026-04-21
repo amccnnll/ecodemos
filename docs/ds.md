@@ -2,7 +2,7 @@
 title: "Distance Sampling (DS)"
 ---
 
-[→ Open simulation](/ecodemos/ds/)
+[→ Open simulation](../ds/)
 
 ## Overview
 

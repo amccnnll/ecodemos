@@ -2,7 +2,7 @@
 title: "SECR"
 ---
 
-[→ Open simulation](/ecodemos/secr/)
+[→ Open simulation](../secr/)
 
 ## Overview
 
