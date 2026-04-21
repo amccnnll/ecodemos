@@ -133,7 +133,7 @@ window.Quarto = {
 
 </head>
 
-<body class="nav-sidebar docked">
+<body class="nav-sidebar docked fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -205,59 +205,7 @@ window.Quarto = {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
-  <li><a href="#arena-geometry" id="toc-arena-geometry" class="nav-link" data-scroll-target="#arena-geometry">Arena geometry</a></li>
-  <li><a href="#animal-placement" id="toc-animal-placement" class="nav-link" data-scroll-target="#animal-placement">Animal placement</a></li>
-  <li><a href="#detector-placement" id="toc-detector-placement" class="nav-link" data-scroll-target="#detector-placement">Detector placement</a>
-  <ul class="collapse">
-  <li><a href="#grid-layout" id="toc-grid-layout" class="nav-link" data-scroll-target="#grid-layout">Grid layout</a></li>
-  <li><a href="#random-layout" id="toc-random-layout" class="nav-link" data-scroll-target="#random-layout">Random layout</a></li>
-  <li><a href="#custom-layout" id="toc-custom-layout" class="nav-link" data-scroll-target="#custom-layout">Custom layout</a></li>
-  </ul></li>
-  <li><a href="#seed-and-rng-architecture" id="toc-seed-and-rng-architecture" class="nav-link" data-scroll-target="#seed-and-rng-architecture">Seed and RNG architecture</a></li>
-  <li><a href="#movement-model-ouv" id="toc-movement-model-ouv" class="nav-link" data-scroll-target="#movement-model-ouv">Movement model (OUV)</a>
-  <ul class="collapse">
-  <li><a href="#frame-level-update" id="toc-frame-level-update" class="nav-link" data-scroll-target="#frame-level-update">Frame-level update</a></li>
-  <li><a href="#wall-reflection" id="toc-wall-reflection" class="nav-link" data-scroll-target="#wall-reflection">Wall reflection</a></li>
-  <li><a href="#parameter-derivation" id="toc-parameter-derivation" class="nav-link" data-scroll-target="#parameter-derivation">Parameter derivation</a></li>
-  <li><a href="#speed-and-frames-per-occasion" id="toc-speed-and-frames-per-occasion" class="nav-link" data-scroll-target="#speed-and-frames-per-occasion">Speed and frames per occasion</a></li>
-  <li><a href="#display-smoothing" id="toc-display-smoothing" class="nav-link" data-scroll-target="#display-smoothing">Display smoothing</a></li>
-  </ul></li>
-  <li><a href="#movement-presets" id="toc-movement-presets" class="nav-link" data-scroll-target="#movement-presets">Movement presets</a></li>
-  <li><a href="#detection-function" id="toc-detection-function" class="nav-link" data-scroll-target="#detection-function">Detection function</a>
-  <ul class="collapse">
-  <li><a href="#effective-detection-σ" id="toc-effective-detection-σ" class="nav-link" data-scroll-target="#effective-detection-σ">Effective detection σ</a></li>
-  <li><a href="#detector-type-presets" id="toc-detector-type-presets" class="nav-link" data-scroll-target="#detector-type-presets">Detector type presets</a></li>
-  </ul></li>
-  <li><a href="#effective-sample-area-esa" id="toc-effective-sample-area-esa" class="nav-link" data-scroll-target="#effective-sample-area-esa">Effective sample area (ESA)</a>
-  <ul class="collapse">
-  <li><a href="#single-occasion-p_1x-y" id="toc-single-occasion-p_1x-y" class="nav-link" data-scroll-target="#single-occasion-p_1x-y">Single-occasion <span class="math inline">\(p_1(x, y)\)</span></a></li>
-  <li><a href="#k-occasion-esa" id="toc-k-occasion-esa" class="nav-link" data-scroll-target="#k-occasion-esa"><span class="math inline">\(K\)</span>-occasion ESA</a></li>
-  </ul></li>
-  <li><a href="#density-estimator" id="toc-density-estimator" class="nav-link" data-scroll-target="#density-estimator">Density estimator</a></li>
-  <li><a href="#analytics-panels" id="toc-analytics-panels" class="nav-link" data-scroll-target="#analytics-panels">Analytics panels</a>
-  <ul class="collapse">
-  <li><a href="#detection-surface-heatmap" id="toc-detection-surface-heatmap" class="nav-link" data-scroll-target="#detection-surface-heatmap">1. Detection surface heatmap</a></li>
-  <li><a href="#capture-history-matrix" id="toc-capture-history-matrix" class="nav-link" data-scroll-target="#capture-history-matrix">2. Capture history matrix</a></li>
-  <li><a href="#d-convergence-chart" id="toc-d-convergence-chart" class="nav-link" data-scroll-target="#d-convergence-chart">3. D̂ convergence chart</a></li>
-  <li><a href="#running-estimates-strip" id="toc-running-estimates-strip" class="nav-link" data-scroll-target="#running-estimates-strip">4. Running estimates strip</a></li>
-  </ul></li>
-  <li><a href="#phase-states" id="toc-phase-states" class="nav-link" data-scroll-target="#phase-states">Phase states</a></li>
-  <li><a href="#control-taxonomy" id="toc-control-taxonomy" class="nav-link" data-scroll-target="#control-taxonomy">Control taxonomy</a>
-  <ul class="collapse">
-  <li><a href="#live-update-no-reset-required" id="toc-live-update-no-reset-required" class="nav-link" data-scroll-target="#live-update-no-reset-required">Live update (no reset required)</a></li>
-  <li><a href="#reset-required" id="toc-reset-required" class="nav-link" data-scroll-target="#reset-required">Reset required</a></li>
-  </ul></li>
-  <li><a href="#assumptions-and-limitations" id="toc-assumptions-and-limitations" class="nav-link" data-scroll-target="#assumptions-and-limitations">Assumptions and limitations</a></li>
-  <li><a href="#external-references" id="toc-external-references" class="nav-link" data-scroll-target="#external-references">External references</a></li>
-  </ul>
-</nav>
-    </div>
+    
 <!-- main -->
 <main class="content" id="quarto-document-content">
 

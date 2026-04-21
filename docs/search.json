@@ -228,9 +228,9 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Documentation",
+    "title": "ecodemos documentation",
     "section": "",
-    "text": "Reference documentation for all current simulations.\n\n\n\nDistance Sampling (DS)\nSpatially Explicit Capture-Recapture (SECR)\nLotka-Volterra (LV)\n\n\n\n\n\nGlossary\n\n\n\n\nEach simulation page includes:\n\nBrief overview\nKey equations\nParameter and control definitions\nImplementation choices that affect behaviour\nAssumptions and limitations\nExternal links for deeper reading",
+    "text": "Reference documentation for all current simulations.",
     "crumbs": [
       "Overview"
     ]
@@ -238,9 +238,9 @@
   {
     "objectID": "index.html#simulations",
     "href": "index.html#simulations",
-    "title": "Documentation",
-    "section": "",
-    "text": "Distance Sampling (DS)\nSpatially Explicit Capture-Recapture (SECR)\nLotka-Volterra (LV)",
+    "title": "ecodemos documentation",
+    "section": "Simulations",
+    "text": "Simulations\n\nDistance Sampling (DS)\nSpatially Explicit Capture-Recapture (SECR)\nLotka-Volterra (LV)",
     "crumbs": [
       "Overview"
     ]
@@ -248,19 +248,9 @@
   {
     "objectID": "index.html#shared-references",
     "href": "index.html#shared-references",
-    "title": "Documentation",
-    "section": "",
-    "text": "Glossary",
-    "crumbs": [
-      "Overview"
-    ]
-  },
-  {
-    "objectID": "index.html#scope",
-    "href": "index.html#scope",
-    "title": "Documentation",
-    "section": "",
-    "text": "Each simulation page includes:\n\nBrief overview\nKey equations\nParameter and control definitions\nImplementation choices that affect behaviour\nAssumptions and limitations\nExternal links for deeper reading",
+    "title": "ecodemos documentation",
+    "section": "Shared references",
+    "text": "Shared references\n\nGlossary",
     "crumbs": [
       "Overview"
     ]

@@ -1,8 +1,6 @@
 ---
-title: "Documentation"
+title: "ecodemos documentation"
 ---
-
-# ecodemos documentation
 
 Reference documentation for all current simulations.
 
@@ -15,14 +13,3 @@ Reference documentation for all current simulations.
 ## Shared references
 
 - [Glossary](./glossary.html)
-
-## Scope
-
-Each simulation page includes:
-
-- Brief overview
-- Key equations
-- Parameter and control definitions
-- Implementation choices that affect behaviour
-- Assumptions and limitations
-- External links for deeper reading

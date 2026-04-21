@@ -31,7 +31,5 @@ website:
 format:
   html:
     theme: cosmo
-    toc: true
-    toc-depth: 3
-    toc-title: "On this page"
+    toc: false
     math: true
