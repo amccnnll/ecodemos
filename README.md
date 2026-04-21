@@ -1,6 +1,6 @@
 # ecodemos
 
-Interactive, animated browser-based simulations of ecological models primarily using [p5.js](https://p5js.org) and [d3.js](https://d3js.org).
+Interactive animated browser-based simulations of ecological models.
 
 Live site: https://amccnnll.github.io/ecodemos/
 
@@ -39,3 +39,7 @@ ES modules require a local server; opening `index.html` directly does not work.
 python3 -m http.server 8000
 # then open http://localhost:8000
 ```
+
+## Tech notes
+
+The simulations are primarily built with [p5.js](https://p5js.org) and [d3.js](https://d3js.org) and the website is built with [Quarto](https://quarto.org) and hosted on [GitHub Pages](https://docs.github.com/en/pages).
