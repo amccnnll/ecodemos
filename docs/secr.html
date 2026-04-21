@@ -133,7 +133,7 @@ window.Quarto = {
 
 </head>
 
-<body class="nav-sidebar docked fullcontent">
+<body class="nav-sidebar docked">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -194,18 +194,70 @@ window.Quarto = {
 </li>
       </ul>
   </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Glossary</span></a>
-  </div>
-</li>
     </ul>
     </div>
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#glossary" id="toc-glossary" class="nav-link active" data-scroll-target="#glossary">Glossary</a>
+  <ul class="collapse">
+  <li><a href="#controls" id="toc-controls" class="nav-link" data-scroll-target="#controls">Controls</a></li>
+  <li><a href="#estimates-readout" id="toc-estimates-readout" class="nav-link" data-scroll-target="#estimates-readout">Estimates readout</a></li>
+  <li><a href="#key-symbols" id="toc-key-symbols" class="nav-link" data-scroll-target="#key-symbols">Key symbols</a></li>
+  </ul></li>
+  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#arena-geometry" id="toc-arena-geometry" class="nav-link" data-scroll-target="#arena-geometry">Arena geometry</a></li>
+  <li><a href="#animal-placement" id="toc-animal-placement" class="nav-link" data-scroll-target="#animal-placement">Animal placement</a></li>
+  <li><a href="#detector-placement" id="toc-detector-placement" class="nav-link" data-scroll-target="#detector-placement">Detector placement</a>
+  <ul class="collapse">
+  <li><a href="#grid-layout" id="toc-grid-layout" class="nav-link" data-scroll-target="#grid-layout">Grid layout</a></li>
+  <li><a href="#random-layout" id="toc-random-layout" class="nav-link" data-scroll-target="#random-layout">Random layout</a></li>
+  <li><a href="#custom-layout" id="toc-custom-layout" class="nav-link" data-scroll-target="#custom-layout">Custom layout</a></li>
+  </ul></li>
+  <li><a href="#seed-and-rng-architecture" id="toc-seed-and-rng-architecture" class="nav-link" data-scroll-target="#seed-and-rng-architecture">Seed and RNG architecture</a></li>
+  <li><a href="#movement-model-ouv" id="toc-movement-model-ouv" class="nav-link" data-scroll-target="#movement-model-ouv">Movement model (OUV)</a>
+  <ul class="collapse">
+  <li><a href="#frame-level-update" id="toc-frame-level-update" class="nav-link" data-scroll-target="#frame-level-update">Frame-level update</a></li>
+  <li><a href="#wall-reflection" id="toc-wall-reflection" class="nav-link" data-scroll-target="#wall-reflection">Wall reflection</a></li>
+  <li><a href="#parameter-derivation" id="toc-parameter-derivation" class="nav-link" data-scroll-target="#parameter-derivation">Parameter derivation</a></li>
+  <li><a href="#speed-and-frames-per-occasion" id="toc-speed-and-frames-per-occasion" class="nav-link" data-scroll-target="#speed-and-frames-per-occasion">Speed and frames per occasion</a></li>
+  <li><a href="#display-smoothing" id="toc-display-smoothing" class="nav-link" data-scroll-target="#display-smoothing">Display smoothing</a></li>
+  </ul></li>
+  <li><a href="#movement-presets" id="toc-movement-presets" class="nav-link" data-scroll-target="#movement-presets">Movement presets</a></li>
+  <li><a href="#detection-function" id="toc-detection-function" class="nav-link" data-scroll-target="#detection-function">Detection function</a>
+  <ul class="collapse">
+  <li><a href="#effective-detection-σ" id="toc-effective-detection-σ" class="nav-link" data-scroll-target="#effective-detection-σ">Effective detection σ</a></li>
+  <li><a href="#detector-type-presets" id="toc-detector-type-presets" class="nav-link" data-scroll-target="#detector-type-presets">Detector type presets</a></li>
+  </ul></li>
+  <li><a href="#effective-sample-area-esa" id="toc-effective-sample-area-esa" class="nav-link" data-scroll-target="#effective-sample-area-esa">Effective sample area (ESA)</a>
+  <ul class="collapse">
+  <li><a href="#single-occasion-p_1x-y" id="toc-single-occasion-p_1x-y" class="nav-link" data-scroll-target="#single-occasion-p_1x-y">Single-occasion <span class="math inline">\(p_1(x, y)\)</span></a></li>
+  <li><a href="#k-occasion-esa" id="toc-k-occasion-esa" class="nav-link" data-scroll-target="#k-occasion-esa"><span class="math inline">\(K\)</span>-occasion ESA</a></li>
+  </ul></li>
+  <li><a href="#density-estimator" id="toc-density-estimator" class="nav-link" data-scroll-target="#density-estimator">Density estimator</a></li>
+  <li><a href="#analytics-panels" id="toc-analytics-panels" class="nav-link" data-scroll-target="#analytics-panels">Analytics panels</a>
+  <ul class="collapse">
+  <li><a href="#detection-surface-heatmap" id="toc-detection-surface-heatmap" class="nav-link" data-scroll-target="#detection-surface-heatmap">1. Detection surface heatmap</a></li>
+  <li><a href="#capture-history-matrix" id="toc-capture-history-matrix" class="nav-link" data-scroll-target="#capture-history-matrix">2. Capture history matrix</a></li>
+  <li><a href="#d-convergence-chart" id="toc-d-convergence-chart" class="nav-link" data-scroll-target="#d-convergence-chart">3. D̂ convergence chart</a></li>
+  <li><a href="#running-estimates-strip" id="toc-running-estimates-strip" class="nav-link" data-scroll-target="#running-estimates-strip">4. Running estimates strip</a></li>
+  </ul></li>
+  <li><a href="#phase-states" id="toc-phase-states" class="nav-link" data-scroll-target="#phase-states">Phase states</a></li>
+  <li><a href="#control-taxonomy" id="toc-control-taxonomy" class="nav-link" data-scroll-target="#control-taxonomy">Control taxonomy</a>
+  <ul class="collapse">
+  <li><a href="#live-update-no-reset-required" id="toc-live-update-no-reset-required" class="nav-link" data-scroll-target="#live-update-no-reset-required">Live update (no reset required)</a></li>
+  <li><a href="#reset-required" id="toc-reset-required" class="nav-link" data-scroll-target="#reset-required">Reset required</a></li>
+  </ul></li>
+  <li><a href="#assumptions-and-limitations" id="toc-assumptions-and-limitations" class="nav-link" data-scroll-target="#assumptions-and-limitations">Assumptions and limitations</a></li>
+  <li><a href="#external-references" id="toc-external-references" class="nav-link" data-scroll-target="#external-references">External references</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
@@ -228,6 +280,201 @@ window.Quarto = {
 </header>
 
 
+<section id="glossary" class="level2">
+<h2 class="anchored" data-anchor-id="glossary">Glossary</h2>
+<section id="controls" class="level3">
+<h3 class="anchored" data-anchor-id="controls">Controls</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Speed</td>
+<td>Playback speed: Slow / Normal / Fast.</td>
+</tr>
+<tr class="even">
+<td>Seed</td>
+<td>RNG seed for animal and detector placement. Reset = same layout. 🎲 New = new population and layout.</td>
+</tr>
+<tr class="odd">
+<td>Detector type</td>
+<td>Named preset that adjusts <span class="math inline">\(g_0\)</span> and <span class="math inline">\(\sigma\)</span> to approximate a sensor type: Default, Camera trap, Live trap, Acoustic detector.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(g_0\)</span></td>
+<td>Baseline detection probability at zero distance from an animal’s activity centre (0.05–1.0). Updates live. Default: 0.40.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\sigma\)</span></td>
+<td>Home range / detection scale (km). Controls how steeply detection probability drops with distance from the activity centre. Updates live. Default: 0.20 km.</td>
+</tr>
+<tr class="even">
+<td>N</td>
+<td>Number of animals in the arena. Takes effect on Reset. Default: 10.</td>
+</tr>
+<tr class="odd">
+<td>K</td>
+<td>Number of sampling occasions per run. Takes effect on Reset. Default: 10.</td>
+</tr>
+<tr class="even">
+<td>Movement</td>
+<td>Named movement preset (Typical resident / Sedentary / Wide-ranging / Nomad) — sets <span class="math inline">\(\tau\)</span> and <span class="math inline">\(f\)</span>.</td>
+</tr>
+<tr class="odd">
+<td>τ (mobility)</td>
+<td>Home range crossing time in occasions. Low <span class="math inline">\(\tau\)</span> = restless / fast-moving; high <span class="math inline">\(\tau\)</span> = sedentary. Takes effect immediately. Default: 5 occ.</td>
+</tr>
+<tr class="even">
+<td>f (fidelity)</td>
+<td>Site fidelity multiplier — tightens the effective home range around the activity centre. Higher = tighter. Default: 1.0×.</td>
+</tr>
+<tr class="odd">
+<td>Detectors</td>
+<td>Detector layout: Grid (regular array), Random (random placement), or Click to place (interactive). Takes effect on Reset.</td>
+</tr>
+<tr class="even">
+<td>n_grid</td>
+<td>Grid dimension (<span class="math inline">\(N \times N\)</span>). Visible when Detectors = Grid (3–7, default 4). Takes effect on Reset.</td>
+</tr>
+<tr class="odd">
+<td>Show detection surface</td>
+<td>Overlays the spatial detection probability surface <span class="math inline">\(p(x,y)\)</span> on the simulation canvas. Updates live when <span class="math inline">\(g_0\)</span>, <span class="math inline">\(\sigma\)</span>, or detectors change.</td>
+</tr>
+<tr class="even">
+<td>Show activity centres</td>
+<td>Shows true activity centres (•) and estimated centres (×, mean of capturing detector positions) for each individual.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="estimates-readout" class="level3">
+<h3 class="anchored" data-anchor-id="estimates-readout">Estimates readout</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Occasion (<span class="math inline">\(k\)</span>)</td>
+<td>Current occasion index.</td>
+</tr>
+<tr class="even">
+<td>Individuals (<span class="math inline">\(M\)</span>)</td>
+<td>Number of distinct animals detected at least once so far.</td>
+</tr>
+<tr class="odd">
+<td>Captures</td>
+<td>Total capture events across all individuals and occasions.</td>
+</tr>
+<tr class="even">
+<td>ESA</td>
+<td>Effective sampling area (km²) — <span class="math inline">\(\int\!\int p(x,y)\,dx\,dy\)</span> over the arena, given current <span class="math inline">\(g_0\)</span>, <span class="math inline">\(\sigma\)</span>, and detector layout.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\hat{D}\)</span></td>
+<td>Estimated density: <span class="math inline">\(M / \mathrm{ESA}\)</span>.</td>
+</tr>
+<tr class="even">
+<td>True <span class="math inline">\(D\)</span></td>
+<td>True density = <span class="math inline">\(N / \text{arena area}\)</span>.</td>
+</tr>
+<tr class="odd">
+<td>Home range (<span class="math inline">\(\pi\sigma^2\)</span>)</td>
+<td>Area of a circle with radius <span class="math inline">\(\sigma\)</span> — approximate home range size (km²).</td>
+</tr>
+<tr class="even">
+<td>Recapture rate</td>
+<td>Proportion of capture events involving a previously-detected individual.</td>
+</tr>
+<tr class="odd">
+<td>Coverage (<span class="math inline">\(M/N\)</span>)</td>
+<td>Proportion of the true population detected at least once.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="key-symbols" class="level3">
+<h3 class="anchored" data-anchor-id="key-symbols">Key symbols</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(g_0\)</span></td>
+<td>Baseline detection probability at zero distance (dimensionless, 0–1).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\sigma\)</span></td>
+<td>Detection / home range scale (km).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\tau\)</span></td>
+<td>Mobility parameter — home range crossing time (occasions).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(f\)</span></td>
+<td>Site fidelity multiplier (dimensionless).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(K\)</span></td>
+<td>Number of occasions.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(N\)</span></td>
+<td>True number of animals.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(M\)</span></td>
+<td>Number of detected individuals.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathrm{ESA}\)</span></td>
+<td>Effective sampling area (km²).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\hat{D}\)</span></td>
+<td>Estimated density (animals per km²).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(D\)</span></td>
+<td>True density (animals per km²).</td>
+</tr>
+<tr class="odd">
+<td>Activity centre</td>
+<td>Latent centre of an individual’s home range — never directly observed.</td>
+</tr>
+<tr class="even">
+<td>Capture history</td>
+<td>Record of which individual was detected at which detector on which occasion.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
 <p>Animals move within a two-dimensional arena and are sampled by a fixed detector array across repeated occasions. Density is estimated from who was caught, at which detectors, and on which occasions — with no assumption of a fixed observable strip.</p>

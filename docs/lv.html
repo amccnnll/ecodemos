@@ -133,7 +133,7 @@ window.Quarto = {
 
 </head>
 
-<body class="nav-sidebar docked fullcontent">
+<body class="nav-sidebar docked">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -194,18 +194,57 @@ window.Quarto = {
 </li>
       </ul>
   </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Glossary</span></a>
-  </div>
-</li>
     </ul>
     </div>
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#glossary" id="toc-glossary" class="nav-link active" data-scroll-target="#glossary">Glossary</a>
+  <ul class="collapse">
+  <li><a href="#controls-all-modes" id="toc-controls-all-modes" class="nav-link" data-scroll-target="#controls-all-modes">Controls — all modes</a></li>
+  <li><a href="#controls-predator-prey-classic-mode" id="toc-controls-predator-prey-classic-mode" class="nav-link" data-scroll-target="#controls-predator-prey-classic-mode">Controls — predator-prey (classic) mode</a></li>
+  <li><a href="#controls-dynamic-predator-prey-mode-additional" id="toc-controls-dynamic-predator-prey-mode-additional" class="nav-link" data-scroll-target="#controls-dynamic-predator-prey-mode-additional">Controls — dynamic predator-prey mode (additional)</a></li>
+  <li><a href="#controls-competition-mode" id="toc-controls-competition-mode" class="nav-link" data-scroll-target="#controls-competition-mode">Controls — competition mode</a></li>
+  <li><a href="#key-symbols" id="toc-key-symbols" class="nav-link" data-scroll-target="#key-symbols">Key symbols</a></li>
+  </ul></li>
+  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#numerical-integration" id="toc-numerical-integration" class="nav-link" data-scroll-target="#numerical-integration">Numerical integration</a>
+  <ul class="collapse">
+  <li><a href="#rk4-step" id="toc-rk4-step" class="nav-link" data-scroll-target="#rk4-step">RK4 step</a></li>
+  <li><a href="#time-step-delta-t" id="toc-time-step-delta-t" class="nav-link" data-scroll-target="#time-step-delta-t">Time step <span class="math inline">\(\Delta t\)</span></a></li>
+  <li><a href="#speed-and-steps-per-frame" id="toc-speed-and-steps-per-frame" class="nav-link" data-scroll-target="#speed-and-steps-per-frame">Speed and steps per frame</a></li>
+  </ul></li>
+  <li><a href="#mode-equations" id="toc-mode-equations" class="nav-link" data-scroll-target="#mode-equations">Mode equations</a>
+  <ul class="collapse">
+  <li><a href="#classic-predator-prey" id="toc-classic-predator-prey" class="nav-link" data-scroll-target="#classic-predator-prey">Classic predator-prey</a></li>
+  <li><a href="#dynamic-predator-prey" id="toc-dynamic-predator-prey" class="nav-link" data-scroll-target="#dynamic-predator-prey">Dynamic predator-prey</a></li>
+  <li><a href="#competition" id="toc-competition" class="nav-link" data-scroll-target="#competition">Competition</a></li>
+  </ul></li>
+  <li><a href="#state-and-time-series" id="toc-state-and-time-series" class="nav-link" data-scroll-target="#state-and-time-series">State and time series</a></li>
+  <li><a href="#checkpoint-auto-pause" id="toc-checkpoint-auto-pause" class="nav-link" data-scroll-target="#checkpoint-auto-pause">Checkpoint auto-pause</a></li>
+  <li><a href="#controls" id="toc-controls" class="nav-link" data-scroll-target="#controls">Controls</a>
+  <ul class="collapse">
+  <li><a href="#parameter-sliders-behaviour-on-input-vs-change" id="toc-parameter-sliders-behaviour-on-input-vs-change" class="nav-link" data-scroll-target="#parameter-sliders-behaviour-on-input-vs-change">Parameter sliders — behaviour on input vs change</a></li>
+  <li><a href="#model-type" id="toc-model-type" class="nav-link" data-scroll-target="#model-type">Model type</a></li>
+  <li><a href="#reset-vs-reset-defaults" id="toc-reset-vs-reset-defaults" class="nav-link" data-scroll-target="#reset-vs-reset-defaults">Reset vs Reset Defaults</a></li>
+  <li><a href="#speed-buttons" id="toc-speed-buttons" class="nav-link" data-scroll-target="#speed-buttons">Speed buttons</a></li>
+  </ul></li>
+  <li><a href="#analytics-panels" id="toc-analytics-panels" class="nav-link" data-scroll-target="#analytics-panels">Analytics panels</a>
+  <ul class="collapse">
+  <li><a href="#time-series-chart" id="toc-time-series-chart" class="nav-link" data-scroll-target="#time-series-chart">Time series chart</a></li>
+  <li><a href="#phase-plane-chart" id="toc-phase-plane-chart" class="nav-link" data-scroll-target="#phase-plane-chart">Phase-plane chart</a></li>
+  <li><a href="#estimates-strip" id="toc-estimates-strip" class="nav-link" data-scroll-target="#estimates-strip">Estimates strip</a></li>
+  </ul></li>
+  <li><a href="#assumptions-and-limitations" id="toc-assumptions-and-limitations" class="nav-link" data-scroll-target="#assumptions-and-limitations">Assumptions and limitations</a></li>
+  <li><a href="#external-references" id="toc-external-references" class="nav-link" data-scroll-target="#external-references">External references</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
@@ -228,6 +267,225 @@ window.Quarto = {
 </header>
 
 
+<section id="glossary" class="level2">
+<h2 class="anchored" data-anchor-id="glossary">Glossary</h2>
+<section id="controls-all-modes" class="level3">
+<h3 class="anchored" data-anchor-id="controls-all-modes">Controls — all modes</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Speed</td>
+<td>Playback speed: Slow / Normal / Fast.</td>
+</tr>
+<tr class="even">
+<td>Preset</td>
+<td>Named parameter combinations for the current mode. Applied immediately.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\Delta t\)</span></td>
+<td>RK4 integration time step. Smaller = more accurate but slower; larger = faster but potentially unstable. Default: 0.03.</td>
+</tr>
+<tr class="even">
+<td>Unbounded time</td>
+<td>Disables the auto-pause checkpoints (default every 50 time units). Simulation runs until manually paused.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="controls-predator-prey-classic-mode" class="level3">
+<h3 class="anchored" data-anchor-id="controls-predator-prey-classic-mode">Controls — predator-prey (classic) mode</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\alpha\)</span></td>
+<td>Prey intrinsic growth rate — rate of increase of the prey population in the absence of predators. Default: 1.1.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta\)</span></td>
+<td>Predation rate — rate at which each predator removes prey per unit time. Default: 0.06.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\delta\)</span></td>
+<td>Predator conversion efficiency — prey consumed per new predator produced. Default: 0.03.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\gamma\)</span></td>
+<td>Predator death rate — intrinsic rate of decrease of predators in the absence of prey. Default: 0.7.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(N_0\)</span></td>
+<td>Initial prey population. Default: 40.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(P_0\)</span></td>
+<td>Initial predator population. Default: 9.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="controls-dynamic-predator-prey-mode-additional" class="level3">
+<h3 class="anchored" data-anchor-id="controls-dynamic-predator-prey-mode-additional">Controls — dynamic predator-prey mode (additional)</h3>
+<p>Adds logistic prey growth and predator self-limitation to the classic system.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Dynamic preset</td>
+<td>Named presets: Damped spiral, Slow damping / predator collapse, Tight cycle.</td>
+</tr>
+<tr class="even">
+<td>K (prey)</td>
+<td>Prey carrying capacity — logistic ceiling for prey growth in the absence of predators. Default: 120.</td>
+</tr>
+<tr class="odd">
+<td>m (predator)</td>
+<td>Predator self-limitation coefficient — intraspecific competition among predators. Default: 0.01.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="controls-competition-mode" class="level3">
+<h3 class="anchored" data-anchor-id="controls-competition-mode">Controls — competition mode</h3>
+<p>Replaces the predator-prey parameters with two-species competition parameters.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Competition preset</td>
+<td>Named presets: Coexistence, Species 1 wins, Species 2 wins.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(r_1\)</span></td>
+<td>Intrinsic growth rate of species 1. Default: 0.9.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(r_2\)</span></td>
+<td>Intrinsic growth rate of species 2. Default: 0.8.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(K_1\)</span></td>
+<td>Carrying capacity of species 1. Default: 75.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(K_2\)</span></td>
+<td>Carrying capacity of species 2. Default: 65.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\alpha_{12}\)</span></td>
+<td>Effect of species 2 on species 1 — per-individual competitive impact. Default: 0.60.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\alpha_{21}\)</span></td>
+<td>Effect of species 1 on species 2 — per-individual competitive impact. Default: 0.50.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="key-symbols" class="level3">
+<h3 class="anchored" data-anchor-id="key-symbols">Key symbols</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(N\)</span></td>
+<td>Prey (or species 1) population size.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(P\)</span></td>
+<td>Predator (or species 2) population size.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\alpha\)</span></td>
+<td>Prey growth rate (classic / dynamic modes).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta\)</span></td>
+<td>Predation rate (classic / dynamic modes).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\delta\)</span></td>
+<td>Predator conversion efficiency (classic / dynamic modes).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\gamma\)</span></td>
+<td>Predator death rate (classic / dynamic modes).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(K\)</span></td>
+<td>Carrying capacity.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(m\)</span></td>
+<td>Predator self-limitation (dynamic mode).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(r_1, r_2\)</span></td>
+<td>Species intrinsic growth rates (competition mode).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(K_1, K_2\)</span></td>
+<td>Species carrying capacities (competition mode).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\alpha_{12}, \alpha_{21}\)</span></td>
+<td>Interspecific competition coefficients (competition mode).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\Delta t\)</span></td>
+<td>RK4 integration time step.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
 <p>Three two-species dynamical systems integrated via RK4, displayed as a live time series and phase-plane trajectory. The three modes are:</p>

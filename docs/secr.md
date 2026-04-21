@@ -2,6 +2,60 @@
 title: "SECR"
 ---
 
+## Glossary
+
+### Controls
+
+| Control | Description |
+|---|---|
+| Speed | Playback speed: Slow / Normal / Fast. |
+| Seed | RNG seed for animal and detector placement. Reset = same layout. 🎲 New = new population and layout. |
+| Detector type | Named preset that adjusts $g_0$ and $\sigma$ to approximate a sensor type: Default, Camera trap, Live trap, Acoustic detector. |
+| $g_0$ | Baseline detection probability at zero distance from an animal's activity centre (0.05–1.0). Updates live. Default: 0.40. |
+| $\sigma$ | Home range / detection scale (km). Controls how steeply detection probability drops with distance from the activity centre. Updates live. Default: 0.20 km. |
+| N | Number of animals in the arena. Takes effect on Reset. Default: 10. |
+| K | Number of sampling occasions per run. Takes effect on Reset. Default: 10. |
+| Movement | Named movement preset (Typical resident / Sedentary / Wide-ranging / Nomad) — sets $\tau$ and $f$. |
+| τ (mobility) | Home range crossing time in occasions. Low $\tau$ = restless / fast-moving; high $\tau$ = sedentary. Takes effect immediately. Default: 5 occ. |
+| f (fidelity) | Site fidelity multiplier — tightens the effective home range around the activity centre. Higher = tighter. Default: 1.0×. |
+| Detectors | Detector layout: Grid (regular array), Random (random placement), or Click to place (interactive). Takes effect on Reset. |
+| n_grid | Grid dimension ($N \times N$). Visible when Detectors = Grid (3–7, default 4). Takes effect on Reset. |
+| Show detection surface | Overlays the spatial detection probability surface $p(x,y)$ on the simulation canvas. Updates live when $g_0$, $\sigma$, or detectors change. |
+| Show activity centres | Shows true activity centres (•) and estimated centres (×, mean of capturing detector positions) for each individual. |
+
+### Estimates readout
+
+| Symbol | Meaning |
+|---|---|
+| Occasion ($k$) | Current occasion index. |
+| Individuals ($M$) | Number of distinct animals detected at least once so far. |
+| Captures | Total capture events across all individuals and occasions. |
+| ESA | Effective sampling area (km²) — $\int\!\int p(x,y)\,dx\,dy$ over the arena, given current $g_0$, $\sigma$, and detector layout. |
+| $\hat{D}$ | Estimated density: $M / \mathrm{ESA}$. |
+| True $D$ | True density = $N / \text{arena area}$. |
+| Home range ($\pi\sigma^2$) | Area of a circle with radius $\sigma$ — approximate home range size (km²). |
+| Recapture rate | Proportion of capture events involving a previously-detected individual. |
+| Coverage ($M/N$) | Proportion of the true population detected at least once. |
+
+### Key symbols
+
+| Symbol | Meaning |
+|---|---|
+| $g_0$ | Baseline detection probability at zero distance (dimensionless, 0–1). |
+| $\sigma$ | Detection / home range scale (km). |
+| $\tau$ | Mobility parameter — home range crossing time (occasions). |
+| $f$ | Site fidelity multiplier (dimensionless). |
+| $K$ | Number of occasions. |
+| $N$ | True number of animals. |
+| $M$ | Number of detected individuals. |
+| $\mathrm{ESA}$ | Effective sampling area (km²). |
+| $\hat{D}$ | Estimated density (animals per km²). |
+| $D$ | True density (animals per km²). |
+| Activity centre | Latent centre of an individual's home range — never directly observed. |
+| Capture history | Record of which individual was detected at which detector on which occasion. |
+
+---
+
 ## Overview
 
 Animals move within a two-dimensional arena and are sampled by a fixed detector array across repeated occasions. Density is estimated from who was caught, at which detectors, and on which occasions — with no assumption of a fixed observable strip.

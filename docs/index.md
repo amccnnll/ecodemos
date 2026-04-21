@@ -1,5 +1,6 @@
 ---
 title: "ecodemos documentation"
+toc: false
 ---
 
 Reference documentation for all current simulations.

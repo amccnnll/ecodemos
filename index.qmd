@@ -1,0 +1,24 @@
+---
+title: "ecodemos"
+subtitle: "Ecological simulations and demos"
+format:
+  html:
+    theme: cosmo
+    toc: false
+    page-layout: article
+---
+
+## Simulations
+
+**[Distance Sampling](/ecodemos/ds/)**
+Line-transect distance sampling. Observer traverses a transect; animals are detected with probability declining with perpendicular distance. Detected distances used to fit a detection function and estimate density.
+
+**[SECR](/ecodemos/secr/)**
+Spatially explicit capture-recapture. A detector array samples animals across repeated occasions; detection is driven by distance to latent activity centres. Density estimated from spatial capture histories.
+
+**[Lotka-Volterra](/ecodemos/lv/)**
+Two-species dynamical systems integrated via RK4: classic predator-prey, dynamic predator-prey with logistic prey growth and predator self-limitation, and two-species competition.
+
+---
+
+[Documentation](/ecodemos/docs/)

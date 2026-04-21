@@ -2,6 +2,56 @@
 title: "Distance Sampling (DS)"
 ---
 
+## Glossary
+
+### Controls
+
+| Control | Description |
+|---|---|
+| Speed | Playback speed: Slow / Normal / Fast. Affects only how fast the observer traverses the transect — does not change what gets detected. |
+| Seed | RNG seed for animal placement (0–99999). Reset with the same seed reproduces the exact same population. |
+| 🎲 New | Draws a new random seed and regenerates the population. |
+| Field truth | Detection function used to simulate detections: half-normal or hazard-rate. Takes effect on Reset (if mid-run, affects future detections only). |
+| Model | Detection function used for MLE fitting. Mismatching Field truth and Model produces biased D̂ (warning shown). Takes effect on Reset. |
+| σ | Detection scale (km). For half-normal: distance at which detection probability = $e^{-1/2} \approx 0.607$. For hazard-rate: scale of the decay. Updates live. Default: 0.25 km. |
+| W | Truncation distance (km). Animals beyond W are never detected; stored detections beyond W are excluded from analysis if W is later reduced. Updates live. Default: 0.40 km. |
+| b (shape) | Hazard-rate shape parameter. Visible only when hazard-rate is selected. Higher b = wider flat shoulder near the transect before a sharper falloff. Default: 2.5. |
+| D | True animal density (animals per km²). Takes effect on Reset. Default: 50 /km². |
+| L | Transect length (km) — sets the width of the arena. Takes effect on Reset. Default: 4.0 km. |
+| Distribution | Spatial distribution of animals: Uniform, Clustered, or Regular. Takes effect on Reset. |
+| s_clump | Cluster spread as a fraction of transect length. Visible when Distribution = Clustered. Default: 0.10. |
+| ρ (regularity) | Grid jitter: 0 = perfect grid, 1 = maximum jitter. Visible when Distribution = Regular. Default: 0.50. |
+| Keep previous runs | Overlays the previous runs' fitted curves and D̂ traces as faded ghost lines (up to 8 retained). |
+
+### Estimates readout
+
+| Symbol | Meaning |
+|---|---|
+| $n$ | Count of within-$W$ detections in the current run. |
+| Effort ($L$) | Observer x-position (km) at the time of the most recent detection. |
+| ESW | Effective strip width (km) — $\int_0^W g(x)\,dx$. Computed from $\hat\sigma$ (or true $\sigma$ if fewer than 3 detections). |
+| $\hat\sigma$ | MLE estimate of $\sigma$ (requires $n \geq 3$; shown as — otherwise). |
+| True $\sigma$ | Current slider value of $\sigma$. |
+| $\hat{D}$ | Estimated density: $n / (2L \cdot \mathrm{ESW})$. |
+| True $D$ | Realised density $= \text{areaN} / (L \times H)$, which may differ slightly from the slider due to rounding. |
+
+### Key symbols
+
+| Symbol | Meaning |
+|---|---|
+| $g(x)$ | Detection function — probability of detecting an animal at perpendicular distance $x$ from the transect. |
+| $\sigma$ | Detection scale parameter (km). |
+| $W$ | Truncation distance (km). |
+| $\mathrm{ESW}$ | Effective strip width (km). |
+| $\hat\sigma$ | MLE estimate of $\sigma$. |
+| $\hat{D}$ | Estimated density (animals per km²). |
+| $D$ | True density (animals per km²). |
+| $L$ | Transect length / effort (km). |
+| $n$ | Number of within-$W$ detections. |
+| $b$ | Hazard-rate shape parameter (dimensionless). |
+
+---
+
 ## Overview
 
 An observer traverses a fixed straight transect. Animals within a strip around the transect are detected with probability that declines with perpendicular distance. The recorded distances are then used to estimate detectability and, from that, density.

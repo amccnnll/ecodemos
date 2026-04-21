@@ -133,7 +133,7 @@ window.Quarto = {
 
 </head>
 
-<body class="nav-sidebar docked fullcontent">
+<body class="nav-sidebar docked">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -194,18 +194,86 @@ window.Quarto = {
 </li>
       </ul>
   </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Glossary</span></a>
-  </div>
-</li>
     </ul>
     </div>
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#glossary" id="toc-glossary" class="nav-link active" data-scroll-target="#glossary">Glossary</a>
+  <ul class="collapse">
+  <li><a href="#controls" id="toc-controls" class="nav-link" data-scroll-target="#controls">Controls</a></li>
+  <li><a href="#estimates-readout" id="toc-estimates-readout" class="nav-link" data-scroll-target="#estimates-readout">Estimates readout</a></li>
+  <li><a href="#key-symbols" id="toc-key-symbols" class="nav-link" data-scroll-target="#key-symbols">Key symbols</a></li>
+  </ul></li>
+  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#arena-geometry" id="toc-arena-geometry" class="nav-link" data-scroll-target="#arena-geometry">Arena geometry</a></li>
+  <li><a href="#animal-placement" id="toc-animal-placement" class="nav-link" data-scroll-target="#animal-placement">Animal placement</a>
+  <ul class="collapse">
+  <li><a href="#animal-count" id="toc-animal-count" class="nav-link" data-scroll-target="#animal-count">Animal count</a></li>
+  <li><a href="#uniform-distribution-placeanimals" id="toc-uniform-distribution-placeanimals" class="nav-link" data-scroll-target="#uniform-distribution-placeanimals">Uniform distribution (<code>placeAnimals</code>)</a></li>
+  <li><a href="#clustered-distribution-placeanimalsclumped" id="toc-clustered-distribution-placeanimalsclumped" class="nav-link" data-scroll-target="#clustered-distribution-placeanimalsclumped">Clustered distribution (<code>placeAnimalsClumped</code>)</a></li>
+  <li><a href="#regular-distribution-placeanimalsregular" id="toc-regular-distribution-placeanimalsregular" class="nav-link" data-scroll-target="#regular-distribution-placeanimalsregular">Regular distribution (<code>placeAnimalsRegular</code>)</a></li>
+  </ul></li>
+  <li><a href="#seed-and-rng-architecture" id="toc-seed-and-rng-architecture" class="nav-link" data-scroll-target="#seed-and-rng-architecture">Seed and RNG architecture</a>
+  <ul class="collapse">
+  <li><a href="#placement-rng-seeded" id="toc-placement-rng-seeded" class="nav-link" data-scroll-target="#placement-rng-seeded">Placement RNG (seeded)</a></li>
+  <li><a href="#detection-rng-unseeded" id="toc-detection-rng-unseeded" class="nav-link" data-scroll-target="#detection-rng-unseeded">Detection RNG (unseeded)</a></li>
+  <li><a href="#seed-value" id="toc-seed-value" class="nav-link" data-scroll-target="#seed-value">Seed value</a></li>
+  </ul></li>
+  <li><a href="#observer-mechanics" id="toc-observer-mechanics" class="nav-link" data-scroll-target="#observer-mechanics">Observer mechanics</a>
+  <ul class="collapse">
+  <li><a href="#speed-settings" id="toc-speed-settings" class="nav-link" data-scroll-target="#speed-settings">Speed settings</a></li>
+  </ul></li>
+  <li><a href="#detection-mechanism" id="toc-detection-mechanism" class="nav-link" data-scroll-target="#detection-mechanism">Detection mechanism</a>
+  <ul class="collapse">
+  <li><a href="#one-shot-rule" id="toc-one-shot-rule" class="nav-link" data-scroll-target="#one-shot-rule">One-shot rule</a></li>
+  <li><a href="#perpendicular-distance" id="toc-perpendicular-distance" class="nav-link" data-scroll-target="#perpendicular-distance">Perpendicular distance</a></li>
+  <li><a href="#bernoulli-draw" id="toc-bernoulli-draw" class="nav-link" data-scroll-target="#bernoulli-draw">Bernoulli draw</a></li>
+  </ul></li>
+  <li><a href="#detection-functions" id="toc-detection-functions" class="nav-link" data-scroll-target="#detection-functions">Detection functions</a>
+  <ul class="collapse">
+  <li><a href="#half-normal" id="toc-half-normal" class="nav-link" data-scroll-target="#half-normal">Half-normal</a></li>
+  <li><a href="#hazard-rate" id="toc-hazard-rate" class="nav-link" data-scroll-target="#hazard-rate">Hazard-rate</a></li>
+  </ul></li>
+  <li><a href="#state-recording" id="toc-state-recording" class="nav-link" data-scroll-target="#state-recording">State recording</a></li>
+  <li><a href="#truncation-and-w-post-hoc-filtering" id="toc-truncation-and-w-post-hoc-filtering" class="nav-link" data-scroll-target="#truncation-and-w-post-hoc-filtering">Truncation and W post-hoc filtering</a></li>
+  <li><a href="#esw-computation" id="toc-esw-computation" class="nav-link" data-scroll-target="#esw-computation">ESW computation</a>
+  <ul class="collapse">
+  <li><a href="#half-normal-analytical" id="toc-half-normal-analytical" class="nav-link" data-scroll-target="#half-normal-analytical">Half-normal (analytical)</a></li>
+  <li><a href="#hazard-rate-numerical" id="toc-hazard-rate-numerical" class="nav-link" data-scroll-target="#hazard-rate-numerical">Hazard-rate (numerical)</a></li>
+  </ul></li>
+  <li><a href="#mle-fitting" id="toc-mle-fitting" class="nav-link" data-scroll-target="#mle-fitting">MLE fitting</a>
+  <ul class="collapse">
+  <li><a href="#nll-for-half-normal" id="toc-nll-for-half-normal" class="nav-link" data-scroll-target="#nll-for-half-normal">NLL for half-normal</a></li>
+  <li><a href="#nll-for-hazard-rate" id="toc-nll-for-hazard-rate" class="nav-link" data-scroll-target="#nll-for-hazard-rate">NLL for hazard-rate</a></li>
+  </ul></li>
+  <li><a href="#density-estimator" id="toc-density-estimator" class="nav-link" data-scroll-target="#density-estimator">Density estimator</a>
+  <ul class="collapse">
+  <li><a href="#per-detection-effort-in-the-convergence-chart" id="toc-per-detection-effort-in-the-convergence-chart" class="nav-link" data-scroll-target="#per-detection-effort-in-the-convergence-chart">Per-detection effort in the convergence chart</a></li>
+  </ul></li>
+  <li><a href="#analytics-panels" id="toc-analytics-panels" class="nav-link" data-scroll-target="#analytics-panels">Analytics panels</a>
+  <ul class="collapse">
+  <li><a href="#detection-function-chart" id="toc-detection-function-chart" class="nav-link" data-scroll-target="#detection-function-chart">1. Detection function chart</a></li>
+  <li><a href="#running-estimates-strip" id="toc-running-estimates-strip" class="nav-link" data-scroll-target="#running-estimates-strip">2. Running estimates strip</a></li>
+  <li><a href="#d-convergence-chart" id="toc-d-convergence-chart" class="nav-link" data-scroll-target="#d-convergence-chart">3. D̂ convergence chart</a></li>
+  </ul></li>
+  <li><a href="#ghost-keep-runs-mechanic" id="toc-ghost-keep-runs-mechanic" class="nav-link" data-scroll-target="#ghost-keep-runs-mechanic">Ghost / keep-runs mechanic</a></li>
+  <li><a href="#control-taxonomy" id="toc-control-taxonomy" class="nav-link" data-scroll-target="#control-taxonomy">Control taxonomy</a>
+  <ul class="collapse">
+  <li><a href="#live-update-takes-effect-without-reset" id="toc-live-update-takes-effect-without-reset" class="nav-link" data-scroll-target="#live-update-takes-effect-without-reset">Live update (takes effect without reset)</a></li>
+  <li><a href="#reset-required-takes-effect-on-next-reset-or-new-population" id="toc-reset-required-takes-effect-on-next-reset-or-new-population" class="nav-link" data-scroll-target="#reset-required-takes-effect-on-next-reset-or-new-population">Reset required (takes effect on next Reset or New Population)</a></li>
+  <li><a href="#reset-defaults" id="toc-reset-defaults" class="nav-link" data-scroll-target="#reset-defaults">Reset Defaults</a></li>
+  </ul></li>
+  <li><a href="#assumptions-and-limitations" id="toc-assumptions-and-limitations" class="nav-link" data-scroll-target="#assumptions-and-limitations">Assumptions and limitations</a></li>
+  <li><a href="#external-references" id="toc-external-references" class="nav-link" data-scroll-target="#external-references">External references</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
@@ -228,6 +296,185 @@ window.Quarto = {
 </header>
 
 
+<section id="glossary" class="level2">
+<h2 class="anchored" data-anchor-id="glossary">Glossary</h2>
+<section id="controls" class="level3">
+<h3 class="anchored" data-anchor-id="controls">Controls</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Speed</td>
+<td>Playback speed: Slow / Normal / Fast. Affects only how fast the observer traverses the transect — does not change what gets detected.</td>
+</tr>
+<tr class="even">
+<td>Seed</td>
+<td>RNG seed for animal placement (0–99999). Reset with the same seed reproduces the exact same population.</td>
+</tr>
+<tr class="odd">
+<td>🎲 New</td>
+<td>Draws a new random seed and regenerates the population.</td>
+</tr>
+<tr class="even">
+<td>Field truth</td>
+<td>Detection function used to simulate detections: half-normal or hazard-rate. Takes effect on Reset (if mid-run, affects future detections only).</td>
+</tr>
+<tr class="odd">
+<td>Model</td>
+<td>Detection function used for MLE fitting. Mismatching Field truth and Model produces biased D̂ (warning shown). Takes effect on Reset.</td>
+</tr>
+<tr class="even">
+<td>σ</td>
+<td>Detection scale (km). For half-normal: distance at which detection probability = <span class="math inline">\(e^{-1/2} \approx 0.607\)</span>. For hazard-rate: scale of the decay. Updates live. Default: 0.25 km.</td>
+</tr>
+<tr class="odd">
+<td>W</td>
+<td>Truncation distance (km). Animals beyond W are never detected; stored detections beyond W are excluded from analysis if W is later reduced. Updates live. Default: 0.40 km.</td>
+</tr>
+<tr class="even">
+<td>b (shape)</td>
+<td>Hazard-rate shape parameter. Visible only when hazard-rate is selected. Higher b = wider flat shoulder near the transect before a sharper falloff. Default: 2.5.</td>
+</tr>
+<tr class="odd">
+<td>D</td>
+<td>True animal density (animals per km²). Takes effect on Reset. Default: 50 /km².</td>
+</tr>
+<tr class="even">
+<td>L</td>
+<td>Transect length (km) — sets the width of the arena. Takes effect on Reset. Default: 4.0 km.</td>
+</tr>
+<tr class="odd">
+<td>Distribution</td>
+<td>Spatial distribution of animals: Uniform, Clustered, or Regular. Takes effect on Reset.</td>
+</tr>
+<tr class="even">
+<td>s_clump</td>
+<td>Cluster spread as a fraction of transect length. Visible when Distribution = Clustered. Default: 0.10.</td>
+</tr>
+<tr class="odd">
+<td>ρ (regularity)</td>
+<td>Grid jitter: 0 = perfect grid, 1 = maximum jitter. Visible when Distribution = Regular. Default: 0.50.</td>
+</tr>
+<tr class="even">
+<td>Keep previous runs</td>
+<td>Overlays the previous runs’ fitted curves and D̂ traces as faded ghost lines (up to 8 retained).</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="estimates-readout" class="level3">
+<h3 class="anchored" data-anchor-id="estimates-readout">Estimates readout</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(n\)</span></td>
+<td>Count of within-<span class="math inline">\(W\)</span> detections in the current run.</td>
+</tr>
+<tr class="even">
+<td>Effort (<span class="math inline">\(L\)</span>)</td>
+<td>Observer x-position (km) at the time of the most recent detection.</td>
+</tr>
+<tr class="odd">
+<td>ESW</td>
+<td>Effective strip width (km) — <span class="math inline">\(\int_0^W g(x)\,dx\)</span>. Computed from <span class="math inline">\(\hat\sigma\)</span> (or true <span class="math inline">\(\sigma\)</span> if fewer than 3 detections).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat\sigma\)</span></td>
+<td>MLE estimate of <span class="math inline">\(\sigma\)</span> (requires <span class="math inline">\(n \geq 3\)</span>; shown as — otherwise).</td>
+</tr>
+<tr class="odd">
+<td>True <span class="math inline">\(\sigma\)</span></td>
+<td>Current slider value of <span class="math inline">\(\sigma\)</span>.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat{D}\)</span></td>
+<td>Estimated density: <span class="math inline">\(n / (2L \cdot \mathrm{ESW})\)</span>.</td>
+</tr>
+<tr class="odd">
+<td>True <span class="math inline">\(D\)</span></td>
+<td>Realised density <span class="math inline">\(= \text{areaN} / (L \times H)\)</span>, which may differ slightly from the slider due to rounding.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="key-symbols" class="level3">
+<h3 class="anchored" data-anchor-id="key-symbols">Key symbols</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(g(x)\)</span></td>
+<td>Detection function — probability of detecting an animal at perpendicular distance <span class="math inline">\(x\)</span> from the transect.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\sigma\)</span></td>
+<td>Detection scale parameter (km).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(W\)</span></td>
+<td>Truncation distance (km).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathrm{ESW}\)</span></td>
+<td>Effective strip width (km).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\hat\sigma\)</span></td>
+<td>MLE estimate of <span class="math inline">\(\sigma\)</span>.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat{D}\)</span></td>
+<td>Estimated density (animals per km²).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(D\)</span></td>
+<td>True density (animals per km²).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(L\)</span></td>
+<td>Transect length / effort (km).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(n\)</span></td>
+<td>Number of within-<span class="math inline">\(W\)</span> detections.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(b\)</span></td>
+<td>Hazard-rate shape parameter (dimensionless).</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
 <p>An observer traverses a fixed straight transect. Animals within a strip around the transect are detected with probability that declines with perpendicular distance. The recorded distances are then used to estimate detectability and, from that, density.</p>

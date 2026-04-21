@@ -2,6 +2,71 @@
 title: "Lotka-Volterra (LV)"
 ---
 
+## Glossary
+
+### Controls — all modes
+
+| Control | Description |
+|---|---|
+| Speed | Playback speed: Slow / Normal / Fast. |
+| Preset | Named parameter combinations for the current mode. Applied immediately. |
+| $\Delta t$ | RK4 integration time step. Smaller = more accurate but slower; larger = faster but potentially unstable. Default: 0.03. |
+| Unbounded time | Disables the auto-pause checkpoints (default every 50 time units). Simulation runs until manually paused. |
+
+### Controls — predator-prey (classic) mode
+
+| Control | Description |
+|---|---|
+| $\alpha$ | Prey intrinsic growth rate — rate of increase of the prey population in the absence of predators. Default: 1.1. |
+| $\beta$ | Predation rate — rate at which each predator removes prey per unit time. Default: 0.06. |
+| $\delta$ | Predator conversion efficiency — prey consumed per new predator produced. Default: 0.03. |
+| $\gamma$ | Predator death rate — intrinsic rate of decrease of predators in the absence of prey. Default: 0.7. |
+| $N_0$ | Initial prey population. Default: 40. |
+| $P_0$ | Initial predator population. Default: 9. |
+
+### Controls — dynamic predator-prey mode (additional)
+
+Adds logistic prey growth and predator self-limitation to the classic system.
+
+| Control | Description |
+|---|---|
+| Dynamic preset | Named presets: Damped spiral, Slow damping / predator collapse, Tight cycle. |
+| K (prey) | Prey carrying capacity — logistic ceiling for prey growth in the absence of predators. Default: 120. |
+| m (predator) | Predator self-limitation coefficient — intraspecific competition among predators. Default: 0.01. |
+
+### Controls — competition mode
+
+Replaces the predator-prey parameters with two-species competition parameters.
+
+| Control | Description |
+|---|---|
+| Competition preset | Named presets: Coexistence, Species 1 wins, Species 2 wins. |
+| $r_1$ | Intrinsic growth rate of species 1. Default: 0.9. |
+| $r_2$ | Intrinsic growth rate of species 2. Default: 0.8. |
+| $K_1$ | Carrying capacity of species 1. Default: 75. |
+| $K_2$ | Carrying capacity of species 2. Default: 65. |
+| $\alpha_{12}$ | Effect of species 2 on species 1 — per-individual competitive impact. Default: 0.60. |
+| $\alpha_{21}$ | Effect of species 1 on species 2 — per-individual competitive impact. Default: 0.50. |
+
+### Key symbols
+
+| Symbol | Meaning |
+|---|---|
+| $N$ | Prey (or species 1) population size. |
+| $P$ | Predator (or species 2) population size. |
+| $\alpha$ | Prey growth rate (classic / dynamic modes). |
+| $\beta$ | Predation rate (classic / dynamic modes). |
+| $\delta$ | Predator conversion efficiency (classic / dynamic modes). |
+| $\gamma$ | Predator death rate (classic / dynamic modes). |
+| $K$ | Carrying capacity. |
+| $m$ | Predator self-limitation (dynamic mode). |
+| $r_1, r_2$ | Species intrinsic growth rates (competition mode). |
+| $K_1, K_2$ | Species carrying capacities (competition mode). |
+| $\alpha_{12}, \alpha_{21}$ | Interspecific competition coefficients (competition mode). |
+| $\Delta t$ | RK4 integration time step. |
+
+---
+
 ## Overview
 
 Three two-species dynamical systems integrated via RK4, displayed as a live time series and phase-plane trajectory. The three modes are:

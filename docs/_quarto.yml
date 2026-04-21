@@ -6,7 +6,6 @@ project:
     - ds.md
     - secr.md
     - lv.md
-    - glossary.md
 
 website:
   title: "ecodemos docs"
@@ -25,11 +24,10 @@ website:
             href: secr.md
           - text: "Lotka-Volterra"
             href: lv.md
-      - text: "Glossary"
-        href: glossary.md
 
 format:
   html:
     theme: cosmo
-    toc: false
+    toc: true
+    toc-depth: 3
     math: true

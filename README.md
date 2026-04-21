@@ -4,6 +4,8 @@ Interactive, animated simulations of ecological models.
 
 View the demos here: https://amccnnll.github.io/ecodemos/
 
+Full documentation here: https://amccnnll.github.io/ecodemos/docs/ (includes explanation of the theory behind the ecological models and how they're specifically implemented here)
+
 ---
 
 ## Structure
