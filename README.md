@@ -22,7 +22,7 @@ ecodemos/
 
 ## Running locally
 
-ES modules require a local server — opening `index.html` directly doesn't work.
+ES modules require a local server, opening `index.html` directly doesn't work.
 
 ```bash
 python3 -m http.server 8000
