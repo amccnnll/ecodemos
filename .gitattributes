@@ -1,0 +1,2 @@
+# Tell GitHub Linguist to ignore HTML when calculating language stats.
+*.html linguist-detectable=false
