@@ -16,8 +16,9 @@ function buildNetwork() {
   const anal = state.analysis;
   if (!anal) { netContainer.innerHTML = '<p class="bne-empty">Run Generate to see the network.</p>'; return; }
 
-  const cW = netContainer.clientWidth  || 500;
-  const cH = netContainer.clientHeight || 380;
+  const rect = netContainer.getBoundingClientRect();
+  const cW = rect.width  || 500;
+  const cH = rect.height || 460;
 
   if (state.networkView === 'bstar') { drawBstarMatrix(cW, cH); return; }
 

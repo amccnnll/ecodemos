@@ -30,8 +30,9 @@ function buildHexMap() {
   lastHexGrid = hg;
 
   hexContainer.innerHTML = '';
-  const cW = hexContainer.clientWidth  || 500;
-  const cH = hexContainer.clientHeight || 380;
+  const rect = hexContainer.getBoundingClientRect();
+  const cW = rect.width  || 500;
+  const cH = rect.height || 460;
   const { hexes, xMin, xMax, yMin, yMax, hexSize } = hg;
 
   const pad    = hexSize * 0.9;
@@ -185,6 +186,9 @@ state.subscribe(() => {
     updateHexColours();
   }
 });
+
+// Rebuild SVG if the container is resized (e.g. window resize)
+new ResizeObserver(() => { if (state.hexGrid) buildHexMap(); }).observe(hexContainer);
 
 // Initial run — defer so analytics.js has time to register its subscriber
 requestAnimationFrame(() => {
