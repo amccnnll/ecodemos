@@ -24,10 +24,11 @@ The simulation shows two concurrent views of the same scene:
 | Speed | Playback speed: Slow / Normal / Fast. Affects only how fast the observer traverses the transect; does not change what gets detected. |
 | Seed | RNG seed for animal placement (0–99999). Reset with the same seed reproduces the exact same population. |
 | 🎲 New | Draws a new random seed and regenerates the population. |
+| Preset | Named parameter set. Two groups: Cetacean scenarios (harbour porpoise, bottlenose dolphin, common dolphin, minke whale, bowhead whale) and Terrestrial surveys (songbird, shorebird, raptor, bird nest survey, snake). Applying a preset overwrites all Complications sliders and selectors. |
 | Field truth | Detection function used to simulate detections: half-normal or hazard-rate. Takes effect on Reset (if mid-run, affects future detections only). |
 | Model | Detection function used for MLE fitting. Mismatching Field truth and Model produces biased D̂ (warning shown). Takes effect on Reset. |
 | σ | Detection scale (km). For half-normal: distance at which detection probability = $e^{-1/2} \approx 0.607$. For hazard-rate: scale of the decay. Updates live. Default: 0.25 km. |
-| W | Truncation distance (km). Animals beyond W are never detected; stored detections beyond W are excluded from analysis if W is later reduced. Updates live. Default: 0.40 km. |
+| W | Truncation distance (km). Animals beyond W are never detected; stored detections beyond W are excluded from analysis if W is later reduced. Updates live. Default: 0.50 km. |
 | b (shape) | Hazard-rate shape parameter. Visible only when hazard-rate is selected. Higher b = wider flat shoulder near the transect before a sharper falloff. Default: 2.5. |
 | D | True animal density (animals per km²). Takes effect on Reset. Default: 50 /km². |
 | L | Transect length (km). Sets the width of the arena. Takes effect on Reset. Default: 4.0 km. |
@@ -448,7 +449,7 @@ Resets **all** controls to their factory defaults, then calls Reset:
 | Parameter            | Default     |
 | -------------------- | ----------- |
 | $\sigma$             | 0.25 km     |
-| $W$                  | 0.40 km     |
+| $W$                  | 0.50 km     |
 | Density              | 50 /km²     |
 | Transect length      | 4.0 km      |
 | $b$                  | 2.5         |

@@ -336,46 +336,50 @@ window.Quarto = {
 <td>Draws a new random seed and regenerates the population.</td>
 </tr>
 <tr class="even">
+<td>Preset</td>
+<td>Named parameter set. Two groups: Cetacean scenarios (harbour porpoise, bottlenose dolphin, common dolphin, minke whale, bowhead whale) and Terrestrial surveys (songbird, shorebird, raptor, bird nest survey, snake). Applying a preset overwrites all Complications sliders and selectors.</td>
+</tr>
+<tr class="odd">
 <td>Field truth</td>
 <td>Detection function used to simulate detections: half-normal or hazard-rate. Takes effect on Reset (if mid-run, affects future detections only).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Model</td>
 <td>Detection function used for MLE fitting. Mismatching Field truth and Model produces biased D̂ (warning shown). Takes effect on Reset.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>σ</td>
 <td>Detection scale (km). For half-normal: distance at which detection probability = <span class="math inline">\(e^{-1/2} \approx 0.607\)</span>. For hazard-rate: scale of the decay. Updates live. Default: 0.25 km.</td>
 </tr>
-<tr class="odd">
-<td>W</td>
-<td>Truncation distance (km). Animals beyond W are never detected; stored detections beyond W are excluded from analysis if W is later reduced. Updates live. Default: 0.40 km.</td>
-</tr>
 <tr class="even">
+<td>W</td>
+<td>Truncation distance (km). Animals beyond W are never detected; stored detections beyond W are excluded from analysis if W is later reduced. Updates live. Default: 0.50 km.</td>
+</tr>
+<tr class="odd">
 <td>b (shape)</td>
 <td>Hazard-rate shape parameter. Visible only when hazard-rate is selected. Higher b = wider flat shoulder near the transect before a sharper falloff. Default: 2.5.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>D</td>
 <td>True animal density (animals per km²). Takes effect on Reset. Default: 50 /km².</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>L</td>
 <td>Transect length (km). Sets the width of the arena. Takes effect on Reset. Default: 4.0 km.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Distribution</td>
 <td>Spatial distribution of animals: Uniform, Clustered, or Regular. Takes effect on Reset.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>s_clump</td>
 <td>Cluster spread as a fraction of transect length. Visible when Distribution = Clustered. Default: 0.10.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>ρ (regularity)</td>
 <td>Grid jitter: 0 = perfect grid, 1 = maximum jitter. Visible when Distribution = Regular. Default: 0.50.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Keep previous runs</td>
 <td>Overlays the previous runs’ fitted curves and D̂ traces as faded ghost lines (up to 8 retained).</td>
 </tr>
@@ -927,7 +931,7 @@ barHeight[i] = binCount[i] / scale</code></pre>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(W\)</span></td>
-<td>0.40 km</td>
+<td>0.50 km</td>
 </tr>
 <tr class="odd">
 <td>Density</td>

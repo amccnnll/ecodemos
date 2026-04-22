@@ -62,10 +62,26 @@
           <span class="control-label">Preset</span>
           <select id="select-ds-preset" class="fn-select">
             <option value="">— choose —</option>
-            <option value="goodConditions">Good conditions</option>
-            <option value="poorDetectability">Poor detectability</option>
-            <option value="sparsePopulation">Sparse population</option>
-            <option value="shortTransect">Short transect</option>
+            <optgroup label="Cetacean scenarios">
+              <option value="harbourPorpoise">Harbour porpoise</option>
+              <option value="bottlenoseDolphin">Bottlenose dolphin</option>
+              <option value="commonDolphin">Common dolphin</option>
+              <option value="minkeWhale">Minke whale</option>
+              <option value="bowheadWhale">Bowhead whale</option>
+            </optgroup>
+            <optgroup label="Terrestrial surveys">
+              <option value="songbird">Songbird (woodland)</option>
+              <option value="shorebird">Shorebird (estuary)</option>
+              <option value="raptor">Raptor (open landscape)</option>
+              <option value="birdNest">Bird nest survey</option>
+              <option value="snake">Snake (road transect)</option>
+            </optgroup>
+            <optgroup label="Generic teaching">
+              <option value="goodConditions">Good conditions</option>
+              <option value="poorDetectability">Poor detectability</option>
+              <option value="sparsePopulation">Sparse population</option>
+              <option value="shortTransect">Short transect</option>
+            </optgroup>
           </select>
         </div>
       </div>
@@ -104,9 +120,9 @@
           <div class="slider-row">
             <span class="control-label slider-label">W</span>
             <input type="range" id="slider-w" class="param-slider"
-                   min="0.10" max="0.60" step="0.01" value="0.40"
+                   min="0.10" max="1.50" step="0.05" value="0.50"
                    aria-label="Truncation distance W (km)" />
-            <span class="slider-value" id="val-w">0.40 km</span>
+            <span class="slider-value" id="val-w">0.50 km</span>
           </div>
 
           <div class="slider-row" id="row-b" style="display:none">
@@ -120,7 +136,7 @@
           <div class="slider-row">
             <span class="control-label slider-label">D</span>
             <input type="range" id="slider-density" class="param-slider"
-                   min="10" max="200" step="5" value="50"
+                   min="1" max="200" step="1" value="50"
                    aria-label="Animal density (per km²)" />
             <span class="slider-value" id="val-density">50 /km²</span>
           </div>

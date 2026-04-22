@@ -25,8 +25,8 @@ Detection is spatial and imperfect:
 | Speed | Playback speed: Slow / Normal / Fast. |
 | Seed | RNG seed for animal and detector placement. Reset = same layout. 🎲 New = new population and layout. |
 | Detector type | Named preset that adjusts $g_0$ and $\sigma$ to approximate a sensor type: Default, Camera trap, Live trap, Acoustic detector. |
-| $g_0$ | Baseline detection probability at zero distance from an animal's activity centre (0.05–1.0). Updates live. Default: 0.40. |
-| $\sigma$ | Home range / detection scale (km). Controls how steeply detection probability drops with distance from the activity centre. Updates live. Default: 0.20 km. |
+| $g_0$ | Baseline detection probability at zero distance from an animal's activity centre (0.05–1.0). Updates live. Default: 0.20. |
+| $\sigma$ | Home range / detection scale (km). Controls how steeply detection probability drops with distance from the activity centre. Updates live. Default: 0.15 km. |
 | N | Number of animals in the arena. Takes effect on Reset. Default: 10. |
 | K | Number of sampling occasions per run. Takes effect on Reset. Default: 10. |
 | Movement | Named movement preset: Typical resident, Sedentary, Wide-ranging, or Nomad. Sets $\tau$ and $f$. |
@@ -79,7 +79,7 @@ The arena is a square with side length `ARENA_KM = 2.0 km`. It is divided into t
 | Inner study area        | `INNER_KM`  | 1.2 km × 1.2 km |
 | Buffer zone (each side) | `BUFFER_KM` | 0.4 km          |
 
-The buffer is `= 2σ` at the default `σ = 0.20 km`. This is a standard SECR convention: animals whose activity centres lie within `~2σ` of the detector array contribute meaningfully to detections. Animals further out are effectively invisible.
+The buffer is `≈ 2.7σ` at the default `σ = 0.15 km`. This is a standard SECR convention: animals whose activity centres lie within `~2σ` of the detector array contribute meaningfully to detections. Animals further out are effectively invisible.
 
 The canvas is a square. `PX_PER_KM = canvasSize / ARENA_KM`. All world coordinates are in km; pixel coordinates are computed for display only using `worldToPx(wx, wy)`.
 
@@ -279,10 +279,10 @@ These set `g0` and `sigma` simultaneously.
 
 | Preset      | $g_0$ | $\sigma$ (km) | Interpretation                              |
 | ----------- | ----- | ------------- | ------------------------------------------- |
-| Default     | 0.40  | 0.20          | Balanced starting point                     |
-| Camera trap | 0.45  | 0.08          | High detection within narrow field          |
-| Live trap   | 0.60  | 0.05          | Very localised, high if animal passes       |
-| Acoustic    | 0.20  | 0.40          | Wide detection radius, moderate probability |
+| Default     | 0.20  | 0.15          | Balanced starting point                     |
+| Camera trap | 0.25  | 0.08          | High detection within narrow field          |
+| Live trap   | 0.40  | 0.05          | Very localised, high if animal passes       |
+| Acoustic    | 0.12  | 0.40          | Wide detection radius, moderate probability |
 
 ---
 

@@ -45,8 +45,8 @@ Adds logistic prey growth and predator self-limitation to the classic system.
 | Control | Description |
 |---|---|
 | Dynamic preset | Named presets: Damped oscillations, Limit cycle, Predator collapse. All three share the same α/β/δ/γ; only K varies, isolating the effect of prey carrying capacity. |
-| K (prey) | Prey carrying capacity: logistic ceiling for prey growth in the absence of predators. Default: 120. |
-| m (predator) | Predator self-limitation coefficient: intraspecific competition among predators. Default: 0.01. |
+| K (prey) | Prey carrying capacity: logistic ceiling for prey growth in the absence of predators. Default: 60. |
+| m (predator) | Predator self-limitation coefficient: intraspecific competition among predators. Default: 0.00. |
 
 ### Controls: competition mode
 
@@ -196,8 +196,8 @@ Additional parameters:
 
 | Symbol | Role                     | Default | Range       | Step  |
 | ------ | ------------------------ | ------- | ----------- | ----- |
-| $K$    | Prey carrying capacity   | 120     | 20–250      | 1     |
-| $m$    | Predator self-limitation | 0.010   | 0.000–0.200 | 0.001 |
+| $K$    | Prey carrying capacity   | 60      | 20–250      | 1     |
+| $m$    | Predator self-limitation | 0.000   | 0.000–0.200 | 0.001 |
 
 In the engine, $K$ is guarded: `kSafe = max(1e-6, Kdyn)` and `mSafe = max(0, mPred)` to prevent division by zero or negative values.
 

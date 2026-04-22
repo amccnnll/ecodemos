@@ -15,8 +15,8 @@ export const state = {
   delta: 0.03,
   gamma: 0.7,
 
-  Kdyn: 120,
-  mPred: 0.01,
+  Kdyn: 60,
+  mPred: 0,
 
   r1: 0.9,
   r2: 0.8,
@@ -44,6 +44,9 @@ export const state = {
 
   series: [{ t: 0, prey: 40, predator: 9 }],
   phaseSeries: [{ prey: 40, predator: 9 }],
+  // Running maxima for phase plane axes — avoids O(n) scan over phaseSeries every frame
+  phasePreyMax:  40,
+  phasePredMax:  9,
 };
 
 const listeners = new Set();
@@ -78,6 +81,8 @@ export function resetState(next = {}) {
   state.autoPausedAt = null;
   state.series = [{ t: 0, prey: state.prey0, predator: state.predator0 }];
   state.phaseSeries = [{ prey: state.prey0, predator: state.predator0 }];
+  state.phasePreyMax = state.prey0;
+  state.phasePredMax = state.predator0;
   notify();
 }
 
@@ -154,6 +159,8 @@ export function advanceSimulation(steps = 1) {
     state.predator = next.predator;
     state.series.push({ t: state.t, prey: state.prey, predator: state.predator });
     state.phaseSeries.push({ prey: state.prey, predator: state.predator });
+    if (state.prey      > state.phasePreyMax) state.phasePreyMax = state.prey;
+    if (state.predator  > state.phasePredMax) state.phasePredMax = state.predator;
 
     if (state.series.length > MAX_POINTS) {
       state.series.shift();

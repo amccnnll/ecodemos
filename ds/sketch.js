@@ -13,7 +13,7 @@ import { resetState, recordDetection, updateParams, state } from './state.js';
 
 // --- Config constants ---
 const ARENA_W_KM   = 4;      // transect length (km)
-const W_KM         = 0.4;    // truncation distance (km)
+const W_KM         = 0.5;    // truncation distance (km)
 const SIGMA_KM     = 0.25;   // detection scale parameter (km)
 const DENSITY      = 50;     // animals per km²
 const FLASH_FRAMES = 35;     // detection flash duration (~500ms at 60fps)
@@ -205,12 +205,16 @@ new p5(function (p) {
     p.line(0, transectY, p.width, transectY);
   }
 
+  // Colours hoisted — avoids allocating a p5 Color object per animal per frame
+  let colDetected, colUndetected;
+
   function drawAnimals() {
+    if (!colDetected) { colDetected = p.color(200, 50, 50); colUndetected = p.color(190); }
+    p.noStroke();
     for (const animal of animals) {
       const px = animal.x * PX_PER_KM;
       const py = transectY + (animal.y - arenaH / 2) * PX_PER_KM;
-      p.noStroke();
-      p.fill(animal.detected ? p.color(200, 50, 50) : p.color(190));
+      p.fill(animal.detected ? colDetected : colUndetected);
       p.circle(px, py, 6);
     }
   }
@@ -420,6 +424,95 @@ document.getElementById('slider-regularity').addEventListener('input', (e) => {
 
 // Presets — set sliders to a named scenario and reset
 const DS_PRESETS = {
+  // ── Cetacean scenarios ──────────────────────────────────────────────────────
+  harbourPorpoise: {
+    // Dedicated vessel survey (SCANS-style), N. Sea. Highly cryptic — low profile,
+    // short dives, steep falloff. Density representative of N. Sea peak areas.
+    // W/σ ≈ 2.1 gives g(W) ≈ 0.10 — most animals near the boundary missed.
+    sigma: 0.07, W: 0.15, density: 15, transect: 8.0,
+    b: 2.5, truthFn: 'halfNormal', modelFn: 'halfNormal',
+    distribution: 'clustered', clumpScale: 0.08, regularity: 0.50,
+  },
+  bottlenoseDolphin: {
+    // Coastal boat survey (e.g., Moray Firth / Scottish west coast).
+    // Good detectability, moderate density, uniform distribution of residents.
+    // Clean half-normal; "textbook good conditions" for a medium cetacean.
+    sigma: 0.20, W: 0.50, density: 5, transect: 6.0,
+    b: 2.5, truthFn: 'halfNormal', modelFn: 'halfNormal',
+    distribution: 'uniform', clumpScale: 0.10, regularity: 0.50,
+  },
+  commonDolphin: {
+    // Offshore vessel survey (Bay of Biscay / Celtic Sea). Schooling species —
+    // detection is near-certain on the transect then drops sharply, giving a
+    // pronounced shoulder best captured by the hazard-rate function.
+    // Clustered distribution reflects schools rather than individuals.
+    sigma: 0.28, W: 0.60, density: 5, transect: 8.0,
+    b: 3.5, truthFn: 'hazardRate', modelFn: 'hazardRate',
+    distribution: 'clustered', clumpScale: 0.12, regularity: 0.50,
+  },
+  minkeWhale: {
+    // North Atlantic vessel survey. Solitary, conspicuous blow visible at
+    // distance — wide detection range relative to typical whale density.
+    // Low density means few detections and noisy D̂ despite good g(0).
+    sigma: 0.40, W: 1.00, density: 2, transect: 8.0,
+    b: 2.5, truthFn: 'halfNormal', modelFn: 'halfNormal',
+    distribution: 'uniform', clumpScale: 0.10, regularity: 0.50,
+  },
+  bowheadWhale: {
+    // Aerial survey of an aggregation patch (e.g., Bering Sea ice lead/feeding
+    // ground). Large body, easy to spot, but very sparse even in aggregations.
+    // High clustering mimics the patchy ice-edge distribution.
+    // Expect ~8–12 sightings — deliberately noisy D̂ to show sparse-data variance.
+    sigma: 0.45, W: 1.00, density: 1, transect: 8.0,
+    b: 2.5, truthFn: 'halfNormal', modelFn: 'halfNormal',
+    distribution: 'clustered', clumpScale: 0.20, regularity: 0.50,
+  },
+  // ── Terrestrial surveys ─────────────────────────────────────────────────────
+  songbird: {
+    // Woodland/scrub line transect (BTO-style). Small passerine, cryptic in
+    // vegetation — detected mostly by sight at very close range. Clustered
+    // distribution reflects territory/flock aggregations.
+    // W/σ = 2.4; expect ~55–65 detections for typical run.
+    sigma: 0.05, W: 0.12, density: 150, transect: 3.0,
+    b: 2.5, truthFn: 'halfNormal', modelFn: 'halfNormal',
+    distribution: 'clustered', clumpScale: 0.10, regularity: 0.50,
+  },
+  shorebird: {
+    // Open estuary/mudflat wader survey (curlew, oystercatcher).
+    // Conspicuous, detectable at moderate distance; clusters around feeding patches.
+    // W/σ = 2.5; ~35–40 detections expected.
+    sigma: 0.20, W: 0.50, density: 15, transect: 5.0,
+    b: 2.5, truthFn: 'halfNormal', modelFn: 'halfNormal',
+    distribution: 'clustered', clumpScale: 0.15, regularity: 0.50,
+  },
+  raptor: {
+    // Territorial raptor survey (red kite, buzzard) — aerial or vehicle transect
+    // across open landscape. Very visible, very sparse; territorial spacing
+    // gives a regular spatial pattern. Deliberately few detections (~8–10)
+    // to illustrate noisy D̂ under sparse data. W/σ ≈ 2.2.
+    sigma: 0.45, W: 1.00, density: 1, transect: 8.0,
+    b: 2.5, truthFn: 'halfNormal', modelFn: 'halfNormal',
+    distribution: 'regular', clumpScale: 0.10, regularity: 0.80,
+  },
+  birdNest: {
+    // Ground or scrub nest survey (lapwing, curlew). Observer walks slowly;
+    // nests are cryptic static objects detected only at very close approach.
+    // High density, very short detection strip — most nests missed.
+    // W/σ = 2.7; ~30 detections expected at density cap.
+    sigma: 0.03, W: 0.08, density: 200, transect: 2.0,
+    b: 2.5, truthFn: 'halfNormal', modelFn: 'halfNormal',
+    distribution: 'clustered', clumpScale: 0.08, regularity: 0.50,
+  },
+  snake: {
+    // Road/path transect for adder or grass snake. Near-certain detection
+    // within ~1–2 m of path (sharp shoulder), then rapid falloff — hazard-rate
+    // with high b captures the "either right there or missed" behaviour.
+    // Clustered around basking habitat. W/σ = 2.5; ~18–22 detections expected.
+    sigma: 0.04, W: 0.10, density: 80, transect: 3.0,
+    b: 6.0, truthFn: 'hazardRate', modelFn: 'hazardRate',
+    distribution: 'clustered', clumpScale: 0.12, regularity: 0.50,
+  },
+  // ── Generic teaching scenarios ──────────────────────────────────────────────
   goodConditions: {
     sigma: 0.25, W: 0.40, density: 50, transect: 4.0,
     b: 2.5, truthFn: 'halfNormal', modelFn: 'halfNormal',
@@ -439,7 +532,7 @@ const DS_PRESETS = {
   },
   shortTransect: {
     // Short survey: high variance in D̂ despite good conditions
-    sigma: 0.25, W: 0.40, density: 80, transect: 1.5,
+    sigma: 0.25, W: 0.40, density: 50, transect: 1.5,
     b: 2.5, truthFn: 'halfNormal', modelFn: 'halfNormal',
     distribution: 'uniform', clumpScale: 0.10, regularity: 0.50,
   },

@@ -26,15 +26,15 @@ import {
 
 // ─── Config constants ─────────────────────────────────────────────────────────
 
-// Buffer = 2σ at default σ=0.20 (0.40km). Inner = total − 2×buffer = 1.20km.
-// Smaller buffer keeps the inner zone visually prominent and ensures most
-// animals are close enough to the detector array to be detectable.
+// Buffer ≈ 2.7σ at default σ=0.15 (0.40km). Inner = total − 2×buffer = 1.20km.
+// Keeping the buffer at 0.40km gives adequate coverage even when σ is raised
+// to the acoustic preset value (0.40km), where 1σ ≈ buffer edge.
 const BUFFER_KM   = 0.4;              // buffer zone around inner study area (km)
 const INNER_KM    = 1.2;              // inner study area side length (km)
 const ARENA_KM    = INNER_KM + 2 * BUFFER_KM; // total arena side (= 2 km)
 
-const G0_DEFAULT       = 0.4;
-const SIGMA_DEFAULT    = 0.20;        // km — buffer ≈ 2σ so most animals overlap the detector array
+const G0_DEFAULT       = 0.20;
+const SIGMA_DEFAULT    = 0.15;        // km — buffer ≈ 2.7σ so buffer-zone animals are still detectable
 const N_DEFAULT        = 10;          // animals — visual clarity over statistical power
 const K_DEFAULT        = 10;
 const GRID_N_DEFAULT   = 4;           // 4×4 = 16 detectors
@@ -54,10 +54,10 @@ const MOVEMENT_PRESETS = {
 };
 
 const DETECTOR_PRESETS = {
-  default:  { g0: 0.40, sigma: 0.20 },
-  camera:   { g0: 0.45, sigma: 0.08 },
-  liveTrap: { g0: 0.60, sigma: 0.05 },
-  acoustic: { g0: 0.20, sigma: 0.40 },
+  default:  { g0: 0.20, sigma: 0.15 },  // generic survey; matches G0_DEFAULT/SIGMA_DEFAULT
+  camera:   { g0: 0.25, sigma: 0.08 },  // trail camera: focused field of view, short range
+  liveTrap: { g0: 0.40, sigma: 0.05 },  // baited trap: high capture rate, highly localised
+  acoustic: { g0: 0.12, sigma: 0.40 },  // hydrophone/bat detector: long range, lower peak prob
 };
 
 // Effective detection σ = intrinsic σ / √fidelity.
