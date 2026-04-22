@@ -124,10 +124,11 @@ export function generateHexGrid({ cols = 18, rows = 14, hexSize = 30, seed = 42 
 
       // D_h: depth-like (increases away from coast)
       const D_h = clamp01(distCoast * 0.75 + 0.25 * perlinD(normX * 4, normY * 4) + 0.1);
-      // P_h: productivity (Perlin, moderate correlation with depth)
+      // P_h: productivity (Perlin, independent of coastline)
       const P_h = clamp01(0.5 + 0.45 * perlinP(normX * 3 + 1, normY * 3 + 1));
-      // R_h: disturbance (highest near coast)
-      const R_h = clamp01((1 - distCoast) * 0.55 + 0.45 * Math.max(0, perlinR(normX * 5, normY * 5)));
+      // R_h: disturbance (pure Perlin — patchy like shipping lanes/recreation, not a simple gradient)
+      // Kept independent of D_h so all three axes span genuine 3D preference space.
+      const R_h = clamp01(0.5 + 0.45 * Math.max(-1, Math.min(1, perlinR(normX * 5, normY * 5))));
       // Q_h: composite habitat quality
       const Q_h = clamp01(0.4 * D_h + 0.4 * P_h - 0.25 * R_h + 0.2);
 

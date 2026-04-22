@@ -18,14 +18,26 @@ export function runAnalysis(simData, params) {
     }
   }
 
-  // ── Weighted Jaccard ─────────────────────────────────────────────────────
+  // ── Row-normalise B* before Jaccard ─────────────────────────────────────
+  // Normalise each dolphin's B* row to unit sum (probability distribution over
+  // hexes) so Jaccard compares habitat-preference shape, not absolute sighting
+  // counts. This removes activity-level variation and makes same-guild dolphins
+  // comparable even when one has far more sightings than another.
+  const BnormI = new Float64Array(N * H);
+  for (let i = 0; i < N; i++) {
+    let tot = 0;
+    for (let hi = 0; hi < H; hi++) tot += Bstar[i * H + hi];
+    if (tot > 0) for (let hi = 0; hi < H; hi++) BnormI[i * H + hi] = Bstar[i * H + hi] / tot;
+  }
+
+  // ── Weighted Jaccard on normalised profiles ──────────────────────────────
   const jaccard = new Float64Array(N * N);
   for (let i = 0; i < N; i++) {
     for (let j = i + 1; j < N; j++) {
       let num = 0, den = 0;
       const offI = i * H, offJ = j * H;
       for (let hi = 0; hi < H; hi++) {
-        const a = Bstar[offI + hi], b = Bstar[offJ + hi];
+        const a = BnormI[offI + hi], b = BnormI[offJ + hi];
         num += a < b ? a : b;
         den += a > b ? a : b;
       }

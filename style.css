@@ -413,11 +413,11 @@ a {
   overflow-y: auto;
 }
 
-/* Sim pane: hex map left, network panel right */
+/* Sim pane: hex map left, network panel right — network gets slightly more width */
 .module-layout--bne .pane-sim {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 500px;
+  grid-template-columns: 5fr 6fr;
+  grid-template-rows: 540px;
   gap: 1px;
   background: #e0e0e0;
   padding: 0;
@@ -429,7 +429,7 @@ a {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: 500px;
+  height: 540px;
 }
 
 #bne-hexmap-svg {
@@ -442,7 +442,7 @@ a {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: 500px;
+  height: 540px;
 }
 
 #bne-network-view {
@@ -517,6 +517,24 @@ a {
   letter-spacing: 0.04em;
   color: #888;
   margin: 0 0 0.4rem;
+}
+
+/* BNE scatter panel (below main grid) */
+.bne-analytics {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 6px 8px 24px;
+}
+
+.bne-scatter-panel {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 10px 14px 6px;
+}
+
+#chart-bne-scatter {
+  height: 240px;
+  position: relative;
 }
 
 /* ─── SECR module overrides ─────────────────────────────────────────────────── */

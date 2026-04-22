@@ -94,7 +94,9 @@ export function generateSimulation({
   }
 
   // ── Latent use λ per dolphin × sea hex ────────────────────────────────
-  // log λ_{i,h} = -4 + activity + 3.0 * guild_score + home_range_penalty
+  // log λ_{i,h} = -4.0 + activity + 6.0 * guild_score + home_range_penalty
+  // Guild coefficient 6.0 gives exp(6) ≈ 403× contrast between best and worst
+  // hexes for a guild, creating clearly distinct B* profiles across guilds.
   const lambdaIH = new Float64Array(N * H);
   for (let i = 0; i < N; i++) {
     const d = dolphins[i];
@@ -104,7 +106,7 @@ export function generateSimulation({
       const hx = seaHexes[hi];
       const dx = hx.x - d.mu_x, dy = hx.y - d.mu_y;
       const homeRangePenalty = -(dx * dx + dy * dy) / sig2;
-      const logLam = -4.0 + d.activity + 3.0 * guildScores[g][hi] + homeRangePenalty;
+      const logLam = -4.0 + d.activity + 6.0 * guildScores[g][hi] + homeRangePenalty;
       lambdaIH[i * H + hi] = Math.exp(logLam);
     }
   }

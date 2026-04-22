@@ -12,6 +12,15 @@ const GUILD_COLS = d3.schemeTableau10;
 const LAND_FILL  = '#c8c0b0';
 const SEA_FILL   = '#dbeeff';
 
+function blendWithWhite(hexCol, t) {
+  const c = d3.color(hexCol);
+  if (!c) return hexCol;
+  c.r = Math.round(c.r + (255 - c.r) * t);
+  c.g = Math.round(c.g + (255 - c.g) * t);
+  c.b = Math.round(c.b + (255 - c.b) * t);
+  return c.formatHex();
+}
+
 function normArr(arr) {
   let mn = Infinity, mx = -Infinity;
   for (const v of arr) { if (v < mn) mn = v; if (v > mx) mx = v; }
@@ -101,21 +110,32 @@ function updateHexColours() {
 
   } else if (layer === 'guild' && anal) {
     const { Bstar, communities, N } = anal;
-    const commW = new Array(H).fill(null).map(() => new Map());
+    // Accumulate total B* weight and per-community weight for each sea hex
+    const hexTotals = new Float64Array(H);
+    const commW     = new Array(H).fill(null).map(() => new Map());
     for (let i = 0; i < N; i++) {
       const c = communities[i]; if (c < 0) continue;
       for (let hi = 0; hi < H; hi++) {
         const w = Bstar[i * H + hi]; if (w <= 0) continue;
         commW[hi].set(c, (commW[hi].get(c) || 0) + w);
+        hexTotals[hi] += w;
       }
     }
-    const domComm = commW.map(m => {
+    // Dominant community + its share of total B* weight for each hex
+    const domResult = commW.map((m, hi) => {
       let best = -1, bestW = 0;
       for (const [c, w] of m) { if (w > bestW) { bestW = w; best = c; } }
-      return best;
+      const share = hexTotals[hi] > 0 ? bestW / hexTotals[hi] : 0;
+      return { comm: best, share };
     });
-    const lut = new Map(seaHexes.map((h, i) => [h.hex_id, domComm[i]]));
-    seaColour = h => { const c = lut.get(h.hex_id); return c >= 0 ? GUILD_COLS[c % 10] : SEA_FILL; };
+    const lut = new Map(seaHexes.map((h, i) => [h.hex_id, domResult[i]]));
+    // Full colour = majority (>50%); pale = plurality only
+    seaColour = h => {
+      const res = lut.get(h.hex_id);
+      if (!res || res.comm < 0) return SEA_FILL;
+      const base = GUILD_COLS[res.comm % 10];
+      return res.share > 0.5 ? base : blendWithWhite(base, 0.55);
+    };
 
   } else if (layer === 'individual' && anal && state.selectedDolphin >= 0) {
     const { Bstar, dolphins, N } = anal;
