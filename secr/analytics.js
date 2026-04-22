@@ -13,6 +13,19 @@
 import { subscribe, state } from './state.js';
 import { detectionSurface, computeESA_K } from '../src/secr-engine.js';
 
+// Detection surface cache — recomputed only when g0/sigmaEff/detectors change
+let _surfCache = { key: null, cols: 0, rows: 0, cells: null };
+
+function getCachedSurface(detectors, g0, sigmaEff, arenaW, arenaH, cols, rows) {
+  if (!detectors || detectors.length === 0) return [];
+  const key = `${g0}|${sigmaEff}|${arenaW}|${arenaH}|${cols}|${rows}|`
+    + detectors.map(d => `${d.x},${d.y}`).join(';');
+  if (key === _surfCache.key) return _surfCache.cells;
+  const cells = detectionSurface(detectors, g0, sigmaEff, arenaW, arenaH, cols, rows);
+  _surfCache = { key, cells };
+  return cells;
+}
+
 // Match sketch.js — per-animal colours for capture history row headers
 const ANIMAL_COLOURS = [
   '#4080ff', '#dc5050', '#3cb43c', '#c850c8',
@@ -119,9 +132,9 @@ function updateSurface(s) {
   const cellPxH  = innerH / rows;
   const hasDetectors = s.detectors && s.detectors.length > 0;
 
-  // Compute surface (only if detectors exist)
+  // Compute surface (cached — only recomputes when g0/sigmaEff/detectors change)
   const cells = hasDetectors
-    ? detectionSurface(s.detectors, s.g0, s.sigmaEff, s.arenaW, s.arenaH, cols, rows)
+    ? getCachedSurface(s.detectors, s.g0, s.sigmaEff, s.arenaW, s.arenaH, cols, rows)
     : Array.from({ length: cols * rows }, (_, i) => ({
         cx: ((i % cols) + 0.5) * (s.arenaW / cols),
         cy: (Math.floor(i / cols) + 0.5) * (s.arenaH / rows),
@@ -328,24 +341,39 @@ function updateDhat(s) {
   const trueD    = s.trueD;
 
   // Compute D̂ history up to current k.
-  // ESA must use the K-occasion formula: ∫∫ [1−(1−p₁)^ki] dx dy, where ki grows
-  // with each occasion. Precompute the detection surface once, then derive per-ki
-  // ESA by reducing over cells — avoids re-running detectionSurface k times.
+  // ESA = ∫∫ [1−(1−p₁)^ki] dx dy. Precompute the detection surface once via cache,
+  // then track (1−p)^ki incrementally (multiply by (1−p) each occasion) to avoid
+  // Math.pow and repeated array scans.
   const hasDetectors = s.detectors && s.detectors.length > 0;
   const COLS = 60, ROWS = 60;
   const surface  = hasDetectors
-    ? detectionSurface(s.detectors, s.g0, s.sigmaEff, s.arenaW, s.arenaH, COLS, ROWS)
+    ? getCachedSurface(s.detectors, s.g0, s.sigmaEff, s.arenaW, s.arenaH, COLS, ROWS)
     : [];
   const cellArea = s.arenaW * s.arenaH / (COLS * ROWS);
 
   const history = [];
   if (surface.length > 0 && k > 0) {
+    // Sort captures by occasion once; walk in sync with ki loop
+    const sorted = captures.slice().sort((a, b) => a.k - b.k);
+    let ci = 0;
+    const capturedIds = new Set();
+    // nonDetect[i] = (1 − p_i)^ki, updated by multiplying (1−p_i) each occasion
+    const nonDetect = new Float64Array(surface.length);
+    for (let i = 0; i < surface.length; i++) nonDetect[i] = 1;
+
     for (let ki = 1; ki <= k; ki++) {
-      const capturedByK = new Set(captures.filter(c => c.k <= ki).map(c => c.animalId));
-      const M      = capturedByK.size;
-      const esa_ki = surface.reduce((sum, c) => sum + (1 - Math.pow(1 - c.p, ki)) * cellArea, 0);
-      const dhat   = esa_ki > 0 ? M / esa_ki : 0;
-      history.push({ k: ki, dhat });
+      // Accumulate (1−p)^ki incrementally — no Math.pow
+      for (let i = 0; i < surface.length; i++) nonDetect[i] *= (1 - surface[i].p);
+      // Advance capture pointer
+      while (ci < sorted.length && sorted[ci].k <= ki) {
+        capturedIds.add(sorted[ci].animalId);
+        ci++;
+      }
+      const M = capturedIds.size;
+      let esa_ki = 0;
+      for (let i = 0; i < surface.length; i++) esa_ki += 1 - nonDetect[i];
+      esa_ki *= cellArea;
+      history.push({ k: ki, dhat: esa_ki > 0 ? M / esa_ki : 0 });
     }
   }
 

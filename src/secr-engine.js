@@ -12,7 +12,6 @@
  *   computeESA(detectors, g0, sigma, arenaW, arenaH, cols, rows, habitatFn)
  */
 
-import { halfNormal } from './stats.js';
 
 // ─── Animal placement ─────────────────────────────────────────────────────────
 
@@ -99,32 +98,37 @@ export function stepAnimal(
   springStr     = 0.005,
   drag          = 0.08,
 ) {
-  // Gaussian noise via Box-Muller (2 uniform samples → 2 independent N(0,1))
-  const u1 = Math.max(rng(), 1e-10);
-  const r  = Math.sqrt(-2 * Math.log(u1));
-  const th = 2 * Math.PI * rng();
-  const nx = r * Math.cos(th) * noiseScale;
-  const ny = r * Math.sin(th) * noiseScale;
+  // Gaussian noise via polar form — avoids cos/sin, replaces Box-Muller trig calls.
+  // Expected ~1.27 RNG draws per pair; rejection probability = 1 - π/4 ≈ 21%.
+  let u, v, s;
+  do {
+    u = rng() * 2 - 1;
+    v = rng() * 2 - 1;
+    s = u * u + v * v;
+  } while (s >= 1 || s === 0);
+  const mul = Math.sqrt(-2 * Math.log(s) / s) * noiseScale;
 
   // OUV update: drag velocity, apply spring toward home centre, add noise
   let vx = (animal.vx ?? 0) * (1 - drag)
          + springStr * (animal.cx - animal.x)
-         + nx;
+         + u * mul;
   let vy = (animal.vy ?? 0) * (1 - drag)
          + springStr * (animal.cy - animal.y)
-         + ny;
+         + v * mul;
 
   // Update position
   let x = animal.x + vx;
   let y = animal.y + vy;
 
   // Reflect off arena walls (preserves speed, prevents wall-hugging)
-  if (x < 0)      { x = -x;            vx = -vx; }
+  if (x < 0)      { x = -x;             vx = -vx; }
   if (x > arenaW) { x = 2 * arenaW - x; vx = -vx; }
-  if (y < 0)      { y = -y;            vy = -vy; }
+  if (y < 0)      { y = -y;             vy = -vy; }
   if (y > arenaH) { y = 2 * arenaH - y; vy = -vy; }
 
-  return { ...animal, x, y, vx, vy };
+  // Mutate in place — avoids allocating a new object every frame per animal
+  animal.x = x; animal.y = y; animal.vx = vx; animal.vy = vy;
+  return animal;
 }
 
 // ─── Detection ────────────────────────────────────────────────────────────────
@@ -137,12 +141,14 @@ export function stepAnimal(
 // position — consistent with SECR theory where g(d) is a marginalised home-range
 // detection function, not an instantaneous proximity function.
 export function tryDetectsOnOccasion(animals, detectors, g0, sigma, rng) {
-  const captures = [];
+  const captures  = [];
+  const inv2s2    = 1 / (2 * sigma * sigma); // precompute once per occasion
   for (const animal of animals) {
+    const ax = animal.cx, ay = animal.cy;
     for (const detector of detectors) {
-      const d = Math.hypot(animal.cx - detector.x, animal.cy - detector.y);
-      const g = g0 * halfNormal(d, sigma);
-      if (rng() < g) {
+      const dx = ax - detector.x;
+      const dy = ay - detector.y;
+      if (rng() < g0 * Math.exp(-(dx * dx + dy * dy) * inv2s2)) {
         captures.push({ animalId: animal.id, detectorId: detector.id });
       }
     }
@@ -154,12 +160,13 @@ export function tryDetectsOnOccasion(animals, detectors, g0, sigma, rng) {
 
 // Single-occasion detection probability for a home range centre at (cx, cy).
 // p(cx,cy) = 1 − ∏_d (1 − g(dist((cx,cy), d)))
-function _pAtPoint(cx, cy, detectors, g0, sigma) {
+function _pAtPoint(cx, cy, detectors, g0, inv2s2) {
   let logNonDetect = 0;
   for (const det of detectors) {
-    const d = Math.hypot(cx - det.x, cy - det.y);
-    const g = g0 * halfNormal(d, sigma);
-    logNonDetect += Math.log(1 - g + 1e-15); // guard against log(0)
+    const dx = cx - det.x;
+    const dy = cy - det.y;
+    const g  = g0 * Math.exp(-(dx * dx + dy * dy) * inv2s2);
+    logNonDetect += Math.log(1 - g + 1e-15);
   }
   return 1 - Math.exp(logNonDetect);
 }
@@ -177,14 +184,15 @@ export function detectionSurface(
   rows      = 60,
   habitatFn = () => 1,
 ) {
-  const cellW = arenaW / cols;
-  const cellH = arenaH / rows;
-  const cells = [];
+  const cellW  = arenaW / cols;
+  const cellH  = arenaH / rows;
+  const inv2s2 = 1 / (2 * sigma * sigma); // precompute once for all cells
+  const cells  = [];
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       const cx = (col + 0.5) * cellW;
       const cy = (row + 0.5) * cellH;
-      cells.push({ cx, cy, p: _pAtPoint(cx, cy, detectors, g0, sigma) * habitatFn(cx, cy) });
+      cells.push({ cx, cy, p: _pAtPoint(cx, cy, detectors, g0, inv2s2) * habitatFn(cx, cy) });
     }
   }
   return cells;

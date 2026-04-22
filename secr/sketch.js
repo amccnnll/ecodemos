@@ -101,6 +101,22 @@ let speed         = 'normal';
 let clearDetectorsFn = null;
 let showCentroids    = false;  // controlled by toggle-centroids checkbox
 
+// Cached per-frame movement params — recalculated only when inputs change
+let _cachedSpringStr  = 0;
+let _cachedNoiseScale = 0;
+let _cachedParamKey   = '';
+
+function getMovementParams(fpk) {
+  const key = `${tau}|${sigma}|${fidelity}|${fpk}`;
+  if (key !== _cachedParamKey) {
+    const drag       = 0.08;
+    _cachedSpringStr  = drag / (tau * fpk);
+    _cachedNoiseScale = sigma * drag * Math.sqrt(2 / (fidelity * tau * fpk));
+    _cachedParamKey   = key;
+  }
+  return { springStr: _cachedSpringStr, noiseScale: _cachedNoiseScale };
+}
+
 // ─── p5 sketch ────────────────────────────────────────────────────────────────
 
 new p5(function (p) {
@@ -110,8 +126,10 @@ new p5(function (p) {
   let detectionRng;         // unseeded — governs occasion detection draws
   let animals     = [];
   let detectors   = [];
-  let flashes     = [];     // [{ x, y, col, frame }]
-  let trails      = new Map();  // animalId → [{x, y}], capped at TRAIL_LENGTH
+  let detectorMap = new Map(); // id → detector, rebuilt when detectors change
+  let flashes     = [];        // [{ x, y, col, frame }]
+  // Per-animal circular trail buffers: avoid per-frame array allocation and O(n) shift
+  let trailBufs   = new Map(); // animalId → { xs: Float32Array, ys: Float32Array, head, count }
   let phase       = 'idle'; // 'idle' | 'running' | 'paused' | 'complete'
   let currentK    = 0;
   let targetK     = K_DEFAULT; // occasions to run before stopping (extends on Run again)
@@ -120,6 +138,13 @@ new p5(function (p) {
 
   // Briefly highlight animals that were just captured: Map(animalId → framesLeft)
   const recentCaptures = new Map();
+
+  // Keeps detectors, detectorMap, and state in sync
+  function setDetectors(dets) {
+    detectors   = dets;
+    detectorMap = new Map(dets.map(d => [d.id, d]));
+    updateDetectors(dets);
+  }
 
   // All 7 animal SVGs loaded in preload; we render animalImgs[iconIndex]
   const animalImgs = [];
@@ -146,7 +171,7 @@ new p5(function (p) {
     // Expose detector-clear to module-level listener
     clearDetectorsFn = () => {
       detectors = [];
-      updateDetectors(detectors);
+      setDetectors(detectors);
     };
   };
 
@@ -162,34 +187,28 @@ new p5(function (p) {
 
     if (phase === 'running') {
       const fpk = FRAMES_PER_OCC[speed] ?? 120;
+      const { springStr, noiseScale } = getMovementParams(fpk);
 
-      // OUV movement parameters derived from UI sliders.
-      // Derivation (overdamped Langevin, continuous-time limit):
-      //   Position autocorrelation time τ_x = drag / Ks  →  Ks = drag / (τ·fpk)
-      //   Equilibrium var(x) = noiseScale² / (2·Ks·drag) = σ²/fidelity
-      //   → noiseScale = σ · drag · √(2 / (fidelity · τ · fpk))
-      // τ sets crossing time; fidelity purely controls noise amplitude (range tightness).
-      const drag       = 0.08;
-      const springStr  = drag / (tau * fpk);
-      const noiseScale = sigma * drag * Math.sqrt(2 / (fidelity * tau * fpk));
-
-      // Step all animals (updates true x, y, vx, vy) then lerp display positions
-      animals = animals.map(a => {
-        const stepped = stepAnimal(a, ARENA_KM, ARENA_KM, movementRng, noiseScale, springStr, drag);
-        return {
-          ...stepped,
-          dx: a.dx + DISPLAY_LERP * (stepped.x - a.dx),
-          dy: a.dy + DISPLAY_LERP * (stepped.y - a.dy),
-        };
-      });
+      // Step all animals in place (mutates x/y/vx/vy), then lerp display positions
+      for (const a of animals) {
+        const odx = a.dx, ody = a.dy;
+        stepAnimal(a, ARENA_KM, ARENA_KM, movementRng, noiseScale, springStr, 0.08);
+        a.dx = odx + DISPLAY_LERP * (a.x - odx);
+        a.dy = ody + DISPLAY_LERP * (a.y - ody);
+      }
       updatePositions(animals);
 
-      // Record smoothed display positions into trail
-      for (const animal of animals) {
-        let trail = trails.get(animal.id);
-        if (!trail) { trail = []; trails.set(animal.id, trail); }
-        trail.push({ x: animal.dx, y: animal.dy });
-        if (trail.length > TRAIL_LENGTH) trail.shift();
+      // Record smoothed display positions into pre-allocated circular buffers
+      for (const a of animals) {
+        let tb = trailBufs.get(a.id);
+        if (!tb) {
+          tb = { xs: new Float32Array(TRAIL_LENGTH), ys: new Float32Array(TRAIL_LENGTH), head: 0, count: 0 };
+          trailBufs.set(a.id, tb);
+        }
+        tb.xs[tb.head] = a.dx;
+        tb.ys[tb.head] = a.dy;
+        tb.head = (tb.head + 1) % TRAIL_LENGTH;
+        if (tb.count < TRAIL_LENGTH) tb.count++;
       }
 
       // Tick toward next occasion
@@ -221,7 +240,7 @@ new p5(function (p) {
     targetK      = K;
     framesSinceOcc = 0;
     flashes      = [];
-    trails       = new Map();
+    trailBufs    = new Map();
     recentCaptures.clear();
 
     const innerX0 = BUFFER_KM;
@@ -244,7 +263,7 @@ new p5(function (p) {
     resetState({ N, K, trueD, arenaW: ARENA_KM, arenaH: ARENA_KM,
                  innerW: INNER_KM, innerH: INNER_KM, innerX0, innerY0 });
     updatePositions(animals);
-    updateDetectors(detectors);
+    setDetectors(detectors);
     updateParams({ g0, sigma, sigmaEff: computeSigmaEff() });
     syncPlayBtn();
     syncSeedInput();
@@ -269,8 +288,8 @@ new p5(function (p) {
 
     // Spawn detection flashes (one per capture event, at the detector position)
     for (const c of captures) {
-      const det  = detectors.find(d => d.id === c.detectorId);
-      const col  = ANIMAL_COLOURS[c.animalId % ANIMAL_COLOURS.length];
+      const det = detectorMap.get(c.detectorId);
+      const col = ANIMAL_COLOURS[c.animalId % ANIMAL_COLOURS.length];
       if (det) flashes.push({ x: det.x, y: det.y, col, frame: 0 });
       recentCaptures.set(c.animalId, FLASH_FRAMES);
     }
@@ -425,34 +444,35 @@ new p5(function (p) {
   }
 
   // Draw each animal's movement trail as a smooth fading Catmull-Rom curve.
-  // The trail is split into CHUNKS segments, each drawn with increasing opacity,
-  // giving a fade-in effect from oldest to most recent position.
+  // Reads from circular Float32Array buffers — no per-frame allocation.
   function drawTrails() {
     const CHUNKS = 5;
     p.noFill();
     for (const animal of animals) {
-      const trail = trails.get(animal.id);
-      if (!trail || trail.length < 4) continue;
+      const tb = trailBufs.get(animal.id);
+      if (!tb || tb.count < 4) continue;
       const col       = ANIMAL_COLOURS[animal.id % ANIMAL_COLOURS.length];
-      const chunkSize = Math.ceil(trail.length / CHUNKS);
+      const n         = tb.count;
+      const chunkSize = Math.ceil(n / CHUNKS);
 
       for (let chunk = 0; chunk < CHUNKS; chunk++) {
         const iStart = chunk * chunkSize;
-        const iEnd   = Math.min(iStart + chunkSize + 1, trail.length); // +1 for overlap
+        const iEnd   = Math.min(iStart + chunkSize + 1, n);
         if (iEnd - iStart < 2) continue;
 
         p.stroke(col[0], col[1], col[2], ((chunk + 1) / CHUNKS) * 190);
         p.strokeWeight(1.5);
         p.beginShape();
-        // Duplicate first/last points as Catmull-Rom control vertices
-        const { px: cx0, py: cy0 } = worldToPx(trail[iStart].x,   trail[iStart].y);
-        const { px: cxN, py: cyN } = worldToPx(trail[iEnd-1].x, trail[iEnd-1].y);
-        p.curveVertex(cx0, cy0);
+        // Read circular buffer in logical order: oldest (0) → newest (n-1)
+        const base = tb.head - n + TRAIL_LENGTH;
+        const i0px = (base + iStart)     % TRAIL_LENGTH;
+        const iNpx = (base + iEnd - 1)   % TRAIL_LENGTH;
+        p.curveVertex(tb.xs[i0px] * PX_PER_KM, tb.ys[i0px] * PX_PER_KM);
         for (let i = iStart; i < iEnd; i++) {
-          const { px, py } = worldToPx(trail[i].x, trail[i].y);
-          p.curveVertex(px, py);
+          const bi = (base + i) % TRAIL_LENGTH;
+          p.curveVertex(tb.xs[bi] * PX_PER_KM, tb.ys[bi] * PX_PER_KM);
         }
-        p.curveVertex(cxN, cyN);
+        p.curveVertex(tb.xs[iNpx] * PX_PER_KM, tb.ys[iNpx] * PX_PER_KM);
         p.endShape();
       }
     }
@@ -595,7 +615,7 @@ new p5(function (p) {
       detectors.push({ id: detectors.length, x: wx, y: wy });
     }
 
-    updateDetectors(detectors);
+    setDetectors(detectors);
   };
 
 }, document.getElementById('sim-container'));
