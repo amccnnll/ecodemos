@@ -54,8 +54,9 @@ export function generateSimulation({
   T             = 6,
   effortBias    = 0.7,
   detectionProb = 0.3,
-  sigmaSpecialist = 0.28,  // home-range scale as fraction of domain diagonal
-  sigmaGeneralist = 0.55,
+  sigmaScale    = 0.40,  // uniform home-range scale as fraction of domain diagonal
+  specCoeff     = 10.0,  // guild affinity strength for specialists (strong habitat fidelity)
+  genCoeff      = 5.0,   // guild affinity strength for generalists (weaker fidelity)
   seed          = 42,
 } = {}) {
   const rand       = mulberry32((seed + 100) | 0);
@@ -82,45 +83,112 @@ export function generateSimulation({
   // Home-range centres drawn UNIFORMLY from sea hexes — NOT clustered by guild.
   // Guild signal comes from shared habitat-type preferences, not geography.
   const dolphins = [];
+  const sigma = domainDiag * sigmaScale;
   for (let i = 0; i < N; i++) {
     const guild = (rand() * G) | 0;
     const isSpecialist = rand() < specialistFraction;
     const homeHex = seaHexes[(rand() * H) | 0];
-    const sigma = domainDiag * (isSpecialist ? sigmaSpecialist : sigmaGeneralist);
-    // Box-Muller for activity level
+    // Specialists have stronger habitat fidelity (high guildCoeff) rather than a
+    // smaller home range. Both types roam equally; specialists just prefer their
+    // guild's habitat type more strongly.
+    const gc = isSpecialist ? specCoeff : genCoeff;
     const u1 = Math.max(1e-10, rand()), u2 = rand();
     const activity = 0.25 * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-    dolphins.push({ dolphin_id: i, guild_true: guild, isSpecialist, mu_x: homeHex.x, mu_y: homeHex.y, sigma, activity });
+    dolphins.push({ dolphin_id: i, guild_true: guild, isSpecialist, guildCoeff: gc,
+                    mu_x: homeHex.x, mu_y: homeHex.y, sigma, activity });
   }
 
   // ── Latent use λ per dolphin × sea hex ────────────────────────────────
-  // log λ_{i,h} = -4.0 + activity + 6.0 * guild_score + home_range_penalty
-  // Guild coefficient 6.0 gives exp(6) ≈ 403× contrast between best and worst
-  // hexes for a guild, creating clearly distinct B* profiles across guilds.
+  // log λ_{i,h} = -4.0 + activity + guildCoeff * guild_score + home_range_penalty
+  // Specialists: guildCoeff=10 → exp(10) ≈ 22000× contrast between best and worst
+  // hexes, so B* concentrates sharply in guild-preferred habitat (low core50).
+  // Generalists: guildCoeff=5 → exp(5) ≈ 148× contrast, B* spread more evenly.
   const lambdaIH = new Float64Array(N * H);
+  const sig2 = 2 * sigma * sigma;
   for (let i = 0; i < N; i++) {
     const d = dolphins[i];
     const g = d.guild_true;
-    const sig2 = 2 * d.sigma * d.sigma;
     for (let hi = 0; hi < H; hi++) {
       const hx = seaHexes[hi];
       const dx = hx.x - d.mu_x, dy = hx.y - d.mu_y;
       const homeRangePenalty = -(dx * dx + dy * dy) / sig2;
-      const logLam = -4.0 + d.activity + 6.0 * guildScores[g][hi] + homeRangePenalty;
+      const logLam = -4.0 + d.activity + d.guildCoeff * guildScores[g][hi] + homeRangePenalty;
       lambdaIH[i * H + hi] = Math.exp(logLam);
     }
   }
 
-  // ── Survey effort per sea hex × year ─────────────────────────────────
-  // Higher effort near the coastline (nearshore corridor).
+  // ── Survey effort: tendril routes from a single port hex ─────────────
+  // The port is the nearshore sea hex nearest the x-centroid of the domain.
+  // K survey routes radiate outward from the port in evenly-spaced bearings,
+  // each a directed hex walk with 20% lateral jitter.  The port hex receives
+  // maximum effort because every route passes through it.  effortBias controls
+  // route length: high bias → short nearshore routes; low bias → routes reach
+  // across the domain.
+  const HEX_DIRS  = [[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1]];
+  const hexByQR   = new Map(hexes.map(h => [`${h.q},${h.r}`, h]));
+  const seaIdxMap = new Map(seaHexes.map((h, i) => [h.hex_id, i]));
+
+  // Port: nearshore (distFromCoast < 0.25) sea hex closest to x-centroid.
+  const centX = seaHexes.reduce((s, h) => s + h.x, 0) / H;
+  const shallowSea = seaHexes.filter(h => h.distFromCoast < 0.25);
+  const portCandidates = shallowSea.length > 0 ? shallowSea : seaHexes;
+  const portHex = portCandidates.reduce((best, h) =>
+    Math.abs(h.x - centX) < Math.abs(best.x - centX) ? h : best);
+  const portIdx = seaIdxMap.get(portHex.hex_id);
+
+  // Route length in hex steps.  domainDiag/hexSize ≈ 2× the column-count diagonal
+  // due to hex geometry, so the effective fraction is halved.
+  // effortBias=0 → routes reach ~50% of domain; effortBias=1 → ~10% (nearshore only).
+  const domainDiagHexes = Math.round(domainDiag / hexGrid.hexSize);
+  const L = Math.max(3, Math.round((0.10 + (1 - effortBias) * 0.40) * domainDiagHexes));
+  const K = 8; // number of survey routes
+
+  // Bearing offset: determined by effort seed so it varies across sim seeds.
+  const bearingOffset = effortRand() * (2 * Math.PI / K);
+
+  const routeCounts = new Int32Array(H);
+  for (let ri = 0; ri < K; ri++) {
+    const bearing = bearingOffset + (ri / K) * 2 * Math.PI;
+    let cur = portHex;
+    routeCounts[portIdx]++;
+
+    for (let s = 0; s < L; s++) {
+      // Score sea neighbours by angular closeness to bearing, pick best or jitter.
+      let bestHex = null, bestAligned = Infinity;
+      const candidates = [];
+      for (const [dq, dr] of HEX_DIRS) {
+        const nbr = hexByQR.get(`${cur.q + dq},${cur.r + dr}`);
+        if (!nbr || nbr.isLand) continue;
+        const angle = Math.atan2(nbr.y - cur.y, nbr.x - cur.x);
+        // Angular distance (wraps correctly via modulo)
+        const diff = Math.abs(((angle - bearing + 3 * Math.PI) % (2 * Math.PI)) - Math.PI);
+        candidates.push({ hex: nbr, diff });
+        if (diff < bestAligned) { bestAligned = diff; bestHex = nbr; }
+      }
+      if (!bestHex) break;
+
+      // 20% lateral jitter: pick a random sea neighbour instead
+      const chosen = (effortRand() < 0.20 && candidates.length > 1)
+        ? candidates[(effortRand() * candidates.length) | 0].hex
+        : bestHex;
+
+      const hi = seaIdxMap.get(chosen.hex_id);
+      if (hi !== undefined) routeCounts[hi]++;
+      cur = chosen;
+    }
+  }
+
+  // Effort per hex per year: Gamma-distributed, scaled by route-visit count.
+  // Hexes not on any route get a small background effort (incidental traffic).
   const effortHT = new Float64Array(H * T);
   for (let hi = 0; hi < H; hi++) {
-    const corridorWeight = 1 + effortBias * 3 * (1 - seaHexes[hi].distFromCoast);
+    const rc = routeCounts[hi];
     for (let t = 0; t < T; t++) {
-      // Gamma(2, corridorWeight/2): mean = corridorWeight, some variance
       const g1 = -Math.log(Math.max(1e-10, effortRand()));
       const g2 = -Math.log(Math.max(1e-10, effortRand()));
-      effortHT[hi * T + t] = (g1 + g2) * (corridorWeight / 2);
+      effortHT[hi * T + t] = rc > 0
+        ? (g1 + g2) * rc        // Gamma(2, rc): mean = 2·rc
+        : g1 * 0.25;            // background noise
     }
   }
 

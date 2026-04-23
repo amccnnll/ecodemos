@@ -1,7 +1,7 @@
 // bne/sketch.js — hex map rendering and controls wiring.
 
 import * as state from './state.js';
-import { hexPathString } from '../src/bne-hex.js';
+import { hexPathString, hexVertices } from '../src/bne-hex.js';
 
 // ── Colour scales ─────────────────────────────────────────────────────────
 const colEnv    = d3.scaleSequential(d3.interpolateViridis).domain([0, 1]);
@@ -26,6 +26,78 @@ function normArr(arr) {
   for (const v of arr) { if (v < mn) mn = v; if (v > mx) mx = v; }
   const rng = mx - mn || 1;
   return Array.from(arr, v => (v - mn) / rng);
+}
+
+// ── Legend helpers ────────────────────────────────────────────────────────
+const GRAD_CSS = {
+  viridis: 'linear-gradient(to right,#440154,#3b528b,#21918c,#5ec962,#fde725)',
+  ylorbr:  'linear-gradient(to right,#ffffd4,#fed98e,#fe9929,#d95f0e,#993404)',
+  blues:   'linear-gradient(to right,#deebf7,#9ecae1,#3182bd,#084594)',
+  greens:  'linear-gradient(to right,#e5f5e0,#a1d99b,#41ab5d,#006d2c)',
+};
+
+function gradBar(key) {
+  return `<span class="leg-bar" style="background:${GRAD_CSS[key]}"></span>`;
+}
+function swatchEl(col) {
+  return `<span class="leg-swatch" style="background:${col}"></span>`;
+}
+
+// ── Hex legend ────────────────────────────────────────────────────────────
+const hexLegendEl = document.getElementById('bne-hex-legend');
+
+function updateHexLegend() {
+  if (!hexLegendEl) return;
+  const layer = state.hexLayer;
+  const anal  = state.analysis;
+  let html = '';
+
+  if (layer === 'environment') {
+    html = `${gradBar('viridis')} <b>Habitat quality Q<sub>h</sub></b>&thinsp; low → high
+            <span class="leg-note">Q<sub>h</sub> = 0.4·D<sub>h</sub> + 0.4·P<sub>h</sub> − 0.25·R<sub>h</sub> + 0.2 &nbsp;·&nbsp;
+              D<sub>h</sub> = depth proxy (increases offshore, Perlin-perturbed) &nbsp;·&nbsp;
+              P<sub>h</sub> = productivity (pure Perlin field) &nbsp;·&nbsp;
+              R<sub>h</sub> = disturbance (independent Perlin field) &nbsp;·&nbsp; grey = land</span>`;
+
+  } else if (layer === 'effort') {
+    html = `${gradBar('ylorbr')} <b>Survey effort E<sub>h</sub></b>&thinsp; low → high
+            <span class="leg-note">Cumulative Γ-distributed effort summed over T survey years &nbsp;·&nbsp;
+              Generated as K=8 tendril routes radiating from a single port hex (the brightest spot) &nbsp;·&nbsp;
+              Route length controlled by the Effort bias slider &nbsp;·&nbsp;
+              Hexes not on any route receive only small background effort &nbsp;·&nbsp;
+              Used as denominator in B* = Y<sub>ih</sub> / max(E<sub>h</sub>, E<sub>min</sub>).</span>`;
+
+  } else if (layer === 'sightings') {
+    html = `${gradBar('blues')} <b>Total sightings Σ Y<sub>ih</sub></b>&thinsp; few → many
+            <span class="leg-note">Raw observed sightings summed over all retained dolphins (≥ 4 sightings each).
+              Reflects habitat use and uneven effort together - <i>not</i> effort-corrected.</span>`;
+
+  } else if (layer === 'bstar') {
+    html = `${gradBar('greens')} <b>Summed B*</b>&thinsp; low → high
+            <span class="leg-note">B*<sub>ih</sub> = Y<sub>ih</sub> / max(E<sub>h</sub>, E<sub>min</sub>), summed over all retained dolphins.
+              Effort-corrected habitat-use index. E<sub>min</sub> floor prevents inflation in rarely-surveyed hexes.</span>`;
+
+  } else if (layer === 'guild') {
+    if (anal) {
+      const swatches = Array.from({ length: anal.nCommunities }, (_, c) =>
+        `${swatchEl(GUILD_COLS[c % 10])} <b>C${c + 1}</b>`).join(' &thinsp; ');
+      html = `${swatches}
+              <span class="leg-note"><b>Full colour</b> = community majority (&gt;50% of summed B* weight in that hex) &nbsp;·&nbsp;
+                <b>Pale tint</b> (55% blended to white) = plurality only (dominant community holds ≤50%) &nbsp;·&nbsp;
+                <b>neutral grey</b> = insufficient B* data to assign any community &nbsp;·&nbsp;
+                warm tan = land</span>`;
+    } else {
+      html = '<span class="leg-note">Generate a population to see the community guild map.</span>';
+    }
+
+  } else if (layer === 'individual') {
+    const label = state.selectedDolphin >= 0 ? `dolphin ${state.selectedDolphin}` : '— no dolphin selected';
+    html = `${gradBar('greens')} <b>B* — ${label}</b>&thinsp; low → high
+            <span class="leg-note">Effort-corrected sightings B*<sub>ih</sub> for the selected individual, revealing their personal habitat-use profile.
+              Click a dolphin node in the network panel to select &nbsp;·&nbsp; click any sea hex to deselect.</span>`;
+  }
+
+  hexLegendEl.innerHTML = html;
 }
 
 // ── Hex map ───────────────────────────────────────────────────────────────
@@ -69,6 +141,38 @@ function buildHexMap() {
     .on('click', (_, d) => {
       if (!d.isLand) state.selectDolphin(-1);
     });
+
+  // ── Coastline overlay ───────────────────────────────────────────────────
+  // Draw the edges where sea hexes border land hexes (or the grid boundary).
+  // Uses full hex scale (not 0.98) so edges align to true hex boundaries.
+  // Axial neighbour directions and corresponding shared-edge vertex pairs:
+  const HEX_DIRS  = [[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1]]; // E SE SW W NW NE
+  const EDGE_VERTS = [[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]];    // vertex pairs per direction
+  const hexByQR   = new Map(hexes.map(h => [`${h.q},${h.r}`, h]));
+  const coastSegs = [];
+
+  for (const h of hexes) {
+    if (h.isLand) continue;
+    const pts = hexVertices(tx(h.x), ty(h.y), hexSize * sc);
+    for (let d = 0; d < 6; d++) {
+      const nbr = hexByQR.get(`${h.q + HEX_DIRS[d][0]},${h.r + HEX_DIRS[d][1]}`);
+      if (!nbr || nbr.isLand) {
+        const [v0, v1] = EDGE_VERTS[d];
+        coastSegs.push([pts[v0], pts[v1]]);
+      }
+    }
+  }
+
+  hexG.selectAll('line.coast')
+    .data(coastSegs)
+    .join('line')
+    .attr('class', 'coast')
+    .attr('x1', d => d[0].x).attr('y1', d => d[0].y)
+    .attr('x2', d => d[1].x).attr('y2', d => d[1].y)
+    .attr('stroke', '#7a6650')
+    .attr('stroke-width', 1.8)
+    .attr('stroke-linecap', 'round')
+    .attr('pointer-events', 'none');
 
   updateHexColours();
 }
@@ -130,9 +234,12 @@ function updateHexColours() {
     });
     const lut = new Map(seaHexes.map((h, i) => [h.hex_id, domResult[i]]));
     // Full colour = majority (>50%); pale = plurality only
+    // NO_GUILD_FILL: a neutral light grey, distinct from land (#c8c0b0 warm tan)
+    // and from the saturated community colours.
+    const NO_GUILD_FILL = '#e4e4e4';
     seaColour = h => {
       const res = lut.get(h.hex_id);
-      if (!res || res.comm < 0) return SEA_FILL;
+      if (!res || res.comm < 0) return NO_GUILD_FILL;
       const base = GUILD_COLS[res.comm % 10];
       return res.share > 0.5 ? base : blendWithWhite(base, 0.55);
     };
@@ -152,6 +259,7 @@ function updateHexColours() {
   }
 
   hexG.selectAll('path.hex').attr('fill', d => d.isLand ? LAND_FILL : seaColour(d));
+  updateHexLegend();
 }
 
 // ── Controls wiring ───────────────────────────────────────────────────────
@@ -177,10 +285,31 @@ wireSlider('sl-T',            'T',                  v => String(v | 0),    reg);
 wireSlider('sl-effortBias',   'effortBias',          v => v.toFixed(2),     reg);
 wireSlider('sl-detectionProb','detectionProb',       v => v.toFixed(2),     reg);
 wireSlider('sl-hexSize',      'hexSize',             v => String(v | 0),    reg);
-wireSlider('sl-seed',         'seed',                v => String(v | 0),    reg);
 wireSlider('sl-k',            'k',                  v => String(v | 0),    rean);
 wireSlider('sl-eMin',         'eMin',                v => v.toFixed(1),     rean);
 wireSlider('sl-resolution',   'louvainResolution',   v => v.toFixed(1),     rean);
+
+// Seed inputs (number box + random button, not sliders)
+function wireSeed(inputId, btnId, key) {
+  const inp = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  if (!inp) return;
+  inp.addEventListener('change', () => {
+    const v = Math.max(1, parseInt(inp.value, 10) || 1);
+    inp.value = v;
+    state.setParam(key, v);
+    reg();
+  });
+  if (btn) btn.addEventListener('click', () => {
+    const v = 1 + Math.floor(Math.random() * 99999);
+    inp.value = v;
+    state.setParam(key, v);
+    reg();
+  });
+}
+
+wireSeed('inp-seed',     'btn-rand-seed',     'seed');
+wireSeed('inp-sim-seed', 'btn-rand-sim-seed', 'simSeed');
 
 document.getElementById('btn-bne-generate').addEventListener('click', reg);
 

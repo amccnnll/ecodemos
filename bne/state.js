@@ -7,7 +7,7 @@ export const params = {
   // Domain
   cols: 18, rows: 14, hexSize: 30, seed: 42,
   // Population
-  N: 60, G: 4, guildOverlap: 0.3, specialistFraction: 0.5,
+  N: 60, G: 4, guildOverlap: 0.3, specialistFraction: 0.5, simSeed: 42,
   // Survey
   T: 6, effortBias: 0.7, detectionProb: 0.3,
   // Analysis
@@ -25,7 +25,11 @@ export let selectedDolphin = -1;
 
 const listeners = new Set();
 export function subscribe(fn) { listeners.add(fn); }
-function notify() { for (const fn of listeners) fn(); }
+function notify() {
+  for (const fn of listeners) {
+    try { fn(); } catch (e) { console.error('BNE state subscriber error:', e); }
+  }
+}
 
 export function setHexLayer(layer)   { hexLayer = layer; notify(); }
 export function setNetworkView(view) { networkView = view; notify(); }
@@ -33,10 +37,17 @@ export function selectDolphin(id)    { selectedDolphin = id; hexLayer = id >= 0 
 
 export function setParam(key, value) { params[key] = value; }
 
+// Fixed arena dimensions (cols × hexSize = constant). Changing hexSize keeps the
+// physical extent the same but alters the spatial grain (MAUP demonstration).
+const ARENA_W = 18 * 30; // 540 — reference arena width in grid units
+const ARENA_H = 14 * 30; // 420 — reference arena height in grid units
+
 // Population/domain params changed → full regenerate
 export function regenerate() {
-  hexGrid  = generateHexGrid({ cols: params.cols, rows: params.rows, hexSize: params.hexSize, seed: params.seed });
-  simData  = generateSimulation({ hexGrid, ...params });
+  const cols = Math.max(10, Math.min(36, Math.round(ARENA_W / params.hexSize)));
+  const rows = Math.max(8,  Math.min(28, Math.round(ARENA_H / params.hexSize)));
+  hexGrid  = generateHexGrid({ cols, rows, hexSize: params.hexSize, seed: params.seed });
+  simData  = generateSimulation({ hexGrid, ...params, seed: params.simSeed });
   analysis = (simData && simData.retainedDolphins.length >= 2)
     ? runAnalysis(simData, params)
     : null;

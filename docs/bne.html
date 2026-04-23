@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.40">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Bipartite Network Ecology (BNE) – ecodemos docs</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-2be10d9e998f81ff6e49e26833438aa5.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./ds.html">Simulations</a></li><li class="breadcrumb-item"><a href="./bne.html">BNE</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">ecodemos docs</a> 
+    </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Simulations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Distance Sampling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./secr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">SECR</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lv.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lotka-Volterra</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./bne.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">BNE</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#generative-model" id="toc-generative-model" class="nav-link" data-scroll-target="#generative-model">Generative model</a>
+  <ul class="collapse">
+  <li><a href="#domain" id="toc-domain" class="nav-link" data-scroll-target="#domain">Domain</a></li>
+  <li><a href="#guild-preference-profiles" id="toc-guild-preference-profiles" class="nav-link" data-scroll-target="#guild-preference-profiles">Guild preference profiles</a></li>
+  <li><a href="#dolphin-population" id="toc-dolphin-population" class="nav-link" data-scroll-target="#dolphin-population">Dolphin population</a></li>
+  <li><a href="#survey-effort" id="toc-survey-effort" class="nav-link" data-scroll-target="#survey-effort">Survey effort</a></li>
+  <li><a href="#observations" id="toc-observations" class="nav-link" data-scroll-target="#observations">Observations</a></li>
+  </ul></li>
+  <li><a href="#analysis-pipeline" id="toc-analysis-pipeline" class="nav-link" data-scroll-target="#analysis-pipeline">Analysis pipeline</a>
+  <ul class="collapse">
+  <li><a href="#b-effort-correction" id="toc-b-effort-correction" class="nav-link" data-scroll-target="#b-effort-correction">B* effort correction</a></li>
+  <li><a href="#weighted-jaccard-similarity" id="toc-weighted-jaccard-similarity" class="nav-link" data-scroll-target="#weighted-jaccard-similarity">Weighted Jaccard similarity</a></li>
+  <li><a href="#knn-graph" id="toc-knn-graph" class="nav-link" data-scroll-target="#knn-graph">kNN graph</a></li>
+  <li><a href="#louvain-community-detection" id="toc-louvain-community-detection" class="nav-link" data-scroll-target="#louvain-community-detection">Louvain community detection</a></li>
+  </ul></li>
+  <li><a href="#metrics" id="toc-metrics" class="nav-link" data-scroll-target="#metrics">Metrics</a>
+  <ul class="collapse">
+  <li><a href="#niche-breadth-and-specialistgeneralist-scatter" id="toc-niche-breadth-and-specialistgeneralist-scatter" class="nav-link" data-scroll-target="#niche-breadth-and-specialistgeneralist-scatter">Niche breadth and specialist/generalist scatter</a></li>
+  </ul></li>
+  <li><a href="#glossary" id="toc-glossary" class="nav-link" data-scroll-target="#glossary">Glossary</a>
+  <ul class="collapse">
+  <li><a href="#seeds" id="toc-seeds" class="nav-link" data-scroll-target="#seeds">Seeds</a></li>
+  <li><a href="#population" id="toc-population" class="nav-link" data-scroll-target="#population">Population</a></li>
+  <li><a href="#survey" id="toc-survey" class="nav-link" data-scroll-target="#survey">Survey</a></li>
+  <li><a href="#analysis" id="toc-analysis" class="nav-link" data-scroll-target="#analysis">Analysis</a></li>
+  <li><a href="#domain-1" id="toc-domain-1" class="nav-link" data-scroll-target="#domain-1">Domain</a></li>
+  <li><a href="#hex-map-layers" id="toc-hex-map-layers" class="nav-link" data-scroll-target="#hex-map-layers">Hex map layers</a></li>
+  <li><a href="#network-and-matrix-views" id="toc-network-and-matrix-views" class="nav-link" data-scroll-target="#network-and-matrix-views">Network and matrix views</a></li>
+  </ul></li>
+  <li><a href="#implementation-notes" id="toc-implementation-notes" class="nav-link" data-scroll-target="#implementation-notes">Implementation notes</a></li>
+  <li><a href="#assumptions-and-limitations" id="toc-assumptions-and-limitations" class="nav-link" data-scroll-target="#assumptions-and-limitations">Assumptions and limitations</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading">Further reading</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./ds.html">Simulations</a></li><li class="breadcrumb-item"><a href="./bne.html">BNE</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Bipartite Network Ecology (BNE)</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><a href="../bne/">→ Open simulation</a></p>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>This simulation generates a population of dolphins that each have a preferred habitat type within a shared bay domain, surveys them statistically over multiple years, then runs a community-detection pipeline to see whether the underlying habitat guilds can be recovered from sighting records alone.</p>
+<p>The core idea comes from studies of resident bottlenose dolphins: individuals that repeatedly co-occur in the same habitat patches tend to form detectable groups in a bipartite network (dolphins on one side, spatial cells on the other), even when home ranges broadly overlap. Guild signal comes from <em>which patch types</em> each dolphin uses, not from geographic separation.</p>
+<p>The pipeline runs in three stages:</p>
+<ol type="1">
+<li><strong>Generate</strong>: create a bay domain with three independent environmental fields, assign dolphins to guilds with habitat preference profiles, and simulate Poisson sightings under spatially biased survey effort.</li>
+<li><strong>Data</strong>: inspect the raw survey products (effort, sightings, effort-corrected B* index) on the hex map, and the B* and Jaccard similarity matrices.</li>
+<li><strong>Analyse</strong>: view the kNN graph fed to Louvain community detection, then the detected communities overlaid on the map and network, and compare to the true guild structure.</li>
+</ol>
+<hr>
+</section>
+<section id="generative-model" class="level2">
+<h2 class="anchored" data-anchor-id="generative-model">Generative model</h2>
+<section id="domain" class="level3">
+<h3 class="anchored" data-anchor-id="domain">Domain</h3>
+<p>The domain is a hex grid shaped as a simple bay: a concave coastline with open sea and a land mask. Hex size controls spatial resolution while keeping the arena footprint constant (MAUP demonstration). Three independent environmental fields are assigned to each sea hex:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Symbol</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Depth proxy</td>
+<td><span class="math inline">\(D_h\)</span></td>
+<td>Increases with distance from coast, perturbed by Perlin noise</td>
+</tr>
+<tr class="even">
+<td>Productivity</td>
+<td><span class="math inline">\(P_h\)</span></td>
+<td>Pure Perlin noise field, independent of coastline</td>
+</tr>
+<tr class="odd">
+<td>Disturbance</td>
+<td><span class="math inline">\(R_h\)</span></td>
+<td>Independent Perlin noise field (shipping, recreation)</td>
+</tr>
+</tbody>
+</table>
+<p>A composite habitat quality index is computed for display only:</p>
+<p><span class="math display">\[Q_h = 0.4\,D_h + 0.4\,P_h - 0.25\,R_h + 0.2\]</span></p>
+</section>
+<section id="guild-preference-profiles" class="level3">
+<h3 class="anchored" data-anchor-id="guild-preference-profiles">Guild preference profiles</h3>
+<p>Each of the <span class="math inline">\(G\)</span> guilds has a weight vector <span class="math inline">\(\mathbf{w}_g = (w_{g,D},\, w_{g,P},\, w_{g,R})\)</span> over the three environmental axes, drawn from a fixed set of ecologically motivated archetypes (offshore, productive nearshore, disturbance-tolerant, coastal forager, etc.) and mixed toward the centroid <span class="math inline">\([0.5, 0.5, 0.5]\)</span> by the <strong>Overlap</strong> parameter.</p>
+<p>The raw preference score for guild <span class="math inline">\(g\)</span> in hex <span class="math inline">\(h\)</span> is:</p>
+<p><span class="math display">\[\text{raw}_{g,h} = w_{g,D}\,D_h + w_{g,P}\,P_h - w_{g,R}\,R_h\]</span></p>
+<p>This is normalised to <span class="math inline">\([0,1]\)</span> across all sea hexes to give the guild score <span class="math inline">\(s_{g,h}\)</span>.</p>
+</section>
+<section id="dolphin-population" class="level3">
+<h3 class="anchored" data-anchor-id="dolphin-population">Dolphin population</h3>
+<p>Each dolphin is assigned a guild uniformly at random, then drawn independently of guild membership: home-range centres are placed uniformly across the domain so that guild signal comes entirely from habitat preference rather than spatial clustering.</p>
+<p>Dolphins are classified as <strong>specialists</strong> (fraction controlled by the <strong>Specialist</strong> slider) or <strong>generalists</strong>. The distinction is in habitat fidelity, not home-range size: both types share the same home-range scale (<span class="math inline">\(\sigma = 0.4 \times \text{domain diagonal}\)</span>), but specialists have a higher guild affinity coefficient (<span class="math inline">\(c_i = 10\)</span>) while generalists have a weaker one (<span class="math inline">\(c_i = 5\)</span>).</p>
+<p>The latent use intensity for dolphin <span class="math inline">\(i\)</span> in hex <span class="math inline">\(h\)</span> is:</p>
+<p><span class="math display">\[\log \lambda_{i,h} = \alpha + a_i + c_i\,s_{g_i,h} - \frac{d_{i,h}^2}{2\sigma^2}\]</span></p>
+<p>where <span class="math inline">\(\alpha = -4\)</span> is the log-scale baseline, <span class="math inline">\(a_i \sim \mathcal{N}(0,\,0.25^2)\)</span> is an individual activity level, <span class="math inline">\(c_i\)</span> is the guild affinity coefficient, and <span class="math inline">\(d_{i,h}\)</span> is the Euclidean distance from dolphin <span class="math inline">\(i\)</span>’s home-range centre to hex <span class="math inline">\(h\)</span>.</p>
+<p>Specialists with <span class="math inline">\(c_i = 10\)</span> experience <span class="math inline">\(e^{10} \approx 22{,}000\times\)</span> contrast between their best and worst hexes; generalists with <span class="math inline">\(c_i = 5\)</span> experience <span class="math inline">\(e^5 \approx 150\times\)</span>. This produces clearly different core50 distributions without requiring different home-range sizes.</p>
+</section>
+<section id="survey-effort" class="level3">
+<h3 class="anchored" data-anchor-id="survey-effort">Survey effort</h3>
+<p>Effort is generated as <span class="math inline">\(K = 8\)</span> survey routes radiating outward from a single port hex (the nearshore sea hex nearest the domain’s x-centroid, fixed by the landscape seed). Each route is a directed hex walk in an evenly-spaced bearing with 20% lateral jitter per step. The <strong>Effort bias</strong> slider controls route length: low bias sends routes across the full domain; high bias keeps them nearshore.</p>
+<p>For each hex <span class="math inline">\(h\)</span> and year <span class="math inline">\(t\)</span>:</p>
+<p><span class="math display">\[E_{h,t} \sim \Gamma\!\left(2,\, r_h\right) + \varepsilon_h\]</span></p>
+<p>where <span class="math inline">\(r_h\)</span> is the number of routes visiting hex <span class="math inline">\(h\)</span> (zero for hexes not on any route, which receive only a small background <span class="math inline">\(\varepsilon\)</span>). The port hex, visited by all routes, always has the highest effort.</p>
+</section>
+<section id="observations" class="level3">
+<h3 class="anchored" data-anchor-id="observations">Observations</h3>
+<p>Observed sightings for dolphin <span class="math inline">\(i\)</span> in hex <span class="math inline">\(h\)</span> during year <span class="math inline">\(t\)</span>:</p>
+<p><span class="math display">\[Y_{i,h,t} \sim \text{Poisson}\!\left(E_{h,t}\cdot p\cdot\lambda_{i,h}\right)\]</span></p>
+<p>where <span class="math inline">\(p\)</span> is the per-visit detection probability (<strong>Detection p</strong> slider). Dolphins with fewer than 4 total sightings across all hexes and years are dropped from the analysis.</p>
+<hr>
+</section>
+</section>
+<section id="analysis-pipeline" class="level2">
+<h2 class="anchored" data-anchor-id="analysis-pipeline">Analysis pipeline</h2>
+<section id="b-effort-correction" class="level3">
+<h3 class="anchored" data-anchor-id="b-effort-correction">B* effort correction</h3>
+<p>The effort-corrected sighting index aggregates over years and applies an effort floor:</p>
+<p><span class="math display">\[B^*_{i,h} = \frac{\displaystyle\sum_t Y_{i,h,t}}{\max\!\left(\displaystyle\sum_t E_{h,t},\; E_{\min}\right)}\]</span></p>
+<p>The floor <span class="math inline">\(E_{\min}\)</span> (<strong>E_min</strong> slider) prevents inflation in rarely-visited hexes where a single sighting would otherwise dominate.</p>
+</section>
+<section id="weighted-jaccard-similarity" class="level3">
+<h3 class="anchored" data-anchor-id="weighted-jaccard-similarity">Weighted Jaccard similarity</h3>
+<p>Before computing similarity, each dolphin’s B* row is normalised to a probability distribution:</p>
+<p><span class="math display">\[\tilde{a}_{i,h} = \frac{B^*_{i,h}}{\displaystyle\sum_h B^*_{i,h}}\]</span></p>
+<p>This removes activity-level differences so that two dolphins with the same habitat preference but different total sighting counts appear equally similar.</p>
+<p>Pairwise weighted Jaccard similarity:</p>
+<p><span class="math display">\[J_{ij} = \frac{\displaystyle\sum_h \min(\tilde{a}_{ih},\, \tilde{a}_{jh})}{\displaystyle\sum_h \max(\tilde{a}_{ih},\, \tilde{a}_{jh})}\]</span></p>
+</section>
+<section id="knn-graph" class="level3">
+<h3 class="anchored" data-anchor-id="knn-graph">kNN graph</h3>
+<p>Each dolphin retains edges to its <span class="math inline">\(k\)</span> most-similar neighbours (<strong>k</strong> slider). The graph is symmetrised by taking the maximum weight of each pair, giving an undirected weighted graph.</p>
+</section>
+<section id="louvain-community-detection" class="level3">
+<h3 class="anchored" data-anchor-id="louvain-community-detection">Louvain community detection</h3>
+<p>The kNN graph is partitioned by the Louvain algorithm, which iteratively reassigns nodes to maximise modularity <span class="math inline">\(Q\)</span>. The <strong>Resolution</strong> parameter <span class="math inline">\(\gamma\)</span> scales the expected-edges null model: lower values favour fewer large communities; higher values favour more small ones. Communities with fewer than <code>minCommunitySize</code> (= 3) members are marked as unassigned.</p>
+<p>Newman-Girvan modularity:</p>
+<p><span class="math display">\[Q = \frac{1}{2m}\sum_{ij}\!\left[A_{ij} - \frac{k_i k_j}{2m}\right]\delta(c_i, c_j)\]</span></p>
+<p>where <span class="math inline">\(A_{ij}\)</span> is the edge weight, <span class="math inline">\(k_i\)</span> is the weighted degree, <span class="math inline">\(m = \frac{1}{2}\sum_{ij} A_{ij}\)</span>, and <span class="math inline">\(\delta(c_i, c_j) = 1\)</span> if nodes <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> are in the same community.</p>
+<hr>
+</section>
+</section>
+<section id="metrics" class="level2">
+<h2 class="anchored" data-anchor-id="metrics">Metrics</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Metric</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Retained</td>
+<td>Dolphins with <span class="math inline">\(\geq 4\)</span> total sightings, the minimum for a usable B* profile.</td>
+</tr>
+<tr class="even">
+<td>Communities</td>
+<td>Number of Louvain communities with <span class="math inline">\(\geq 3\)</span> members.</td>
+</tr>
+<tr class="odd">
+<td>Q</td>
+<td>Modularity of the detected partition on the kNN graph. Values above ~0.3 indicate meaningful structure.</td>
+</tr>
+<tr class="even">
+<td>ARI</td>
+<td>Adjusted Rand Index comparing detected communities to true simulated guilds. 0 = random agreement; 1 = perfect recovery. Computed only over dolphins assigned to a community.</td>
+</tr>
+<tr class="odd">
+<td>W/B ratio</td>
+<td>Mean within-community Jaccard divided by mean between-community Jaccard. Values above 1 confirm that same-community dolphins are more similar than cross-community ones.</td>
+</tr>
+</tbody>
+</table>
+<section id="niche-breadth-and-specialistgeneralist-scatter" class="level3">
+<h3 class="anchored" data-anchor-id="niche-breadth-and-specialistgeneralist-scatter">Niche breadth and specialist/generalist scatter</h3>
+<p>Two per-dolphin metrics are plotted in the Specialist/generalist scatter:</p>
+<p><strong>Niche breadth</strong>: number of hexes with <span class="math inline">\(B^*_{i,h} &gt; 0.05 \times \max_h B^*_{i,h}\)</span> (5% relative threshold filters Poisson noise).</p>
+<p><strong>Core50</strong>: the smallest number of hexes (sorted by descending <span class="math inline">\(B^*\)</span>) needed to accumulate 50% of dolphin <span class="math inline">\(i\)</span>’s total <span class="math inline">\(B^*\)</span>. Low core50 indicates concentrated habitat use (specialist); high core50 indicates spread-out use (generalist).</p>
+<p>Shannon evenness (computed but not plotted by default):</p>
+<p><span class="math display">\[J_i = \frac{-\displaystyle\sum_h p_{ih}\ln p_{ih}}{\ln n_i}\]</span></p>
+<p>where <span class="math inline">\(p_{ih} = B^*_{ih}\,/\,\sum B^*_{ih}\)</span> over hexes above the 5% threshold and <span class="math inline">\(n_i\)</span> is the count of such hexes.</p>
+<hr>
+</section>
+</section>
+<section id="glossary" class="level2">
+<h2 class="anchored" data-anchor-id="glossary">Glossary</h2>
+<section id="seeds" class="level3">
+<h3 class="anchored" data-anchor-id="seeds">Seeds</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Landscape</td>
+<td>Seed for the coastline shape and Perlin fields (<span class="math inline">\(D_h\)</span>, <span class="math inline">\(P_h\)</span>, <span class="math inline">\(R_h\)</span>). Changing this regenerates the terrain.</td>
+</tr>
+<tr class="even">
+<td>Population</td>
+<td>Seed for dolphin placement, survey effort, and sightings. Fix the landscape seed and vary this to see how different populations perform on the same terrain.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="population" class="level3">
+<h3 class="anchored" data-anchor-id="population">Population</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>N</td>
+<td>Total number of dolphins before retention filtering. Default: 60.</td>
+</tr>
+<tr class="even">
+<td>G</td>
+<td>Number of habitat guilds (2–6). Each guild has a distinct preference profile over depth, productivity, and disturbance. Default: 4.</td>
+</tr>
+<tr class="odd">
+<td>Overlap</td>
+<td>Guild profile mixing coefficient (0–0.9). At 0, guilds have maximally distinct preferences; at 0.9, profiles are nearly identical and harder to separate. Default: 0.30.</td>
+</tr>
+<tr class="even">
+<td>Specialist</td>
+<td>Fraction of dolphins with a high guild affinity coefficient (<span class="math inline">\(c_i = 10\)</span> vs <span class="math inline">\(c_i = 5\)</span> for generalists). Specialists show lower core50. Default: 0.50.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="survey" class="level3">
+<h3 class="anchored" data-anchor-id="survey">Survey</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Years</td>
+<td>Number of survey years <span class="math inline">\(T\)</span>. More years accumulate more sightings per dolphin and produce better-resolved B* profiles. Default: 6.</td>
+</tr>
+<tr class="even">
+<td>Effort bias</td>
+<td>Survey route length: 0 = routes extend to the domain edge; 1 = routes stay close to the port. Default: 0.70.</td>
+</tr>
+<tr class="odd">
+<td>Detection p</td>
+<td>Per-visit detection probability <span class="math inline">\(p\)</span>, scaled by <span class="math inline">\(\lambda_{i,h}\)</span> and effort. Default: 0.30.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="analysis" class="level3">
+<h3 class="anchored" data-anchor-id="analysis">Analysis</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>k (kNN)</td>
+<td>Number of nearest neighbours each dolphin retains in the similarity graph fed to Louvain. Default: 8.</td>
+</tr>
+<tr class="even">
+<td>E_min</td>
+<td>Effort floor in <span class="math inline">\(B^* = Y / \max(E, E_{\min})\)</span>, preventing inflation in rarely-surveyed hexes. Default: 5.0.</td>
+</tr>
+<tr class="odd">
+<td>Resolution</td>
+<td>Louvain resolution <span class="math inline">\(\gamma\)</span>. Lower values give fewer large communities; higher values give more small ones. Default: 1.0.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="domain-1" class="level3">
+<h3 class="anchored" data-anchor-id="domain-1">Domain</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Hex size</td>
+<td>Spatial resolution: the arena footprint stays constant while the number of hexes changes. Smaller hexes give finer grain (slower at large N); larger hexes give coarser grain. Default: 30 (18 × 14 grid).</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="hex-map-layers" class="level3">
+<h3 class="anchored" data-anchor-id="hex-map-layers">Hex map layers</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Layer</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Environment</td>
+<td>Composite habitat quality <span class="math inline">\(Q_h\)</span>, shown on the viridis scale.</td>
+</tr>
+<tr class="even">
+<td>Effort</td>
+<td>Cumulative survey effort <span class="math inline">\(\sum_t E_{h,t}\)</span>, shown on the yellow-orange-brown scale. The port hex is the brightest point.</td>
+</tr>
+<tr class="odd">
+<td>Sightings</td>
+<td>Raw total sightings <span class="math inline">\(\sum_{i,t} Y_{i,h,t}\)</span> over retained dolphins. Not effort-corrected; combines habitat use with survey coverage.</td>
+</tr>
+<tr class="even">
+<td>B*</td>
+<td>Effort-corrected sighting index <span class="math inline">\(\sum_i B^*_{i,h}\)</span> summed over retained dolphins, on the green scale.</td>
+</tr>
+<tr class="odd">
+<td>Guild</td>
+<td>Dominant community by B* weight. Full colour: community holds more than 50% of hex B*. Pale tint: plurality only. Neutral grey: insufficient data to assign a community. Warm tan: land.</td>
+</tr>
+<tr class="even">
+<td>Individual</td>
+<td>Per-dolphin B* profile for the selected dolphin. Click any node in the network panel to select; click a sea hex or empty space to deselect.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="network-and-matrix-views" class="level3">
+<h3 class="anchored" data-anchor-id="network-and-matrix-views">Network and matrix views</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>View</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>B*</td>
+<td>Dolphin × hex heatmap of row-normalised B*, sorted by detected community. Left colour bar shows community membership. Block patterns in the rows reveal shared habitat preferences.</td>
+</tr>
+<tr class="even">
+<td>Jaccard</td>
+<td>Dolphin × dolphin similarity matrix (weighted Jaccard on row-normalised B*), on the blue scale. Block structure along the diagonal indicates natural groupings before any community labels are applied.</td>
+</tr>
+<tr class="odd">
+<td>kNN</td>
+<td>The sparse graph fed to Louvain, before community assignment. Nodes and edges shown in neutral grey; edge width is proportional to Jaccard similarity.</td>
+</tr>
+<tr class="even">
+<td>Communities</td>
+<td>Same graph coloured by Louvain-detected communities. Within-community edges are coloured; between-community edges are pale grey.</td>
+</tr>
+<tr class="odd">
+<td>Truth</td>
+<td>The same graph coloured by the true simulated guilds. Compare with Communities to understand ARI.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="implementation-notes" class="level2">
+<h2 class="anchored" data-anchor-id="implementation-notes">Implementation notes</h2>
+<ul>
+<li><strong>Seeded randomness</strong>: all stochastic operations use mulberry32, a lightweight seeded PRNG. The landscape seed controls terrain; the population seed controls dolphin placement and surveys.</li>
+<li><strong>Row normalisation before Jaccard</strong>: normalising B* rows to unit sum before computing similarity removes activity-level variation. Two dolphins with the same habitat preference but different total sighting counts remain equally similar.</li>
+<li><strong>Louvain, not Leiden</strong>: no vanilla-JS Leiden implementation exists with an appropriate licence. Louvain gives equivalent results at this scale and is fully reproducible given the seeded graph construction.</li>
+<li><strong>Circular network layout</strong>: nodes are placed on a circle sorted by community or guild, with angular gaps at group boundaries. This avoids force-directed instability and makes block structure immediately visible.</li>
+<li><strong>Per-dolphin guild affinity</strong>: specialist/generalist distinction is implemented via different guild affinity coefficients (<span class="math inline">\(c_i = 10\)</span> vs <span class="math inline">\(c_i = 5\)</span>), not different home-range sizes. This produces separable core50 distributions while keeping ARI high.</li>
+<li><strong>Hex-resolution MAUP</strong>: changing hex size keeps the arena footprint constant by adjusting the column and row counts. The simulation demonstrates the modifiable areal unit problem: very fine hexes reduce co-occurrence to near zero; very coarse hexes collapse all dolphins into the same cells.</li>
+</ul>
+<hr>
+</section>
+<section id="assumptions-and-limitations" class="level2">
+<h2 class="anchored" data-anchor-id="assumptions-and-limitations">Assumptions and limitations</h2>
+<ul>
+<li>Detection probability <span class="math inline">\(p\)</span> is constant within each hex given effort. There is no within-hex distance falloff.</li>
+<li>All survey years are aggregated before analysis. Temporal dynamics in guild membership are not modelled.</li>
+<li>Guild membership is fixed for each dolphin’s lifetime. There is no social influence on habitat use.</li>
+<li>The Poisson observation model assumes independent detections across occasions and individuals.</li>
+<li>ARI is computed only over dolphins assigned to a community. Unassigned dolphins (community = -1) are excluded from both true and predicted label vectors.</li>
+</ul>
+<hr>
+</section>
+<section id="further-reading" class="level2">
+<h2 class="anchored" data-anchor-id="further-reading">Further reading</h2>
+<ul>
+<li><a href="https://doi.org/10.1126/science.1133308">Bipartite networks in ecology (Bascompte &amp; Jordano 2007)</a></li>
+<li><a href="https://doi.org/10.1073/pnas.0601602103">Modularity and community structure in networks (Newman 2006)</a></li>
+<li><a href="https://doi.org/10.1088/1742-5468/2008/10/P10008">Louvain method for community detection (Blondel et al.&nbsp;2008)</a></li>
+<li><a href="https://www.jstor.org/stable/2389362">Habitat guilds in cetaceans (Bearzi et al.)</a></li>
+</ul>
+
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

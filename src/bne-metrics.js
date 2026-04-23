@@ -12,17 +12,41 @@ export function computeMetrics(simData, analysis) {
 
   for (let i = 0; i < N; i++) {
     const off = i * H;
-    let total = 0;
-    let nonZero = 0;
-    for (let hi = 0; hi < H; hi++) { if (Bstar[off + hi] > 0) { total += Bstar[off + hi]; nonZero++; } }
+    // Relative threshold: only count hexes with B* > 5% of this dolphin's peak.
+    // Removes Poisson-noise incidentals from niche calculations, giving genuine
+    // specialist/generalist separation rather than every dolphin appearing broad.
+    let maxB = 0;
+    for (let hi = 0; hi < H; hi++) { if (Bstar[off + hi] > maxB) maxB = Bstar[off + hi]; }
+    const thresh = maxB * 0.05;
+
+    let total = 0, nonZero = 0;
+    for (let hi = 0; hi < H; hi++) {
+      const v = Bstar[off + hi];
+      if (v > thresh) { total += v; nonZero++; }
+    }
     nicheBreadth[i] = nonZero;
     if (nonZero <= 1 || total === 0) { evenness[i] = 0; continue; }
     let shannon = 0;
     for (let hi = 0; hi < H; hi++) {
       const v = Bstar[off + hi];
-      if (v > 0) { const p = v / total; shannon -= p * Math.log(p); }
+      if (v > thresh) { const p = v / total; shannon -= p * Math.log(p); }
     }
     evenness[i] = shannon / Math.log(nonZero);
+  }
+
+  // ── Core50: hexes needed to capture 50% of total B* (sorted descending) ─
+  // Smaller core50 = B* concentrated in few hexes = specialist behaviour.
+  const core50 = new Float64Array(N);
+  for (let i = 0; i < N; i++) {
+    const off = i * H;
+    const vals = [];
+    for (let hi = 0; hi < H; hi++) { const v = Bstar[off + hi]; if (v > 0) vals.push(v); }
+    vals.sort((a, b) => b - a);
+    const total = vals.reduce((s, v) => s + v, 0);
+    const half = total * 0.5;
+    let cum = 0, count = 0;
+    for (const v of vals) { cum += v; count++; if (cum >= half) break; }
+    core50[i] = count;
   }
 
   // ── Specialist/generalist (median niche-breadth split) ───────────────────
@@ -35,7 +59,7 @@ export function computeMetrics(simData, analysis) {
   const predictedLabels = communities;
   const ari = adjustedRandIndex(trueLabels, predictedLabels);
 
-  return { nicheBreadth, evenness, strategy, ari, medianNB };
+  return { nicheBreadth, evenness, core50, strategy, ari, medianNB };
 }
 
 // ── Adjusted Rand Index ───────────────────────────────────────────────────

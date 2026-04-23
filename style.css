@@ -11,7 +11,7 @@
 
 body {
   font-family: system-ui, sans-serif;
-  background: #f9f9f9;
+  background: #fff;
   color: #1a1a1a;
 }
 
@@ -396,21 +396,29 @@ a {
   height: auto;
   min-height: 0;
   grid-template-columns: 1fr 290px;
-  grid-template-rows: auto 48px;
+  grid-template-rows: auto 48px auto;
   grid-template-areas:
     "sim         controls"
-    "bne-metrics controls";
+    "bne-metrics controls"
+    "scatter     controls";
 }
 
-/* Controls column spans both rows; sticky so it stays visible while scrolling */
+/* Controls column spans all rows; sticky so it stays visible while scrolling */
 .module-layout--bne .pane-controls {
-  grid-row: 1 / 3;
+  grid-row: 1 / 4;
   position: sticky;
   top: 0;
   max-height: 100vh;
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
   overflow-y: auto;
+}
+
+/* Scatter panel sits in the grid, below the sim + metrics rows */
+.module-layout--bne .bne-analytics {
+  grid-area: scatter;
+  margin: 0;
+  padding: 6px 8px 16px;
 }
 
 /* Sim pane: hex map left, network panel right — network gets slightly more width */
@@ -519,6 +527,66 @@ a {
   margin: 0 0 0.4rem;
 }
 
+/* BNE legend strips (inside hex map and network panel) */
+.bne-legend {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 10px;
+  padding: 5px 9px 6px;
+  font-size: 10px;
+  color: #444;
+  border-top: 1px solid #e8e8e8;
+  background: #fafafa;
+  min-height: 28px;
+  line-height: 1.4;
+}
+
+.bne-legend b { font-weight: 600; color: #222; }
+
+/* Colour gradient bar */
+.leg-bar {
+  display: inline-block;
+  width: 80px;
+  height: 10px;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* Small coloured square swatch */
+.leg-swatch {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  border: 1px solid rgba(0,0,0,0.18);
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* Ring-only swatch (specialist indicator) */
+.leg-ring {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid #333;
+  background: transparent;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* Italic note — wraps to full row */
+.leg-note {
+  color: #777;
+  font-style: italic;
+  flex-basis: 100%;
+  line-height: 1.5;
+}
+
 /* BNE scatter panel (below main grid) */
 .bne-analytics {
   max-width: 1600px;
@@ -528,7 +596,6 @@ a {
 
 .bne-scatter-panel {
   background: #fff;
-  border: 1px solid #e0e0e0;
   padding: 10px 14px 6px;
 }
 
@@ -835,6 +902,14 @@ details[open] .controls-advanced-summary::before {
   font-size: 0.75rem;
   color: #aaa;
   margin-top: 0.2rem;
+}
+
+/* Per-control explainer text, used in BNE controls */
+.control-hint {
+  font-size: 0.63rem;
+  color: #bbb;
+  margin: 1px 0 5px 0;
+  line-height: 1.35;
 }
 
 kbd {

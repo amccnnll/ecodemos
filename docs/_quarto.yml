@@ -6,6 +6,7 @@ project:
     - ds.md
     - secr.md
     - lv.md
+    - bne.md
 
 website:
   title: "ecodemos docs"
@@ -24,6 +25,8 @@ website:
             href: secr.md
           - text: "Lotka-Volterra"
             href: lv.md
+          - text: "BNE"
+            href: bne.md
 
 format:
   html:
