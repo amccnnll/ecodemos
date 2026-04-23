@@ -419,6 +419,7 @@ a {
   grid-area: scatter;
   margin: 0;
   padding: 6px 8px 16px;
+  background: #fff;
 }
 
 /* Sim pane: hex map left, network panel right — network gets slightly more width */

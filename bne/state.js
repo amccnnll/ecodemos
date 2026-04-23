@@ -7,7 +7,7 @@ export const params = {
   // Domain
   cols: 18, rows: 14, hexSize: 30, seed: 42,
   // Population
-  N: 60, G: 4, guildOverlap: 0.3, specialistFraction: 0.5, simSeed: 42,
+  N: 60, G: 4, guildOverlap: 0.3, specialistFraction: 0.5, nTransients: 15, simSeed: 42,
   // Survey
   T: 6, effortBias: 0.7, detectionProb: 0.3,
   // Analysis

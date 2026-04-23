@@ -69,8 +69,9 @@ function updateHexLegend() {
 
   } else if (layer === 'sightings') {
     html = `${gradBar('blues')} <b>Total sightings Σ Y<sub>ih</sub></b>&thinsp; few → many
-            <span class="leg-note">Raw observed sightings summed over all retained dolphins (≥ 4 sightings each).
-              Reflects habitat use and uneven effort together - <i>not</i> effort-corrected.</span>`;
+            <span class="leg-note">Raw observed sightings summed over all dolphins (residents and transients).
+              Transients contribute here but are filtered from the analysis pipeline by the ≥ 4 sightings gate.
+              Reflects habitat use and uneven effort together — <i>not</i> effort-corrected.</span>`;
 
   } else if (layer === 'bstar') {
     html = `${gradBar('greens')} <b>Summed B*</b>&thinsp; low → high
@@ -145,17 +146,20 @@ function buildHexMap() {
   // ── Coastline overlay ───────────────────────────────────────────────────
   // Draw the edges where sea hexes border land hexes (or the grid boundary).
   // Uses full hex scale (not 0.98) so edges align to true hex boundaries.
-  // Axial neighbour directions and corresponding shared-edge vertex pairs:
-  const HEX_DIRS  = [[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1]]; // E SE SW W NW NE
+  // Offset-r parity-aware neighbour tables (odd rows shift right by 0.5):
+  //   directions order: E SE SW W NW NE — must match EDGE_VERTS slots below.
+  const NBR_EVEN  = [[+1,0],[0,+1],[-1,+1],[-1,0],[-1,-1],[0,-1]];
+  const NBR_ODD   = [[+1,0],[+1,+1],[0,+1],[-1,0],[0,-1],[+1,-1]];
   const EDGE_VERTS = [[0,1],[1,2],[2,3],[3,4],[4,5],[5,0]];    // vertex pairs per direction
   const hexByQR   = new Map(hexes.map(h => [`${h.q},${h.r}`, h]));
   const coastSegs = [];
 
   for (const h of hexes) {
     if (h.isLand) continue;
+    const dirs = (h.r & 1) ? NBR_ODD : NBR_EVEN;
     const pts = hexVertices(tx(h.x), ty(h.y), hexSize * sc);
     for (let d = 0; d < 6; d++) {
-      const nbr = hexByQR.get(`${h.q + HEX_DIRS[d][0]},${h.r + HEX_DIRS[d][1]}`);
+      const nbr = hexByQR.get(`${h.q + dirs[d][0]},${h.r + dirs[d][1]}`);
       if (!nbr || nbr.isLand) {
         const [v0, v1] = EDGE_VERTS[d];
         coastSegs.push([pts[v0], pts[v1]]);
@@ -169,7 +173,7 @@ function buildHexMap() {
     .attr('class', 'coast')
     .attr('x1', d => d[0].x).attr('y1', d => d[0].y)
     .attr('x2', d => d[1].x).attr('y2', d => d[1].y)
-    .attr('stroke', '#7a6650')
+    .attr('stroke', '#c83232')
     .attr('stroke-width', 1.8)
     .attr('stroke-linecap', 'round')
     .attr('pointer-events', 'none');
@@ -198,7 +202,9 @@ function updateHexColours() {
 
   } else if (layer === 'sightings' && sim && anal) {
     const totals = new Float64Array(H);
-    for (const d of sim.retainedDolphins)
+    // Sum over ALL dolphins (residents + transients) — transients contribute to raw sightings
+    // even though they are filtered from the analysis pipeline by the ≥4 gate.
+    for (const d of sim.dolphins)
       for (let hi = 0; hi < H; hi++) totals[hi] += sim.sightingsIH[d.dolphin_id * H + hi];
     const norm = normArr(totals);
     const lut = new Map(seaHexes.map((h, i) => [h.hex_id, norm[i]]));
@@ -281,6 +287,7 @@ wireSlider('sl-N',            'N',                  v => String(v | 0),    reg);
 wireSlider('sl-G',            'G',                  v => String(v | 0),    reg);
 wireSlider('sl-overlap',      'guildOverlap',        v => v.toFixed(2),     reg);
 wireSlider('sl-specialist',   'specialistFraction',  v => v.toFixed(2),     reg);
+wireSlider('sl-nTransients',  'nTransients',         v => String(v | 0),    reg);
 wireSlider('sl-T',            'T',                  v => String(v | 0),    reg);
 wireSlider('sl-effortBias',   'effortBias',          v => v.toFixed(2),     reg);
 wireSlider('sl-detectionProb','detectionProb',       v => v.toFixed(2),     reg);

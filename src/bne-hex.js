@@ -46,14 +46,16 @@ export function makePerlin(seed) {
   };
 }
 
-// ── Hex geometry (pointy-top, axial coords) ───────────────────────────────
-// Centroid of axial (q, r):
-//   x = size * sqrt(3) * (q + r/2)
+// ── Hex geometry (pointy-top, offset-r coords) ───────────────────────────
+// Odd rows shift right by half a hex; even rows do not — gives a rectangular
+// bounding box (brick pattern) rather than the accumulating parallelogram of
+// pure axial coords. Axial (q, r) topology is unchanged; only pixel positions differ.
+//   x = size * sqrt(3) * (q + (r & 1) * 0.5)
 //   y = size * 1.5 * r
 
 export function hexCentroid(q, r, size) {
   return {
-    x: size * SQRT3 * (q + r / 2),
+    x: size * SQRT3 * (q + (r & 1) * 0.5),
     y: size * 1.5 * r,
   };
 }
@@ -72,21 +74,22 @@ export function hexPathString(cx, cy, size) {
   return `M${v.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join('L')}Z`;
 }
 
-// ── Bay coastline ─────────────────────────────────────────────────────────
-// Smooth concave bay: coastline dips further into the domain at the centre.
-// normX ∈ [0,1]; returns distance from top (in domain coords) where coast sits.
-// Sea is below this line; land is above.
-function coastlineY(normX, domainH) {
-  return domainH * (0.16 + 0.14 * Math.sin(Math.PI * normX));
-}
-
 function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
 
 // ── Main export ───────────────────────────────────────────────────────────
 export function generateHexGrid({ cols = 18, rows = 14, hexSize = 30, seed = 42 } = {}) {
-  const perlinD = makePerlin((seed * 31 + 7)  | 0);
-  const perlinP = makePerlin((seed * 17 + 13) | 0);
-  const perlinR = makePerlin((seed * 23 + 19) | 0);
+  const perlinD     = makePerlin((seed * 31 + 7)  | 0);
+  const perlinP     = makePerlin((seed * 17 + 13) | 0);
+  const perlinR     = makePerlin((seed * 23 + 19) | 0);
+  const perlinCoast = makePerlin((seed * 29 + 11) | 0);
+
+  // Sine-base bay perturbed by seeded Perlin noise so each landscape seed gives
+  // a distinct coastline shape (inlets, slight headlands) while retaining the
+  // overall concave bay curvature. Amplitude 0.06 ≈ 40% of the sine amplitude.
+  function coastlineY(normX, domainH) {
+    return domainH * (0.06 + 0.14 * Math.sin(Math.PI * normX)
+                           + 0.06 * perlinCoast(normX * 2.5, 0));
+  }
 
   // Bounding box
   let xMin = Infinity, xMax = -Infinity, yMin = Infinity, yMax = -Infinity;
@@ -141,5 +144,22 @@ export function generateHexGrid({ cols = 18, rows = 14, hexSize = 30, seed = 42 
     }
   }
 
-  return { hexes, cols, rows, hexSize, xMin, xMax, yMin, yMax, domainW, domainH, domainDiag, nSea: seaCount };
+  // Expose so sampleSeaPoint can run the same land/sea test without re-deriving the Perlin seed.
+  const coastlineYExposed = (normX) => coastlineY(normX, domainH);
+
+  return { hexes, cols, rows, hexSize, xMin, xMax, yMin, yMax, domainW, domainH, domainDiag, nSea: seaCount, coastlineY: coastlineYExposed };
+}
+
+// ── Sea-point sampler ─────────────────────────────────────────────────────
+// Rejection-samples a continuous (x, y) uniformly over the sea region.
+// rand must be a mulberry32 PRNG. Caller supplies hexGrid from generateHexGrid.
+export function sampleSeaPoint(hexGrid, rand) {
+  const { xMin, xMax, yMin, yMax, domainW, domainH, coastlineY } = hexGrid;
+  for (;;) {
+    const x = xMin + rand() * domainW;
+    const y = yMin + rand() * domainH;
+    const normX = (x - xMin) / domainW;
+    const relY  = y - yMin;
+    if (relY >= coastlineY(normX)) return { x, y };  // sea: relY >= coastlineY → accept
+  }
 }

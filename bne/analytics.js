@@ -28,7 +28,15 @@ function updateNetworkLegend(view) {
   const anal = state.analysis;
   let html = '';
 
-  if (view === 'bstar') {
+  if (view === 'bipartite') {
+    const n = anal?.nCommunities ?? 0;
+    html = `${n ? commSwatches(n) + ' &thinsp; ' : ''}${swatchNet('#9999aa')} <b>hex</b>
+            <span class="leg-note"><b>Left</b> = retained dolphins (coloured by detected community, sorted by community) &nbsp;·&nbsp;
+              <b>Right</b> = sea hexes &nbsp;·&nbsp;
+              <b>Edges</b>: B*<sub>ih</sub> &gt; 5% of dolphin's peak B*; coloured by dolphin community; width ∝ B* &nbsp;·&nbsp;
+              This is the raw dolphin × hex data before projection to the dolphin-dolphin similarity graph.</span>`;
+
+  } else if (view === 'bstar') {
     html = `${gradBarNet('linear-gradient(to right,#e5f5e0,#a1d99b,#41ab5d,#006d2c)')}
             <b>Row-normalised B*</b>&thinsp; low → high
             <span class="leg-note">Rows = dolphins sorted by detected community (<b>left colour bar</b> = community) &nbsp;·&nbsp;
@@ -45,12 +53,19 @@ function updateNetworkLegend(view) {
               Diagonal = grey (self-similarity undefined) &nbsp;·&nbsp;
               Block structure on the diagonal indicates natural groupings — before any community labels are assigned.</span>`;
 
-  } else if (view === 'knn') {
-    html = `${swatchNet('#b0b8c4')} <b>node</b> &thinsp; ${swatchNet('#d0d0d0')} <b>edge</b>
-            <span class="leg-note">Each dolphin (node) connected to its k most-similar neighbours by Jaccard, then symmetrised by taking the max weight &nbsp;·&nbsp;
+  } else if (view === 'full') {
+    html = `${swatchNet('#4878CF')} <b>node</b> &thinsp; ${swatchNet('#8090a8')} <b>edge</b>
+            <span class="leg-note">All pairs with Jaccard &gt; 0 connected — no kNN pruning &nbsp;·&nbsp;
+              Nodes in neutral order (dolphin ID); no community structure implied &nbsp;·&nbsp;
               <b>Edge width</b> ∝ Jaccard similarity &nbsp;·&nbsp;
-              Nodes and edges are neutral — community colours are not revealed until the Communities view &nbsp;·&nbsp;
-              This is the graph that Louvain partitions.</span>`;
+              Compare with the kNN view to see how pruning removes weak between-guild noise while retaining strong within-guild connections.</span>`;
+
+  } else if (view === 'knn') {
+    html = `${swatchNet('#4878CF')} <b>node</b> &thinsp; ${swatchNet('#8090a8')} <b>edge</b>
+            <span class="leg-note">Each dolphin (node) connected to its k most-similar neighbours by Jaccard, then symmetrised by taking the max weight &nbsp;·&nbsp;
+              Nodes in neutral order (dolphin ID) — community colours not revealed until the Communities view &nbsp;·&nbsp;
+              <b>Edge width</b> ∝ Jaccard similarity &nbsp;·&nbsp;
+              This is the sparse graph that Louvain partitions.</span>`;
 
   } else if (view === 'communities') {
     const n = anal?.nCommunities ?? 0;
@@ -84,22 +99,27 @@ let _prevMetrics     = null;
 // ── Network panel ─────────────────────────────────────────────────────────────
 const netContainer = document.getElementById('bne-network-view');
 
-// Place nodes on a circle sorted by sortField, with gaps at group boundaries.
+// Place nodes on a circle sorted by sortField (with gaps at group boundaries),
+// or in index order with no gaps when sortField is null.
 function placeOnCircle(nodes, sortField, cx, cy, radius) {
   const N = nodes.length;
   if (N === 0) return;
 
-  const order = [...Array(N).keys()].sort((a, b) => {
-    const ka = nodes[a][sortField] >= 0 ? nodes[a][sortField] : 9999;
-    const kb = nodes[b][sortField] >= 0 ? nodes[b][sortField] : 9999;
-    return ka !== kb ? ka - kb : a - b;
-  });
+  const order = sortField === null
+    ? [...Array(N).keys()]
+    : [...Array(N).keys()].sort((a, b) => {
+        const ka = nodes[a][sortField] >= 0 ? nodes[a][sortField] : 9999;
+        const kb = nodes[b][sortField] >= 0 ? nodes[b][sortField] : 9999;
+        return ka !== kb ? ka - kb : a - b;
+      });
 
   let nGaps = 0, prevKey = null;
-  for (const i of order) {
-    const k = nodes[i][sortField] >= 0 ? nodes[i][sortField] : 9999;
-    if (prevKey !== null && k !== prevKey) nGaps++;
-    prevKey = k;
+  if (sortField !== null) {
+    for (const i of order) {
+      const k = nodes[i][sortField] >= 0 ? nodes[i][sortField] : 9999;
+      if (prevKey !== null && k !== prevKey) nGaps++;
+      prevKey = k;
+    }
   }
 
   const GAP          = nGaps > 0 ? 0.10 : 0;
@@ -118,6 +138,109 @@ function placeOnCircle(nodes, sortField, cx, cy, radius) {
   }
 }
 
+// ── Raw bipartite view ────────────────────────────────────────────────────────
+function drawBipartite(cW, cH) {
+  const { Bstar, dolphins, communities, N } = state.analysis;
+  const seaHexes = state.simData.seaHexes;
+  const H = seaHexes.length;
+
+  const xDolph = cW * 0.22;
+  const xHex   = cW * 0.78;
+  const padV   = 24;
+
+  // Sort dolphins by community (unassigned last)
+  const dolphOrder = [...Array(N).keys()].sort((a, b) => {
+    const ca = communities[a] >= 0 ? communities[a] : 9999;
+    const cb = communities[b] >= 0 ? communities[b] : 9999;
+    return ca !== cb ? ca - cb : a - b;
+  });
+
+  const dSlotH = (cH - 2 * padV) / N;
+  const hSlotH = Math.max(1, (cH - 2 * padV) / H);
+  const nodeR  = Math.max(2, Math.min(5, dSlotH * 0.38));
+
+  const svg = d3.select(netContainer).append('svg').attr('width', cW).attr('height', cH);
+
+  // Column headers
+  svg.append('text').attr('x', xDolph).attr('y', 14).attr('text-anchor', 'middle')
+    .attr('font-size', '10px').attr('fill', '#666').text('Dolphins');
+  svg.append('text').attr('x', xHex).attr('y', 14).attr('text-anchor', 'middle')
+    .attr('font-size', '10px').attr('fill', '#666').text('Hexes');
+
+  // Pre-compute per-dolphin max B* for threshold
+  const dMaxB = new Float64Array(N);
+  for (let i = 0; i < N; i++)
+    for (let hi = 0; hi < H; hi++)
+      if (Bstar[i * H + hi] > dMaxB[i]) dMaxB[i] = Bstar[i * H + hi];
+
+  // Build edge list (ascending weight so heavy edges render on top)
+  const edges = [];
+  const threshold = 0.05;
+  for (let oi = 0; oi < N; oi++) {
+    const i = dolphOrder[oi];
+    if (dMaxB[i] <= 0) continue;
+    for (let hi = 0; hi < H; hi++) {
+      const b = Bstar[i * H + hi];
+      if (b >= threshold * dMaxB[i]) edges.push({ oi, hi, b });
+    }
+  }
+  edges.sort((a, b) => a.b - b.b);
+
+  // Global max for stroke-width scaling
+  const globalMax = d3.max(edges, e => e.b) || 1;
+
+  // Dolphin y positions
+  const dolphY = dolphOrder.map((_, slot) => padV + (slot + 0.5) * dSlotH);
+  // Map from dolphin index to its slot y
+  const dY = new Float64Array(N);
+  dolphOrder.forEach((i, slot) => { dY[i] = padV + (slot + 0.5) * dSlotH; });
+
+  // Hex y positions (sorted by seaIdx, which is already sequential)
+  const hY = new Float64Array(H);
+  for (let hi = 0; hi < H; hi++) hY[hi] = padV + (hi + 0.5) * hSlotH;
+
+  // Edges
+  svg.append('g')
+    .selectAll('line')
+    .data(edges)
+    .join('line')
+    .attr('x1', e => xDolph)
+    .attr('y1', e => dY[dolphOrder[e.oi]])
+    .attr('x2', e => xHex)
+    .attr('y2', e => hY[e.hi])
+    .attr('stroke', e => {
+      const c = communities[dolphOrder[e.oi]];
+      return c >= 0 ? GUILD_COLS[c % GUILD_COLS.length] : '#aaa';
+    })
+    .attr('stroke-opacity', 0.20)
+    .attr('stroke-width', e => Math.max(0.3, (e.b / globalMax) * 2.5));
+
+  // Hex nodes (drawn before dolphin nodes so dolphins are on top)
+  svg.append('g')
+    .selectAll('rect')
+    .data(seaHexes)
+    .join('rect')
+    .attr('x', xHex - 1).attr('y', (_, hi) => hY[hi] - 1)
+    .attr('width', 2).attr('height', Math.max(1, hSlotH * 0.6))
+    .attr('fill', '#9999aa');
+
+  // Dolphin nodes — datum is the dolphin index i, dY[i] gives its y position
+  svg.append('g')
+    .selectAll('circle')
+    .data(dolphOrder)
+    .join('circle')
+    .attr('cx', xDolph)
+    .attr('cy', i => dY[i])
+    .attr('r', nodeR)
+    .attr('fill', i => {
+      const c = communities[i];
+      return c >= 0 ? GUILD_COLS[c % GUILD_COLS.length] : UNASSIGNED;
+    })
+    .attr('stroke', '#fff').attr('stroke-width', 0.8);
+
+  updateNetworkLegend('bipartite');
+}
+
 function buildNetwork() {
   netContainer.innerHTML = '';
   const anal = state.analysis;
@@ -132,11 +255,12 @@ function buildNetwork() {
   const cH   = rect.height || 500;
   const view = state.networkView;
 
+  if (view === 'bipartite') { drawBipartite(cW, cH); return; }
   if (view === 'bstar')   { drawBstarMatrix(cW, cH);   updateNetworkLegend('bstar');   return; }
   if (view === 'jaccard') { drawJaccardMatrix(cW, cH); updateNetworkLegend('jaccard'); return; }
 
-  // ── Static circular node-link (knn / communities / truth) ──────────────────
-  const { dolphins, knnAdj, communities, N } = anal;
+  // ── Static circular node-link (full / knn / communities / truth) ───────────
+  const { dolphins, knnAdj, jaccard, communities, N } = anal;
 
   const nodes = dolphins.map((d, i) => ({
     id: d.dolphin_id, idx: i,
@@ -145,16 +269,23 @@ function buildNetwork() {
     x: 0, y: 0,
   }));
 
-  const sortField    = (view === 'truth') ? 'guild_true' : 'community';
+  // Full and kNN views show the graph before community assignment: pass null for
+  // no sorting or gaps, so the layout doesn't pre-reveal community structure.
+  // Communities and Truth sort by their respective labels with group gaps.
+  const sortField = (view === 'truth')        ? 'guild_true'
+                  : (view === 'communities')  ? 'community'
+                  : null;  // full / knn: neutral index order, no group gaps
   const nodeRadius   = Math.max(3, Math.min(7, 230 / Math.sqrt(N)));
   const layoutRadius = Math.min(cW, cH) * 0.38;
 
   placeOnCircle(nodes, sortField, cW / 2, cH / 2, layoutRadius);
 
+  // 'full' uses the unpruned Jaccard matrix; all other node-link views use the kNN-pruned graph.
+  const adjMatrix = (view === 'full') ? jaccard : knnAdj;
   const edges = [];
   for (let i = 0; i < N; i++)
     for (let j = i + 1; j < N; j++) {
-      const w = knnAdj[i * N + j];
+      const w = adjMatrix[i * N + j];
       if (w > 0) edges.push({ i, j, w });
     }
 
@@ -162,8 +293,7 @@ function buildNetwork() {
     .attr('width', cW).attr('height', cH)
     .on('click', () => state.selectDolphin(-1));
 
-  // kNN shows the graph that feeds into Louvain — no community colours yet.
-  // Only 'communities' and 'truth' views reveal the partition result.
+  // Communities and Truth reveal the partition; Full and kNN stay neutral.
   const within = e => nodes[e.i].community >= 0 && nodes[e.i].community === nodes[e.j].community;
   const useComm = view === 'communities' || view === 'truth';
 
@@ -172,6 +302,7 @@ function buildNetwork() {
     ? [...edges].sort((a, b) => (within(a) ? 1 : 0) - (within(b) ? 1 : 0))
     : edges;
 
+  const EDGE_NEUTRAL = '#8090a8';  // visible grey-blue for uncoloured views
   svg.append('g')
     .selectAll('line')
     .data(sortedEdges)
@@ -179,20 +310,24 @@ function buildNetwork() {
     .attr('x1', e => nodes[e.i].x).attr('y1', e => nodes[e.i].y)
     .attr('x2', e => nodes[e.j].x).attr('y2', e => nodes[e.j].y)
     .attr('stroke', e => {
-      if (!useComm) return '#d0d0d0';
-      if (view === 'truth') return '#ccc';
+      if (!useComm) return EDGE_NEUTRAL;
+      if (view === 'truth') return EDGE_NEUTRAL;
       const c = nodes[e.i].community;
-      return within(e) ? GUILD_COLS[c % GUILD_COLS.length] : '#e0e0e0';
+      return within(e) ? GUILD_COLS[c % GUILD_COLS.length] : '#c4ccd8';
     })
-    .attr('stroke-opacity', e => useComm && within(e) ? 0.55 : 0.22)
-    .attr('stroke-width',   e => Math.max(0.3, e.w * 2.5));
+    .attr('stroke-opacity', e => {
+      if (useComm && within(e)) return 0.60;
+      return view === 'full' ? 0.18 : 0.40;  // full: lower opacity (dense); knn/truth: more visible
+    })
+    .attr('stroke-width', e => Math.max(0.3, e.w * 2.5));
 
   // Nodes
+  const COBALT = '#4878CF';
   const colFn = view === 'truth'
-    ? d => GUILD_COLS[d.guild_true % GUILD_COLS.length]
+    ? d => d.guild_true >= 0 ? GUILD_COLS[d.guild_true % GUILD_COLS.length] : UNASSIGNED
     : view === 'communities'
       ? d => (d.community >= 0 ? GUILD_COLS[d.community % GUILD_COLS.length] : UNASSIGNED)
-      : () => '#b0b8c4'; // kNN: neutral before community detection
+      : () => COBALT; // full / knn: neutral cobalt before community detection
 
   svg.append('g')
     .selectAll('circle')
@@ -212,8 +347,8 @@ function buildNetwork() {
       return `Dolphin ${d.id} · ${s} · True guild ${d.guild_true + 1} · ${c}`;
     });
 
-  // Labels around the ring (skip for knn view — it shows structure before community assignment)
-  if (view !== 'knn') {
+  // Labels around the ring only for coloured views (communities / truth)
+  if (view === 'communities' || view === 'truth') {
     const groups = d3.group(nodes, d => view === 'truth' ? d.guild_true : d.community);
     groups.forEach((members, key) => {
       if (key < 0) return;
@@ -453,7 +588,9 @@ function updateMetrics() {
     ['bne-m-n','bne-m-ncomm','bne-m-q','bne-m-ari','bne-m-wb'].forEach(id => set(id, '—'));
     return;
   }
-  set('bne-m-n',     String(anal.N));
+  const sim = state.simData;
+  const ntotal = sim ? sim.Ntotal : anal.N;
+  set('bne-m-n',     anal.N + ' / ' + ntotal);
   set('bne-m-ncomm', String(anal.nCommunities));
   set('bne-m-q',     anal.Q.toFixed(3));
   set('bne-m-ari',   met ? met.ari.toFixed(3) : '—');

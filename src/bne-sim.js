@@ -1,7 +1,7 @@
 // src/bne-sim.js — dolphin population generative model.
 // Pure engine: no DOM, D3, or p5 dependencies.
 
-import { mulberry32 } from './bne-hex.js';
+import { mulberry32, sampleSeaPoint } from './bne-hex.js';
 
 // ── Guild preference profiles ─────────────────────────────────────────────
 // Each guild has weights [wD, wP, wR] over (depth-like, productivity, disturbance).
@@ -51,6 +51,7 @@ export function generateSimulation({
   G             = 4,
   guildOverlap  = 0.3,
   specialistFraction = 0.5,
+  nTransients   = 15,   // extra dolphins with home range outside the arena (filter bait)
   T             = 6,
   effortBias    = 0.7,
   detectionProb = 0.3,
@@ -63,10 +64,11 @@ export function generateSimulation({
   const effortRand = mulberry32((seed + 200) | 0);
   const sightRand  = mulberry32((seed + 300) | 0);
 
-  const { hexes, domainDiag } = hexGrid;
+  const { hexes, domainDiag, xMin, xMax, yMin, yMax, domainW, domainH } = hexGrid;
   const seaHexes = hexes.filter(h => !h.isLand);
   const H = seaHexes.length;
   if (H === 0 || N === 0) return null;
+  const shortDim = Math.min(domainW, domainH);
 
   // ── Guild profiles ────────────────────────────────────────────────────
   const guildProfiles = makeGuildProfiles(G, guildOverlap, rand);
@@ -80,39 +82,64 @@ export function generateSimulation({
   });
 
   // ── Dolphins ──────────────────────────────────────────────────────────
-  // Home-range centres drawn UNIFORMLY from sea hexes — NOT clustered by guild.
+  // Home-range centres sampled CONTINUOUSLY over the sea region (rejection sampling)
+  // so the underlying truth is independent of hex size. The hex grid acts purely as
+  // the observation binning: changing hexSize keeps dolphin positions fixed, only
+  // the sighting-bin grain changes (clean MAUP demonstration).
   // Guild signal comes from shared habitat-type preferences, not geography.
   const dolphins = [];
   const sigma = domainDiag * sigmaScale;
   for (let i = 0; i < N; i++) {
     const guild = (rand() * G) | 0;
     const isSpecialist = rand() < specialistFraction;
-    const homeHex = seaHexes[(rand() * H) | 0];
+    const { x: mu_x, y: mu_y } = sampleSeaPoint(hexGrid, rand);
     // Specialists have stronger habitat fidelity (high guildCoeff) rather than a
     // smaller home range. Both types roam equally; specialists just prefer their
     // guild's habitat type more strongly.
     const gc = isSpecialist ? specCoeff : genCoeff;
     const u1 = Math.max(1e-10, rand()), u2 = rand();
     const activity = 0.25 * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-    dolphins.push({ dolphin_id: i, guild_true: guild, isSpecialist, guildCoeff: gc,
-                    mu_x: homeHex.x, mu_y: homeHex.y, sigma, activity });
+    dolphins.push({ dolphin_id: i, guild_true: guild, isSpecialist, isResident: true, guildCoeff: gc,
+                    mu_x, mu_y, sigma, activity });
   }
+
+  // ── Transient dolphins ────────────────────────────────────────────────
+  // Home-range centres placed just outside the arena boundary so Gaussian tails
+  // produce at most a handful of edge sightings. Transients typically fail the
+  // ≥4 filter, contributing to raw sightings but not to the analysis pipeline.
+  for (let j = 0; j < nTransients; j++) {
+    const edge = (rand() * 4) | 0;  // 0=top, 1=bottom, 2=left, 3=right
+    const offset = (0.15 + rand() * 0.25) * shortDim;
+    let mu_x, mu_y;
+    if      (edge === 0) { mu_x = xMin + rand() * domainW; mu_y = yMin - offset; }
+    else if (edge === 1) { mu_x = xMin + rand() * domainW; mu_y = yMax + offset; }
+    else if (edge === 2) { mu_x = xMin - offset;           mu_y = yMin + rand() * domainH; }
+    else                 { mu_x = xMax + offset;           mu_y = yMin + rand() * domainH; }
+    const u1 = Math.max(1e-10, rand()), u2 = rand();
+    const activity = 0.25 * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    dolphins.push({ dolphin_id: N + j, guild_true: -1, isSpecialist: false, isResident: false,
+                    guildCoeff: 0, mu_x, mu_y, sigma, activity });
+  }
+
+  const Ntotal = dolphins.length;
 
   // ── Latent use λ per dolphin × sea hex ────────────────────────────────
   // log λ_{i,h} = -4.0 + activity + guildCoeff * guild_score + home_range_penalty
   // Specialists: guildCoeff=10 → exp(10) ≈ 22000× contrast between best and worst
   // hexes, so B* concentrates sharply in guild-preferred habitat (low core50).
   // Generalists: guildCoeff=5 → exp(5) ≈ 148× contrast, B* spread more evenly.
-  const lambdaIH = new Float64Array(N * H);
+  // Transients: guildCoeff=0, home range outside arena → weak edge sightings only.
+  const lambdaIH = new Float64Array(Ntotal * H);
   const sig2 = 2 * sigma * sigma;
-  for (let i = 0; i < N; i++) {
+  for (let i = 0; i < Ntotal; i++) {
     const d = dolphins[i];
     const g = d.guild_true;
     for (let hi = 0; hi < H; hi++) {
       const hx = seaHexes[hi];
       const dx = hx.x - d.mu_x, dy = hx.y - d.mu_y;
       const homeRangePenalty = -(dx * dx + dy * dy) / sig2;
-      const logLam = -4.0 + d.activity + d.guildCoeff * guildScores[g][hi] + homeRangePenalty;
+      const guildTerm = g >= 0 ? d.guildCoeff * guildScores[g][hi] : 0;
+      const logLam = -4.0 + d.activity + guildTerm + homeRangePenalty;
       lambdaIH[i * H + hi] = Math.exp(logLam);
     }
   }
@@ -141,49 +168,52 @@ export function generateSimulation({
   // effortBias=0 → routes reach ~50% of domain; effortBias=1 → ~10% (nearshore only).
   const domainDiagHexes = Math.round(domainDiag / hexGrid.hexSize);
   const L = Math.max(3, Math.round((0.10 + (1 - effortBias) * 0.40) * domainDiagHexes));
-  const K = 8; // number of survey routes
 
-  // Bearing offset: determined by effort seed so it varies across sim seeds.
-  const bearingOffset = effortRand() * (2 * Math.PI / K);
+  // K_year routes per year: each year gets its own bearing offset so the tendril
+  // footprint expands as T grows (more years → more spatial coverage, not just
+  // more sightings in the same hexes). Total route-visits accumulate across years.
+  const K_year = 4;
 
-  const routeCounts = new Int32Array(H);
-  for (let ri = 0; ri < K; ri++) {
-    const bearing = bearingOffset + (ri / K) * 2 * Math.PI;
-    let cur = portHex;
-    routeCounts[portIdx]++;
-
-    for (let s = 0; s < L; s++) {
-      // Score sea neighbours by angular closeness to bearing, pick best or jitter.
-      let bestHex = null, bestAligned = Infinity;
-      const candidates = [];
-      for (const [dq, dr] of HEX_DIRS) {
-        const nbr = hexByQR.get(`${cur.q + dq},${cur.r + dr}`);
-        if (!nbr || nbr.isLand) continue;
-        const angle = Math.atan2(nbr.y - cur.y, nbr.x - cur.x);
-        // Angular distance (wraps correctly via modulo)
-        const diff = Math.abs(((angle - bearing + 3 * Math.PI) % (2 * Math.PI)) - Math.PI);
-        candidates.push({ hex: nbr, diff });
-        if (diff < bestAligned) { bestAligned = diff; bestHex = nbr; }
+  function walkRoutes(K, bearingOffset, countArr) {
+    for (let ri = 0; ri < K; ri++) {
+      const bearing = bearingOffset + (ri / K) * 2 * Math.PI;
+      let cur = portHex;
+      countArr[portIdx]++;
+      for (let s = 0; s < L; s++) {
+        let bestHex = null, bestAligned = Infinity;
+        const candidates = [];
+        for (const [dq, dr] of HEX_DIRS) {
+          const nbr = hexByQR.get(`${cur.q + dq},${cur.r + dr}`);
+          if (!nbr || nbr.isLand) continue;
+          const angle = Math.atan2(nbr.y - cur.y, nbr.x - cur.x);
+          const diff = Math.abs(((angle - bearing + 3 * Math.PI) % (2 * Math.PI)) - Math.PI);
+          candidates.push({ hex: nbr, diff });
+          if (diff < bestAligned) { bestAligned = diff; bestHex = nbr; }
+        }
+        if (!bestHex) break;
+        const chosen = (effortRand() < 0.20 && candidates.length > 1)
+          ? candidates[(effortRand() * candidates.length) | 0].hex
+          : bestHex;
+        const hi = seaIdxMap.get(chosen.hex_id);
+        if (hi !== undefined) countArr[hi]++;
+        cur = chosen;
       }
-      if (!bestHex) break;
-
-      // 20% lateral jitter: pick a random sea neighbour instead
-      const chosen = (effortRand() < 0.20 && candidates.length > 1)
-        ? candidates[(effortRand() * candidates.length) | 0].hex
-        : bestHex;
-
-      const hi = seaIdxMap.get(chosen.hex_id);
-      if (hi !== undefined) routeCounts[hi]++;
-      cur = chosen;
     }
   }
 
-  // Effort per hex per year: Gamma-distributed, scaled by route-visit count.
+  // Per-year route counts (each year has its own fresh bearing offset)
+  const routeCountsPerYear = Array.from({ length: T }, () => new Int32Array(H));
+  for (let t = 0; t < T; t++) {
+    const bearingOffset = effortRand() * (2 * Math.PI / K_year);
+    walkRoutes(K_year, bearingOffset, routeCountsPerYear[t]);
+  }
+
+  // Effort per hex per year: Gamma-distributed, scaled by that year's route-visit count.
   // Hexes not on any route get a small background effort (incidental traffic).
   const effortHT = new Float64Array(H * T);
   for (let hi = 0; hi < H; hi++) {
-    const rc = routeCounts[hi];
     for (let t = 0; t < T; t++) {
+      const rc = routeCountsPerYear[t][hi];
       const g1 = -Math.log(Math.max(1e-10, effortRand()));
       const g2 = -Math.log(Math.max(1e-10, effortRand()));
       effortHT[hi * T + t] = rc > 0
@@ -193,14 +223,14 @@ export function generateSimulation({
   }
 
   // ── Observed sightings aggregated over years ──────────────────────────
-  const sightingsIH = new Float64Array(N * H);
+  const sightingsIH = new Float64Array(Ntotal * H);
   const effortH     = new Float64Array(H);
 
   for (let hi = 0; hi < H; hi++) {
     for (let t = 0; t < T; t++) {
       const E = effortHT[hi * T + t];
       effortH[hi] += E;
-      for (let i = 0; i < N; i++) {
+      for (let i = 0; i < Ntotal; i++) {
         const mu = E * detectionProb * lambdaIH[i * H + hi];
         sightingsIH[i * H + hi] += poisson(mu, sightRand);
       }
@@ -208,12 +238,13 @@ export function generateSimulation({
   }
 
   // Total sightings per dolphin; retain only those with >= 4
-  const totalSightings = new Float64Array(N);
-  for (let i = 0; i < N; i++) {
+  const totalSightings = new Float64Array(Ntotal);
+  for (let i = 0; i < Ntotal; i++) {
     for (let hi = 0; hi < H; hi++) totalSightings[i] += sightingsIH[i * H + hi];
   }
   const retainedDolphins = dolphins.filter((_, i) => totalSightings[i] >= 4);
 
   return { dolphins, retainedDolphins, guildProfiles, guildScores, seaHexes,
-           sightingsIH, effortH, effortHT, lambdaIH, totalSightings, N, H, G, T };
+           sightingsIH, effortH, effortHT, lambdaIH, totalSightings,
+           N, Ntotal, H, G, T };
 }

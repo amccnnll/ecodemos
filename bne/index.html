@@ -39,8 +39,10 @@
       <!-- Network / matrix panel -->
       <div id="bne-network-panel">
         <div class="bne-view-tabs" id="bne-view-tabs">
+          <button class="bne-tab" data-view="bipartite">Bipartite</button>
           <button class="bne-tab" data-view="bstar">B*</button>
           <button class="bne-tab" data-view="jaccard">Jaccard</button>
+          <button class="bne-tab" data-view="full">Full</button>
           <button class="bne-tab" data-view="knn">kNN</button>
           <button class="bne-tab active" data-view="communities">Communities</button>
           <button class="bne-tab" data-view="truth">Truth</button>
@@ -113,6 +115,13 @@
           <span class="slider-value" id="val-specialist">0.50</span>
         </div>
         <p class="control-hint">Fraction of dolphins with strong habitat fidelity (guild affinity coefficient 10× vs 5× for generalists); specialists show lower core₅₀ — their sightings concentrate in fewer hexes</p>
+
+        <div class="slider-row">
+          <span class="control-label slider-label">Transients</span>
+          <input type="range" id="sl-nTransients" class="param-slider" min="0" max="30" step="1" value="15" />
+          <span class="slider-value" id="val-nTransients">15</span>
+        </div>
+        <p class="control-hint">Transient visitors with no resident home range; mostly filtered out by the ≥ 4 sightings gate, but contribute to the raw sightings layer</p>
       </div>
 
       <div class="controls-divider"></div>
@@ -125,7 +134,7 @@
           <input type="range" id="sl-T" class="param-slider" min="1" max="10" step="1" value="6" />
           <span class="slider-value" id="val-T">6</span>
         </div>
-        <p class="control-hint">Survey years; more years → more sightings per dolphin and better B* profiles</p>
+        <p class="control-hint">Survey years; each year runs 4 fresh tendril routes, so more years also expands spatial coverage across the domain</p>
 
         <div class="slider-row">
           <span class="control-label slider-label">Effort bias</span>
@@ -186,7 +195,7 @@
 
     <!-- ── Metrics strip ── -->
     <div class="pane-bne-metrics">
-      <span title="Number of dolphins with ≥ 4 total sightings across all years (minimum threshold for a usable B* profile)">Retained: <strong id="bne-m-n">—</strong></span>
+      <span title="Dolphins with ≥ 4 total sightings (usable B* profile) / total including transients">Retained: <strong id="bne-m-n">—</strong></span>
       <span title="Number of communities detected by Louvain with ≥ minCommunitySize members; dolphins in smaller communities are marked unassigned (−1)">Communities: <strong id="bne-m-ncomm">—</strong></span>
       <span title="Newman–Girvan modularity Q of the detected partition on the kNN graph. Q = (within-community edges) − (expected under null). Range −1 to 1; values ≳ 0.3 indicate meaningful structure.">Q: <strong id="bne-m-q">—</strong></span>
       <span title="Adjusted Rand Index comparing detected communities with true simulated guilds. 0 = random agreement; 1 = perfect recovery. Computed only over dolphins assigned to a community (unassigned excluded).">ARI: <strong id="bne-m-ari">—</strong></span>

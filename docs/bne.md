@@ -22,7 +22,13 @@ The pipeline runs in three stages:
 
 ### Domain
 
-The domain is a hex grid shaped as a simple bay: a concave coastline with open sea and a land mask. Hex size controls spatial resolution while keeping the arena footprint constant (MAUP demonstration). Three independent environmental fields are assigned to each sea hex:
+The domain is a pointy-top hex grid using offset-r coordinates (odd rows shift right by half a hex, even rows do not), giving a rectangular bounding box with a brick-pattern edge rather than a parallelogram. Hex size controls spatial resolution while keeping the arena footprint constant (MAUP demonstration).
+
+The coastline follows a sine-base bay perturbed by seeded Perlin noise:
+
+$$C(x) = H \left(0.06 + 0.14 \sin(\pi x) + 0.06 \cdot \mathrm{Perlin}(2.5\,x,\, 0)\right)$$
+
+where $x \in [0,1]$ is the normalised horizontal position and $H$ is the domain height. The Perlin component uses a seed derived from the landscape seed, so rolling the landscape dice produces a distinct coastline shape (varying inlet positions and slight headlands) while retaining the overall concave bay. Sea lies below $C(x)$; land above. Three independent environmental fields are assigned to each sea hex:
 
 | Field | Symbol | Description |
 |---|---|---|
@@ -46,7 +52,7 @@ This is normalised to $[0,1]$ across all sea hexes to give the guild score $s_{g
 
 ### Dolphin population
 
-Each dolphin is assigned a guild uniformly at random, then drawn independently of guild membership: home-range centres are placed uniformly across the domain so that guild signal comes entirely from habitat preference rather than spatial clustering.
+Each dolphin is assigned a guild uniformly at random, then drawn independently of guild membership: home-range centres are sampled continuously and uniformly over the sea region by rejection sampling (uniform draws in the bounding box rejected if they fall on land). This keeps the underlying population truth independent of the hex grid. Changing hex size re-bins the observations but does not re-draw dolphin positions, giving a clean demonstration of the modifiable areal unit problem. Guild signal comes entirely from habitat preference, not from spatial clustering.
 
 Dolphins are classified as **specialists** (fraction controlled by the **Specialist** slider) or **generalists**. The distinction is in habitat fidelity, not home-range size: both types share the same home-range scale ($\sigma = 0.4 \times \text{domain diagonal}$), but specialists have a higher guild affinity coefficient ($c_i = 10$) while generalists have a weaker one ($c_i = 5$).
 
@@ -58,15 +64,21 @@ where $\alpha = -4$ is the log-scale baseline, $a_i \sim \mathcal{N}(0,\,0.25^2)
 
 Specialists with $c_i = 10$ experience $e^{10} \approx 22{,}000\times$ contrast between their best and worst hexes; generalists with $c_i = 5$ experience $e^5 \approx 150\times$. This produces clearly different core50 distributions without requiring different home-range sizes.
 
+### Residents vs transients
+
+Real photo-ID catalogs contain two types of sightings: resident dolphins with stable home ranges that accumulate enough records to support a B\* profile, and transient visitors that are seen too rarely to characterise. The **Transients** slider adds dolphins whose home-range centres lie just outside the arena boundary (random edge, 15–40% of the shorter domain dimension further out). Their Gaussian home range extends only weakly into the domain, so they typically accumulate fewer than 4 total sightings and are filtered out before analysis. They do contribute to the raw Sightings hex-map layer, creating a small amount of edge-region detections that are realistic but uninformative.
+
+Transients have no guild assignment ($\text{guild\_true} = -1$) and contribute no signal to the guild-detection analysis. The Retained metric shows the number of dolphins that pass the ≥ 4 sightings gate out of the total population (residents + transients).
+
 ### Survey effort
 
-Effort is generated as $K = 8$ survey routes radiating outward from a single port hex (the nearshore sea hex nearest the domain's x-centroid, fixed by the landscape seed). Each route is a directed hex walk in an evenly-spaced bearing with 20% lateral jitter per step. The **Effort bias** slider controls route length: low bias sends routes across the full domain; high bias keeps them nearshore.
+Effort is generated as $K = 4$ survey routes per year, each radiating outward from a single port hex (the nearshore sea hex nearest the domain's x-centroid, fixed by the landscape seed). Each route is a directed hex walk in an evenly-spaced bearing with a fresh random offset each year and 20% lateral jitter per step. Because routes are re-drawn each year, the cumulative spatial footprint grows with $T$: more years cover more of the domain, not merely more sightings in the same hexes. The **Effort bias** slider controls route length: low bias sends routes across the full domain; high bias keeps them nearshore.
 
 For each hex $h$ and year $t$:
 
 $$E_{h,t} \sim \Gamma\!\left(2,\, r_h\right) + \varepsilon_h$$
 
-where $r_h$ is the number of routes visiting hex $h$ (zero for hexes not on any route, which receive only a small background $\varepsilon$). The port hex, visited by all routes, always has the highest effort.
+where $r_h$ is the number of route visits to hex $h$ in year $t$ (zero for hexes not visited that year, which receive only a small background $\varepsilon$). The port hex, visited by all routes, always has the highest cumulative effort.
 
 ### Observations
 
@@ -120,7 +132,7 @@ where $A_{ij}$ is the edge weight, $k_i$ is the weighted degree, $m = \frac{1}{2
 
 | Metric | Description |
 |---|---|
-| Retained | Dolphins with $\geq 4$ total sightings, the minimum for a usable B\* profile. |
+| Retained | Dolphins with $\geq 4$ total sightings (usable B\* profile) out of the total population including transients. |
 | Communities | Number of Louvain communities with $\geq 3$ members. |
 | Q | Modularity of the detected partition on the kNN graph. Values above ~0.3 indicate meaningful structure. |
 | ARI | Adjusted Rand Index comparing detected communities to true simulated guilds. 0 = random agreement; 1 = perfect recovery. Computed only over dolphins assigned to a community. |
@@ -159,12 +171,13 @@ where $p_{ih} = B^*_{ih}\,/\,\sum B^*_{ih}$ over hexes above the 5% threshold an
 | G | Number of habitat guilds (2–6). Each guild has a distinct preference profile over depth, productivity, and disturbance. Default: 4. |
 | Overlap | Guild profile mixing coefficient (0–0.9). At 0, guilds have maximally distinct preferences; at 0.9, profiles are nearly identical and harder to separate. Default: 0.30. |
 | Specialist | Fraction of dolphins with a high guild affinity coefficient ($c_i = 10$ vs $c_i = 5$ for generalists). Specialists show lower core50. Default: 0.50. |
+| Transients | Number of extra dolphins whose home-range centres are placed just outside the arena. They produce occasional edge sightings but mostly fail the ≥ 4 sightings filter. Default: 15. |
 
 ### Survey
 
 | Control | Description |
 |---|---|
-| Years | Number of survey years $T$. More years accumulate more sightings per dolphin and produce better-resolved B\* profiles. Default: 6. |
+| Years | Number of survey years $T$. Each year runs $K = 4$ fresh tendril routes with a new bearing offset, so more years both accumulate sightings and expand the cumulative spatial footprint of the survey. Default: 6. |
 | Effort bias | Survey route length: 0 = routes extend to the domain edge; 1 = routes stay close to the port. Default: 0.70. |
 | Detection p | Per-visit detection probability $p$, scaled by $\lambda_{i,h}$ and effort. Default: 0.30. |
 
@@ -197,11 +210,13 @@ where $p_{ih} = B^*_{ih}\,/\,\sum B^*_{ih}$ over hexes above the 5% threshold an
 
 | View | Description |
 |---|---|
+| Bipartite | Raw dolphin × hex bipartite graph before projection to dolphin-dolphin similarity. Dolphins (left column, coloured by community) connected to hexes (right column, grey) by edges where $B^*_{i,h} > 5\%$ of dolphin $i$'s peak $B^*$. Edge width ∝ $B^*$. Shows the data that the projection and community detection are based on. |
 | B\* | Dolphin × hex heatmap of row-normalised B\*, sorted by detected community. Left colour bar shows community membership. Block patterns in the rows reveal shared habitat preferences. |
 | Jaccard | Dolphin × dolphin similarity matrix (weighted Jaccard on row-normalised B\*), on the blue scale. Block structure along the diagonal indicates natural groupings before any community labels are applied. |
-| kNN | The sparse graph fed to Louvain, before community assignment. Nodes and edges shown in neutral grey; edge width is proportional to Jaccard similarity. |
+| Full | The unpruned Jaccard similarity graph: all dolphin pairs with Jaccard > 0 connected. Nodes and edges shown in neutral grey. Compare with kNN to see how pruning removes weak noise connections while retaining the strong within-guild structure. |
+| kNN | The kNN-pruned graph fed to Louvain, before community assignment. Nodes and edges shown in neutral grey; edge width is proportional to Jaccard similarity. |
 | Communities | Same graph coloured by Louvain-detected communities. Within-community edges are coloured; between-community edges are pale grey. |
-| Truth | The same graph coloured by the true simulated guilds. Compare with Communities to understand ARI. |
+| Truth | The same graph coloured by the true simulated guilds. Transients that pass the ≥ 4 sightings gate appear as grey (unassigned) nodes since they have no true guild. Compare with Communities to understand ARI. |
 
 ---
 

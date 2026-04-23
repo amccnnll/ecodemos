@@ -182,6 +182,7 @@ window.Quarto = {
   <li><a href="#domain" id="toc-domain" class="nav-link" data-scroll-target="#domain">Domain</a></li>
   <li><a href="#guild-preference-profiles" id="toc-guild-preference-profiles" class="nav-link" data-scroll-target="#guild-preference-profiles">Guild preference profiles</a></li>
   <li><a href="#dolphin-population" id="toc-dolphin-population" class="nav-link" data-scroll-target="#dolphin-population">Dolphin population</a></li>
+  <li><a href="#residents-vs-transients" id="toc-residents-vs-transients" class="nav-link" data-scroll-target="#residents-vs-transients">Residents vs transients</a></li>
   <li><a href="#survey-effort" id="toc-survey-effort" class="nav-link" data-scroll-target="#survey-effort">Survey effort</a></li>
   <li><a href="#observations" id="toc-observations" class="nav-link" data-scroll-target="#observations">Observations</a></li>
   </ul></li>
@@ -251,7 +252,10 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="generative-model">Generative model</h2>
 <section id="domain" class="level3">
 <h3 class="anchored" data-anchor-id="domain">Domain</h3>
-<p>The domain is a hex grid shaped as a simple bay: a concave coastline with open sea and a land mask. Hex size controls spatial resolution while keeping the arena footprint constant (MAUP demonstration). Three independent environmental fields are assigned to each sea hex:</p>
+<p>The domain is a pointy-top hex grid using offset-r coordinates (odd rows shift right by half a hex, even rows do not), giving a rectangular bounding box with a brick-pattern edge rather than a parallelogram. Hex size controls spatial resolution while keeping the arena footprint constant (MAUP demonstration).</p>
+<p>The coastline follows a sine-base bay perturbed by seeded Perlin noise:</p>
+<p><span class="math display">\[C(x) = H \left(0.06 + 0.14 \sin(\pi x) + 0.06 \cdot \mathrm{Perlin}(2.5\,x,\, 0)\right)\]</span></p>
+<p>where <span class="math inline">\(x \in [0,1]\)</span> is the normalised horizontal position and <span class="math inline">\(H\)</span> is the domain height. The Perlin component uses a seed derived from the landscape seed, so rolling the landscape dice produces a distinct coastline shape (varying inlet positions and slight headlands) while retaining the overall concave bay. Sea lies below <span class="math inline">\(C(x)\)</span>; land above. Three independent environmental fields are assigned to each sea hex:</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 33%">
@@ -295,19 +299,24 @@ window.Quarto = {
 </section>
 <section id="dolphin-population" class="level3">
 <h3 class="anchored" data-anchor-id="dolphin-population">Dolphin population</h3>
-<p>Each dolphin is assigned a guild uniformly at random, then drawn independently of guild membership: home-range centres are placed uniformly across the domain so that guild signal comes entirely from habitat preference rather than spatial clustering.</p>
+<p>Each dolphin is assigned a guild uniformly at random, then drawn independently of guild membership: home-range centres are sampled continuously and uniformly over the sea region by rejection sampling (uniform draws in the bounding box rejected if they fall on land). This keeps the underlying population truth independent of the hex grid. Changing hex size re-bins the observations but does not re-draw dolphin positions, giving a clean demonstration of the modifiable areal unit problem. Guild signal comes entirely from habitat preference, not from spatial clustering.</p>
 <p>Dolphins are classified as <strong>specialists</strong> (fraction controlled by the <strong>Specialist</strong> slider) or <strong>generalists</strong>. The distinction is in habitat fidelity, not home-range size: both types share the same home-range scale (<span class="math inline">\(\sigma = 0.4 \times \text{domain diagonal}\)</span>), but specialists have a higher guild affinity coefficient (<span class="math inline">\(c_i = 10\)</span>) while generalists have a weaker one (<span class="math inline">\(c_i = 5\)</span>).</p>
 <p>The latent use intensity for dolphin <span class="math inline">\(i\)</span> in hex <span class="math inline">\(h\)</span> is:</p>
 <p><span class="math display">\[\log \lambda_{i,h} = \alpha + a_i + c_i\,s_{g_i,h} - \frac{d_{i,h}^2}{2\sigma^2}\]</span></p>
 <p>where <span class="math inline">\(\alpha = -4\)</span> is the log-scale baseline, <span class="math inline">\(a_i \sim \mathcal{N}(0,\,0.25^2)\)</span> is an individual activity level, <span class="math inline">\(c_i\)</span> is the guild affinity coefficient, and <span class="math inline">\(d_{i,h}\)</span> is the Euclidean distance from dolphin <span class="math inline">\(i\)</span>’s home-range centre to hex <span class="math inline">\(h\)</span>.</p>
 <p>Specialists with <span class="math inline">\(c_i = 10\)</span> experience <span class="math inline">\(e^{10} \approx 22{,}000\times\)</span> contrast between their best and worst hexes; generalists with <span class="math inline">\(c_i = 5\)</span> experience <span class="math inline">\(e^5 \approx 150\times\)</span>. This produces clearly different core50 distributions without requiring different home-range sizes.</p>
 </section>
+<section id="residents-vs-transients" class="level3">
+<h3 class="anchored" data-anchor-id="residents-vs-transients">Residents vs transients</h3>
+<p>Real photo-ID catalogs contain two types of sightings: resident dolphins with stable home ranges that accumulate enough records to support a B* profile, and transient visitors that are seen too rarely to characterise. The <strong>Transients</strong> slider adds dolphins whose home-range centres lie just outside the arena boundary (random edge, 15–40% of the shorter domain dimension further out). Their Gaussian home range extends only weakly into the domain, so they typically accumulate fewer than 4 total sightings and are filtered out before analysis. They do contribute to the raw Sightings hex-map layer, creating a small amount of edge-region detections that are realistic but uninformative.</p>
+<p>Transients have no guild assignment (<span class="math inline">\(\text{guild\_true} = -1\)</span>) and contribute no signal to the guild-detection analysis. The Retained metric shows the number of dolphins that pass the ≥ 4 sightings gate out of the total population (residents + transients).</p>
+</section>
 <section id="survey-effort" class="level3">
 <h3 class="anchored" data-anchor-id="survey-effort">Survey effort</h3>
-<p>Effort is generated as <span class="math inline">\(K = 8\)</span> survey routes radiating outward from a single port hex (the nearshore sea hex nearest the domain’s x-centroid, fixed by the landscape seed). Each route is a directed hex walk in an evenly-spaced bearing with 20% lateral jitter per step. The <strong>Effort bias</strong> slider controls route length: low bias sends routes across the full domain; high bias keeps them nearshore.</p>
+<p>Effort is generated as <span class="math inline">\(K = 4\)</span> survey routes per year, each radiating outward from a single port hex (the nearshore sea hex nearest the domain’s x-centroid, fixed by the landscape seed). Each route is a directed hex walk in an evenly-spaced bearing with a fresh random offset each year and 20% lateral jitter per step. Because routes are re-drawn each year, the cumulative spatial footprint grows with <span class="math inline">\(T\)</span>: more years cover more of the domain, not merely more sightings in the same hexes. The <strong>Effort bias</strong> slider controls route length: low bias sends routes across the full domain; high bias keeps them nearshore.</p>
 <p>For each hex <span class="math inline">\(h\)</span> and year <span class="math inline">\(t\)</span>:</p>
 <p><span class="math display">\[E_{h,t} \sim \Gamma\!\left(2,\, r_h\right) + \varepsilon_h\]</span></p>
-<p>where <span class="math inline">\(r_h\)</span> is the number of routes visiting hex <span class="math inline">\(h\)</span> (zero for hexes not on any route, which receive only a small background <span class="math inline">\(\varepsilon\)</span>). The port hex, visited by all routes, always has the highest effort.</p>
+<p>where <span class="math inline">\(r_h\)</span> is the number of route visits to hex <span class="math inline">\(h\)</span> in year <span class="math inline">\(t\)</span> (zero for hexes not visited that year, which receive only a small background <span class="math inline">\(\varepsilon\)</span>). The port hex, visited by all routes, always has the highest cumulative effort.</p>
 </section>
 <section id="observations" class="level3">
 <h3 class="anchored" data-anchor-id="observations">Observations</h3>
@@ -362,7 +371,7 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td>Retained</td>
-<td>Dolphins with <span class="math inline">\(\geq 4\)</span> total sightings, the minimum for a usable B* profile.</td>
+<td>Dolphins with <span class="math inline">\(\geq 4\)</span> total sightings (usable B* profile) out of the total population including transients.</td>
 </tr>
 <tr class="even">
 <td>Communities</td>
@@ -450,6 +459,10 @@ window.Quarto = {
 <td>Specialist</td>
 <td>Fraction of dolphins with a high guild affinity coefficient (<span class="math inline">\(c_i = 10\)</span> vs <span class="math inline">\(c_i = 5\)</span> for generalists). Specialists show lower core50. Default: 0.50.</td>
 </tr>
+<tr class="odd">
+<td>Transients</td>
+<td>Number of extra dolphins whose home-range centres are placed just outside the arena. They produce occasional edge sightings but mostly fail the ≥ 4 sightings filter. Default: 15.</td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -469,7 +482,7 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td>Years</td>
-<td>Number of survey years <span class="math inline">\(T\)</span>. More years accumulate more sightings per dolphin and produce better-resolved B* profiles. Default: 6.</td>
+<td>Number of survey years <span class="math inline">\(T\)</span>. Each year runs <span class="math inline">\(K = 4\)</span> fresh tendril routes with a new bearing offset, so more years both accumulate sightings and expand the cumulative spatial footprint of the survey. Default: 6.</td>
 </tr>
 <tr class="even">
 <td>Effort bias</td>
@@ -588,16 +601,24 @@ window.Quarto = {
 </thead>
 <tbody>
 <tr class="odd">
+<td>Bipartite</td>
+<td>Raw dolphin × hex bipartite graph before projection to dolphin-dolphin similarity. Dolphins (left column, coloured by community) connected to hexes (right column, grey) by edges where <span class="math inline">\(B^*_{i,h} &gt; 5\%\)</span> of dolphin <span class="math inline">\(i\)</span>’s peak <span class="math inline">\(B^*\)</span>. Edge width ∝ <span class="math inline">\(B^*\)</span>. Shows the data that the projection and community detection are based on.</td>
+</tr>
+<tr class="even">
 <td>B*</td>
 <td>Dolphin × hex heatmap of row-normalised B*, sorted by detected community. Left colour bar shows community membership. Block patterns in the rows reveal shared habitat preferences.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Jaccard</td>
 <td>Dolphin × dolphin similarity matrix (weighted Jaccard on row-normalised B*), on the blue scale. Block structure along the diagonal indicates natural groupings before any community labels are applied.</td>
 </tr>
+<tr class="even">
+<td>Full</td>
+<td>The unpruned Jaccard similarity graph: all dolphin pairs with Jaccard &gt; 0 connected. Nodes and edges shown in neutral grey. Compare with kNN to see how pruning removes weak noise connections while retaining the strong within-guild structure.</td>
+</tr>
 <tr class="odd">
 <td>kNN</td>
-<td>The sparse graph fed to Louvain, before community assignment. Nodes and edges shown in neutral grey; edge width is proportional to Jaccard similarity.</td>
+<td>The kNN-pruned graph fed to Louvain, before community assignment. Nodes and edges shown in neutral grey; edge width is proportional to Jaccard similarity.</td>
 </tr>
 <tr class="even">
 <td>Communities</td>
@@ -605,7 +626,7 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>Truth</td>
-<td>The same graph coloured by the true simulated guilds. Compare with Communities to understand ARI.</td>
+<td>The same graph coloured by the true simulated guilds. Transients that pass the ≥ 4 sightings gate appear as grey (unassigned) nodes since they have no true guild. Compare with Communities to understand ARI.</td>
 </tr>
 </tbody>
 </table>
