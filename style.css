@@ -395,6 +395,7 @@ a {
 .module-layout--bne {
   height: auto;
   min-height: 0;
+  align-content: start;
   grid-template-columns: 1fr 290px;
   grid-template-rows: auto 48px auto;
   grid-template-areas:

@@ -11,7 +11,7 @@ export const params = {
   // Survey
   T: 6, effortBias: 0.7, detectionProb: 0.3,
   // Analysis
-  eMin: 5, k: 8, louvainResolution: 1.0, minCommunitySize: 3,
+  eMin: 0.5, k: 8, louvainResolution: 1.0, minCommunitySize: 3,
 };
 
 export let hexGrid  = null;

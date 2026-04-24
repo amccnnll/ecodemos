@@ -196,8 +196,9 @@ function updateHexColours() {
     seaColour = h => colEnv(h.Q_h);
 
   } else if (layer === 'effort' && sim) {
-    const norm = normArr(sim.effortH);
-    const lut = new Map(seaHexes.map((h, i) => [h.hex_id, norm[i]]));
+    const raw  = sim.effortH;
+    const mx   = Math.max(...raw) || 1;
+    const lut  = new Map(seaHexes.map((h, i) => [h.hex_id, Math.log1p(raw[i]) / Math.log1p(mx)]));
     seaColour = h => colEffort(lut.get(h.hex_id) ?? 0);
 
   } else if (layer === 'sightings' && sim && anal) {

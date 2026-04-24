@@ -82,9 +82,8 @@ function updateNetworkLegend(view) {
     const G = anal ? (anal.dolphins.reduce((mx, d) => Math.max(mx, d.guild_true), -1) + 1) : 0;
     html = `${G ? guildSwatches(G) + ' &thinsp;' : ''}
             <span class="leg-note"><b>Node colour = true simulated guild</b> (not the detected community) &nbsp;·&nbsp;
-              Nodes sorted by true guild &nbsp;·&nbsp;
-              All edges pale grey; edge width ∝ Jaccard similarity &nbsp;·&nbsp;
-              Labels G1, G2 … &nbsp;·&nbsp;
+              Nodes sorted by true guild; labels G1, G2 … &nbsp;·&nbsp;
+              <b>Edges = true guild co-membership</b> (fixed by the generative model; independent of detection or analysis settings) &nbsp;·&nbsp;
               Compare with the Communities view: if detected communities align with true guilds, ARI will be high.</span>`;
   }
 
@@ -280,21 +279,33 @@ function buildNetwork() {
 
   placeOnCircle(nodes, sortField, cW / 2, cH / 2, layoutRadius);
 
-  // 'full' uses the unpruned Jaccard matrix; all other node-link views use the kNN-pruned graph.
-  const adjMatrix = (view === 'full') ? jaccard : knnAdj;
-  const edges = [];
-  for (let i = 0; i < N; i++)
-    for (let j = i + 1; j < N; j++) {
-      const w = adjMatrix[i * N + j];
-      if (w > 0) edges.push({ i, j, w });
-    }
+  // Truth view uses guild co-membership edges (fixed by the generative model, independent
+  // of detection or analysis parameters). All other views use similarity-derived edges.
+  let edges;
+  if (view === 'truth') {
+    edges = [];
+    for (let i = 0; i < N; i++)
+      for (let j = i + 1; j < N; j++)
+        if (nodes[i].guild_true >= 0 && nodes[i].guild_true === nodes[j].guild_true)
+          edges.push({ i, j, w: 0.5 });
+  } else {
+    const adjMatrix = (view === 'full') ? jaccard : knnAdj;
+    edges = [];
+    for (let i = 0; i < N; i++)
+      for (let j = i + 1; j < N; j++) {
+        const w = adjMatrix[i * N + j];
+        if (w > 0) edges.push({ i, j, w });
+      }
+  }
 
   const svg = d3.select(netContainer).append('svg')
     .attr('width', cW).attr('height', cH)
     .on('click', () => state.selectDolphin(-1));
 
   // Communities and Truth reveal the partition; Full and kNN stay neutral.
-  const within = e => nodes[e.i].community >= 0 && nodes[e.i].community === nodes[e.j].community;
+  const within = view === 'truth'
+    ? e => nodes[e.i].guild_true >= 0 && nodes[e.i].guild_true === nodes[e.j].guild_true
+    : e => nodes[e.i].community >= 0 && nodes[e.i].community === nodes[e.j].community;
   const useComm = view === 'communities' || view === 'truth';
 
   // Draw between-community edges first (behind), within second (in front)

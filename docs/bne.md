@@ -70,23 +70,19 @@ Real photo-ID catalogs contain two types of sightings: resident dolphins with st
 
 Transients have no guild assignment ($\text{guild\_true} = -1$) and contribute no signal to the guild-detection analysis. The Retained metric shows the number of dolphins that pass the ≥ 4 sightings gate out of the total population (residents + transients).
 
-### Survey effort
+### Survey effort and observations
 
 Effort is generated as $K = 4$ survey routes per year, each radiating outward from a single port hex (the nearshore sea hex nearest the domain's x-centroid, fixed by the landscape seed). Each route is a directed hex walk in an evenly-spaced bearing with a fresh random offset each year and 20% lateral jitter per step. Because routes are re-drawn each year, the cumulative spatial footprint grows with $T$: more years cover more of the domain, not merely more sightings in the same hexes. The **Effort bias** slider controls route length: low bias sends routes across the full domain; high bias keeps them nearshore.
 
-For each hex $h$ and year $t$:
+Detection is a continuous-space process: the route is treated as a sequence of waypoints at hex centres, each separated by a physical step length $\Delta = \text{hexSize} \times \sqrt{3}$. Route length is fixed in continuous units, $L = (0.10 + (1 - \text{effortBias}) \times 0.40) \times \text{domainDiag}$, giving $\lfloor L / \Delta \rceil$ steps regardless of hex size. Hex size therefore only affects the post-hoc binning of sightings, not the observation process itself.
 
-$$E_{h,t} \sim \Gamma\!\left(2,\, r_h\right) + \varepsilon_h$$
+At each waypoint $w$ in year $t$, effort and detections are drawn jointly:
 
-where $r_h$ is the number of route visits to hex $h$ in year $t$ (zero for hexes not visited that year, which receive only a small background $\varepsilon$). The port hex, visited by all routes, always has the highest cumulative effort.
+$$E_w \sim \Delta \cdot \Gamma(2,\,1)$$
 
-### Observations
+$$Y_{i,w,t} \sim \text{Poisson}\!\left(E_w \cdot p \cdot \lambda_{i,w}\right)$$
 
-Observed sightings for dolphin $i$ in hex $h$ during year $t$:
-
-$$Y_{i,h,t} \sim \text{Poisson}\!\left(E_{h,t}\cdot p\cdot\lambda_{i,h}\right)$$
-
-where $p$ is the per-visit detection probability (**Detection p** slider). Dolphins with fewer than 4 total sightings across all hexes and years are dropped from the analysis.
+where $\lambda_{i,w}$ is dolphin $i$'s latent use intensity evaluated at the waypoint's continuous position (home-range Gaussian plus guild habitat preference), and $p$ is the per-unit-effort detection probability (**Detection p** slider). Both $E_w$ and $Y_{i,w,t}$ are then binned into the hex containing $w$ by summing over all waypoints that fall in that hex. Dolphins with fewer than 4 total sightings across all hexes and years are dropped from the analysis.
 
 ---
 
@@ -186,7 +182,7 @@ where $p_{ih} = B^*_{ih}\,/\,\sum B^*_{ih}$ over hexes above the 5% threshold an
 | Control | Description |
 |---|---|
 | k (kNN) | Number of nearest neighbours each dolphin retains in the similarity graph fed to Louvain. Default: 8. |
-| E_min | Effort floor in $B^* = Y / \max(E, E_{\min})$, preventing inflation in rarely-surveyed hexes. Default: 5.0. |
+| E_min | Effort floor in $B^* = Y / \max(E, E_{\min})$, preventing inflation in rarely-surveyed hexes. Default: 0.5. |
 | Resolution | Louvain resolution $\gamma$. Lower values give fewer large communities; higher values give more small ones. Default: 1.0. |
 
 ### Domain
@@ -216,7 +212,7 @@ where $p_{ih} = B^*_{ih}\,/\,\sum B^*_{ih}$ over hexes above the 5% threshold an
 | Full | The unpruned Jaccard similarity graph: all dolphin pairs with Jaccard > 0 connected. Nodes and edges shown in neutral grey. Compare with kNN to see how pruning removes weak noise connections while retaining the strong within-guild structure. |
 | kNN | The kNN-pruned graph fed to Louvain, before community assignment. Nodes and edges shown in neutral grey; edge width is proportional to Jaccard similarity. |
 | Communities | Same graph coloured by Louvain-detected communities. Within-community edges are coloured; between-community edges are pale grey. |
-| Truth | The same graph coloured by the true simulated guilds. Transients that pass the ≥ 4 sightings gate appear as grey (unassigned) nodes since they have no true guild. Compare with Communities to understand ARI. |
+| Truth | Nodes coloured by true simulated guild; edges show true guild co-membership (fixed by the generative model, independent of detection or analysis settings). Transients that pass the ≥ 4 sightings gate appear as grey unassigned nodes. Compare with Communities to assess ARI: if the detected communities match the guild blocks here, recovery is high. |
 
 ---
 
@@ -228,12 +224,13 @@ where $p_{ih} = B^*_{ih}\,/\,\sum B^*_{ih}$ over hexes above the 5% threshold an
 - **Circular network layout**: nodes are placed on a circle sorted by community or guild, with angular gaps at group boundaries. This avoids force-directed instability and makes block structure immediately visible.
 - **Per-dolphin guild affinity**: specialist/generalist distinction is implemented via different guild affinity coefficients ($c_i = 10$ vs $c_i = 5$), not different home-range sizes. This produces separable core50 distributions while keeping ARI high.
 - **Hex-resolution MAUP**: changing hex size keeps the arena footprint constant by adjusting the column and row counts. The simulation demonstrates the modifiable areal unit problem: very fine hexes reduce co-occurrence to near zero; very coarse hexes collapse all dolphins into the same cells.
+- **Continuous-space observation**: route length is fixed in continuous units ($L = (0.10 + (1 - \text{effortBias}) \times 0.40) \times \text{domainDiag}$) and detection is computed per waypoint at physical step length $\Delta = \text{hexSize} \times \sqrt{3}$. Hex size therefore only determines the binning grain of the resulting sightings matrix, not the observation process itself. Dolphin home-range centres are also sampled continuously over the sea region (independent of the hex grid), so the underlying truth is fully hex-size-invariant.
 
 ---
 
 ## Assumptions and limitations
 
-- Detection probability $p$ is constant within each hex given effort. There is no within-hex distance falloff.
+- Detection probability $p$ is constant per unit effort along the route. There is no within-waypoint distance falloff to individual dolphins.
 - All survey years are aggregated before analysis. Temporal dynamics in guild membership are not modelled.
 - Guild membership is fixed for each dolphin's lifetime. There is no social influence on habitat use.
 - The Poisson observation model assumes independent detections across occasions and individuals.

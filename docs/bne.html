@@ -183,8 +183,7 @@ window.Quarto = {
   <li><a href="#guild-preference-profiles" id="toc-guild-preference-profiles" class="nav-link" data-scroll-target="#guild-preference-profiles">Guild preference profiles</a></li>
   <li><a href="#dolphin-population" id="toc-dolphin-population" class="nav-link" data-scroll-target="#dolphin-population">Dolphin population</a></li>
   <li><a href="#residents-vs-transients" id="toc-residents-vs-transients" class="nav-link" data-scroll-target="#residents-vs-transients">Residents vs transients</a></li>
-  <li><a href="#survey-effort" id="toc-survey-effort" class="nav-link" data-scroll-target="#survey-effort">Survey effort</a></li>
-  <li><a href="#observations" id="toc-observations" class="nav-link" data-scroll-target="#observations">Observations</a></li>
+  <li><a href="#survey-effort-and-observations" id="toc-survey-effort-and-observations" class="nav-link" data-scroll-target="#survey-effort-and-observations">Survey effort and observations</a></li>
   </ul></li>
   <li><a href="#analysis-pipeline" id="toc-analysis-pipeline" class="nav-link" data-scroll-target="#analysis-pipeline">Analysis pipeline</a>
   <ul class="collapse">
@@ -311,18 +310,14 @@ window.Quarto = {
 <p>Real photo-ID catalogs contain two types of sightings: resident dolphins with stable home ranges that accumulate enough records to support a B* profile, and transient visitors that are seen too rarely to characterise. The <strong>Transients</strong> slider adds dolphins whose home-range centres lie just outside the arena boundary (random edge, 15–40% of the shorter domain dimension further out). Their Gaussian home range extends only weakly into the domain, so they typically accumulate fewer than 4 total sightings and are filtered out before analysis. They do contribute to the raw Sightings hex-map layer, creating a small amount of edge-region detections that are realistic but uninformative.</p>
 <p>Transients have no guild assignment (<span class="math inline">\(\text{guild\_true} = -1\)</span>) and contribute no signal to the guild-detection analysis. The Retained metric shows the number of dolphins that pass the ≥ 4 sightings gate out of the total population (residents + transients).</p>
 </section>
-<section id="survey-effort" class="level3">
-<h3 class="anchored" data-anchor-id="survey-effort">Survey effort</h3>
+<section id="survey-effort-and-observations" class="level3">
+<h3 class="anchored" data-anchor-id="survey-effort-and-observations">Survey effort and observations</h3>
 <p>Effort is generated as <span class="math inline">\(K = 4\)</span> survey routes per year, each radiating outward from a single port hex (the nearshore sea hex nearest the domain’s x-centroid, fixed by the landscape seed). Each route is a directed hex walk in an evenly-spaced bearing with a fresh random offset each year and 20% lateral jitter per step. Because routes are re-drawn each year, the cumulative spatial footprint grows with <span class="math inline">\(T\)</span>: more years cover more of the domain, not merely more sightings in the same hexes. The <strong>Effort bias</strong> slider controls route length: low bias sends routes across the full domain; high bias keeps them nearshore.</p>
-<p>For each hex <span class="math inline">\(h\)</span> and year <span class="math inline">\(t\)</span>:</p>
-<p><span class="math display">\[E_{h,t} \sim \Gamma\!\left(2,\, r_h\right) + \varepsilon_h\]</span></p>
-<p>where <span class="math inline">\(r_h\)</span> is the number of route visits to hex <span class="math inline">\(h\)</span> in year <span class="math inline">\(t\)</span> (zero for hexes not visited that year, which receive only a small background <span class="math inline">\(\varepsilon\)</span>). The port hex, visited by all routes, always has the highest cumulative effort.</p>
-</section>
-<section id="observations" class="level3">
-<h3 class="anchored" data-anchor-id="observations">Observations</h3>
-<p>Observed sightings for dolphin <span class="math inline">\(i\)</span> in hex <span class="math inline">\(h\)</span> during year <span class="math inline">\(t\)</span>:</p>
-<p><span class="math display">\[Y_{i,h,t} \sim \text{Poisson}\!\left(E_{h,t}\cdot p\cdot\lambda_{i,h}\right)\]</span></p>
-<p>where <span class="math inline">\(p\)</span> is the per-visit detection probability (<strong>Detection p</strong> slider). Dolphins with fewer than 4 total sightings across all hexes and years are dropped from the analysis.</p>
+<p>Detection is a continuous-space process: the route is treated as a sequence of waypoints at hex centres, each separated by a physical step length <span class="math inline">\(\Delta = \text{hexSize} \times \sqrt{3}\)</span>. Route length is fixed in continuous units, <span class="math inline">\(L = (0.10 + (1 - \text{effortBias}) \times 0.40) \times \text{domainDiag}\)</span>, giving <span class="math inline">\(\lfloor L / \Delta \rceil\)</span> steps regardless of hex size. Hex size therefore only affects the post-hoc binning of sightings, not the observation process itself.</p>
+<p>At each waypoint <span class="math inline">\(w\)</span> in year <span class="math inline">\(t\)</span>, effort and detections are drawn jointly:</p>
+<p><span class="math display">\[E_w \sim \Delta \cdot \Gamma(2,\,1)\]</span></p>
+<p><span class="math display">\[Y_{i,w,t} \sim \text{Poisson}\!\left(E_w \cdot p \cdot \lambda_{i,w}\right)\]</span></p>
+<p>where <span class="math inline">\(\lambda_{i,w}\)</span> is dolphin <span class="math inline">\(i\)</span>’s latent use intensity evaluated at the waypoint’s continuous position (home-range Gaussian plus guild habitat preference), and <span class="math inline">\(p\)</span> is the per-unit-effort detection probability (<strong>Detection p</strong> slider). Both <span class="math inline">\(E_w\)</span> and <span class="math inline">\(Y_{i,w,t}\)</span> are then binned into the hex containing <span class="math inline">\(w\)</span> by summing over all waypoints that fall in that hex. Dolphins with fewer than 4 total sightings across all hexes and years are dropped from the analysis.</p>
 <hr>
 </section>
 </section>
@@ -515,7 +510,7 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td>E_min</td>
-<td>Effort floor in <span class="math inline">\(B^* = Y / \max(E, E_{\min})\)</span>, preventing inflation in rarely-surveyed hexes. Default: 5.0.</td>
+<td>Effort floor in <span class="math inline">\(B^* = Y / \max(E, E_{\min})\)</span>, preventing inflation in rarely-surveyed hexes. Default: 0.5.</td>
 </tr>
 <tr class="odd">
 <td>Resolution</td>
@@ -626,7 +621,7 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>Truth</td>
-<td>The same graph coloured by the true simulated guilds. Transients that pass the ≥ 4 sightings gate appear as grey (unassigned) nodes since they have no true guild. Compare with Communities to understand ARI.</td>
+<td>Nodes coloured by true simulated guild; edges show true guild co-membership (fixed by the generative model, independent of detection or analysis settings). Transients that pass the ≥ 4 sightings gate appear as grey unassigned nodes. Compare with Communities to assess ARI: if the detected communities match the guild blocks here, recovery is high.</td>
 </tr>
 </tbody>
 </table>
@@ -642,13 +637,14 @@ window.Quarto = {
 <li><strong>Circular network layout</strong>: nodes are placed on a circle sorted by community or guild, with angular gaps at group boundaries. This avoids force-directed instability and makes block structure immediately visible.</li>
 <li><strong>Per-dolphin guild affinity</strong>: specialist/generalist distinction is implemented via different guild affinity coefficients (<span class="math inline">\(c_i = 10\)</span> vs <span class="math inline">\(c_i = 5\)</span>), not different home-range sizes. This produces separable core50 distributions while keeping ARI high.</li>
 <li><strong>Hex-resolution MAUP</strong>: changing hex size keeps the arena footprint constant by adjusting the column and row counts. The simulation demonstrates the modifiable areal unit problem: very fine hexes reduce co-occurrence to near zero; very coarse hexes collapse all dolphins into the same cells.</li>
+<li><strong>Continuous-space observation</strong>: route length is fixed in continuous units (<span class="math inline">\(L = (0.10 + (1 - \text{effortBias}) \times 0.40) \times \text{domainDiag}\)</span>) and detection is computed per waypoint at physical step length <span class="math inline">\(\Delta = \text{hexSize} \times \sqrt{3}\)</span>. Hex size therefore only determines the binning grain of the resulting sightings matrix, not the observation process itself. Dolphin home-range centres are also sampled continuously over the sea region (independent of the hex grid), so the underlying truth is fully hex-size-invariant.</li>
 </ul>
 <hr>
 </section>
 <section id="assumptions-and-limitations" class="level2">
 <h2 class="anchored" data-anchor-id="assumptions-and-limitations">Assumptions and limitations</h2>
 <ul>
-<li>Detection probability <span class="math inline">\(p\)</span> is constant within each hex given effort. There is no within-hex distance falloff.</li>
+<li>Detection probability <span class="math inline">\(p\)</span> is constant per unit effort along the route. There is no within-waypoint distance falloff to individual dolphins.</li>
 <li>All survey years are aggregated before analysis. Temporal dynamics in guild membership are not modelled.</li>
 <li>Guild membership is fixed for each dolphin’s lifetime. There is no social influence on habitat use.</li>
 <li>The Poisson observation model assumes independent detections across occasions and individuals.</li>

@@ -10,4 +10,5 @@ Reference documentation for all current simulations.
 - [Distance Sampling (DS)](./ds.html)
 - [Spatially Explicit Capture-Recapture (SECR)](./secr.html)
 - [Lotka-Volterra (LV)](./lv.html)
+- [Bipartite Network Ecology (BNE)](./bne.html)
 

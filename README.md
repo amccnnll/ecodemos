@@ -17,6 +17,9 @@ Spatially explicit capture-recapture. Animals move via an Ornstein-Uhlenbeck vel
 **Lotka-Volterra (LV)**
 Two-species dynamical systems integrated via RK4: classic predator-prey, dynamic predator-prey (Rosenzweig-MacArthur model with logistic prey growth), and two-species Lotka-Volterra competition.
 
+**Bipartite Network Ecology (BNE)**
+A dolphin population inhabits a simulated bay, each individual preferring particular habitat types. Tendril survey routes accumulate photo-ID sightings; an effort-corrected bipartite network (dolphins × hex cells) is projected to a dolphin-similarity graph and partitioned by Louvain community detection to test whether latent habitat guilds can be recovered from sighting records alone.
+
 ## Structure
 
 ```
@@ -28,6 +31,7 @@ ecodemos/
 ├── ds/                     ← Distance Sampling
 ├── secr/                   ← Spatially Explicit Capture-Recapture
 ├── lv/                     ← Lotka-Volterra
+├── bne/                    ← Bipartite Network Ecology
 └── src/                    ← shared engines and utilities
 ```
 
