@@ -62,9 +62,8 @@ function updateHexLegend() {
   } else if (layer === 'effort') {
     html = `${gradBar('ylorbr')} <b>Survey effort E<sub>h</sub></b>&thinsp; low → high
             <span class="leg-note">Cumulative Γ-distributed effort summed over T survey years &nbsp;·&nbsp;
-              Generated as K=8 tendril routes radiating from a single port hex (the brightest spot) &nbsp;·&nbsp;
-              Route length controlled by the Effort bias slider &nbsp;·&nbsp;
-              Hexes not on any route receive only small background effort &nbsp;·&nbsp;
+              60 random sample points per year drawn from a radial (half-normal) field centred on the port &nbsp;·&nbsp;
+              Effort bias slider controls the radial decay scale: 1 = tightly nearshore, 0 = spread across the domain &nbsp;·&nbsp;
               Used as denominator in B* = Y<sub>ih</sub> / max(E<sub>h</sub>, E<sub>min</sub>).</span>`;
 
   } else if (layer === 'sightings') {

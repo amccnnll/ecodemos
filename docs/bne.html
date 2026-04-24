@@ -312,12 +312,13 @@ window.Quarto = {
 </section>
 <section id="survey-effort-and-observations" class="level3">
 <h3 class="anchored" data-anchor-id="survey-effort-and-observations">Survey effort and observations</h3>
-<p>Effort is generated as <span class="math inline">\(K = 4\)</span> survey routes per year, each radiating outward from a single port hex (the nearshore sea hex nearest the domain’s x-centroid, fixed by the landscape seed). Each route is a directed hex walk in an evenly-spaced bearing with a fresh random offset each year and 20% lateral jitter per step. Because routes are re-drawn each year, the cumulative spatial footprint grows with <span class="math inline">\(T\)</span>: more years cover more of the domain, not merely more sightings in the same hexes. The <strong>Effort bias</strong> slider controls route length: low bias sends routes across the full domain; high bias keeps them nearshore.</p>
-<p>Detection is a continuous-space process: the route is treated as a sequence of waypoints at hex centres, each separated by a physical step length <span class="math inline">\(\Delta = \text{hexSize} \times \sqrt{3}\)</span>. Route length is fixed in continuous units, <span class="math inline">\(L = (0.10 + (1 - \text{effortBias}) \times 0.40) \times \text{domainDiag}\)</span>, giving <span class="math inline">\(\lfloor L / \Delta \rceil\)</span> steps regardless of hex size. Hex size therefore only affects the post-hoc binning of sightings, not the observation process itself.</p>
-<p>At each waypoint <span class="math inline">\(w\)</span> in year <span class="math inline">\(t\)</span>, effort and detections are drawn jointly:</p>
-<p><span class="math display">\[E_w \sim \Delta \cdot \Gamma(2,\,1)\]</span></p>
+<p>Effort is generated as <span class="math inline">\(M = 60\)</span> independent sample points per year drawn from a 2D half-normal (Rayleigh) field centred on the port hex (the nearshore sea hex nearest the domain’s x-centroid, fixed by the landscape seed). The radial decay scale is:</p>
+<p><span class="math display">\[\sigma_{\text{eff}} = \bigl(0.15 + (1 - \text{effortBias}) \times 0.50\bigr) \times \text{domainDiag}\]</span></p>
+<p>High <strong>Effort bias</strong> gives a tight nearshore cluster (<span class="math inline">\(\sigma_{\text{eff}} \approx 0.15 \cdot \text{domainDiag}\)</span>); low bias spreads effort across the domain (<span class="math inline">\(\sigma_{\text{eff}} \approx 0.65 \cdot \text{domainDiag}\)</span>). Each point is drawn by sampling a radial distance <span class="math inline">\(r \sim \text{Rayleigh}(\sigma_{\text{eff}})\)</span> and a uniform bearing <span class="math inline">\(\theta \sim \text{Uniform}(0,\, 2\pi)\)</span>, rejecting points on land or outside the arena. Because points are redrawn each year, more years accumulate both sightings and spatial coverage.</p>
+<p>At each sample point <span class="math inline">\(w\)</span> in year <span class="math inline">\(t\)</span>, effort and detections are drawn jointly:</p>
+<p><span class="math display">\[E_w \sim \Gamma(2,\,1)\]</span></p>
 <p><span class="math display">\[Y_{i,w,t} \sim \text{Poisson}\!\left(E_w \cdot p \cdot \lambda_{i,w}\right)\]</span></p>
-<p>where <span class="math inline">\(\lambda_{i,w}\)</span> is dolphin <span class="math inline">\(i\)</span>’s latent use intensity evaluated at the waypoint’s continuous position (home-range Gaussian plus guild habitat preference), and <span class="math inline">\(p\)</span> is the per-unit-effort detection probability (<strong>Detection p</strong> slider). Both <span class="math inline">\(E_w\)</span> and <span class="math inline">\(Y_{i,w,t}\)</span> are then binned into the hex containing <span class="math inline">\(w\)</span> by summing over all waypoints that fall in that hex. Dolphins with fewer than 4 total sightings across all hexes and years are dropped from the analysis.</p>
+<p>where <span class="math inline">\(\lambda_{i,w}\)</span> is dolphin <span class="math inline">\(i\)</span>’s latent use intensity at the sample point’s continuous position (home-range Gaussian plus guild habitat preference), and <span class="math inline">\(p\)</span> is the per-unit-effort detection probability (<strong>Detection p</strong> slider). Both <span class="math inline">\(E_w\)</span> and <span class="math inline">\(Y_{i,w,t}\)</span> are binned into the hex containing <span class="math inline">\(w\)</span> by inverse pointy-top offset-r formula. Hex size only determines that binning grain, not the observation process itself. Dolphins with fewer than 4 total sightings are dropped from the analysis.</p>
 <hr>
 </section>
 </section>
@@ -477,11 +478,11 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td>Years</td>
-<td>Number of survey years <span class="math inline">\(T\)</span>. Each year runs <span class="math inline">\(K = 4\)</span> fresh tendril routes with a new bearing offset, so more years both accumulate sightings and expand the cumulative spatial footprint of the survey. Default: 6.</td>
+<td>Number of survey years <span class="math inline">\(T\)</span>. Each year draws <span class="math inline">\(M = 60\)</span> independent sample points from the radial effort field, so more years both accumulate sightings and expand the cumulative spatial footprint. Default: 6.</td>
 </tr>
 <tr class="even">
 <td>Effort bias</td>
-<td>Survey route length: 0 = routes extend to the domain edge; 1 = routes stay close to the port. Default: 0.70.</td>
+<td>Radial decay scale: 1 = effort tightly clustered near port; 0 = effort spread across the full domain. Default: 0.70.</td>
 </tr>
 <tr class="odd">
 <td>Detection p</td>
@@ -560,7 +561,7 @@ window.Quarto = {
 </tr>
 <tr class="even">
 <td>Effort</td>
-<td>Cumulative survey effort <span class="math inline">\(\sum_t E_{h,t}\)</span>, shown on the yellow-orange-brown scale. The port hex is the brightest point.</td>
+<td>Cumulative survey effort <span class="math inline">\(\sum_t E_{h,t}\)</span>, shown on the yellow-orange-brown scale. Shows a smooth radial gradient centred on the port; hexes near the port receive the most effort.</td>
 </tr>
 <tr class="odd">
 <td>Sightings</td>
@@ -637,14 +638,14 @@ window.Quarto = {
 <li><strong>Circular network layout</strong>: nodes are placed on a circle sorted by community or guild, with angular gaps at group boundaries. This avoids force-directed instability and makes block structure immediately visible.</li>
 <li><strong>Per-dolphin guild affinity</strong>: specialist/generalist distinction is implemented via different guild affinity coefficients (<span class="math inline">\(c_i = 10\)</span> vs <span class="math inline">\(c_i = 5\)</span>), not different home-range sizes. This produces separable core50 distributions while keeping ARI high.</li>
 <li><strong>Hex-resolution MAUP</strong>: changing hex size keeps the arena footprint constant by adjusting the column and row counts. The simulation demonstrates the modifiable areal unit problem: very fine hexes reduce co-occurrence to near zero; very coarse hexes collapse all dolphins into the same cells.</li>
-<li><strong>Continuous-space observation</strong>: route length is fixed in continuous units (<span class="math inline">\(L = (0.10 + (1 - \text{effortBias}) \times 0.40) \times \text{domainDiag}\)</span>) and detection is computed per waypoint at physical step length <span class="math inline">\(\Delta = \text{hexSize} \times \sqrt{3}\)</span>. Hex size therefore only determines the binning grain of the resulting sightings matrix, not the observation process itself. Dolphin home-range centres are also sampled continuously over the sea region (independent of the hex grid), so the underlying truth is fully hex-size-invariant.</li>
+<li><strong>Radial effort model</strong>: <span class="math inline">\(M = 60\)</span> sample points per year are drawn from a 2D half-normal (Rayleigh) field centred on the port, with scale <span class="math inline">\(\sigma_{\text{eff}} = (0.15 + (1 - \text{effortBias}) \times 0.50) \times \text{domainDiag}\)</span>. Each point contributes <span class="math inline">\(\Gamma(2,1)\)</span> effort and Poisson detections drawn from the continuous-space <span class="math inline">\(\lambda_{i,w}\)</span>; hex size only determines the post-hoc binning of effort and sightings. Dolphin home-range centres are sampled continuously over the sea region, so the underlying truth is fully hex-size-invariant.</li>
 </ul>
 <hr>
 </section>
 <section id="assumptions-and-limitations" class="level2">
 <h2 class="anchored" data-anchor-id="assumptions-and-limitations">Assumptions and limitations</h2>
 <ul>
-<li>Detection probability <span class="math inline">\(p\)</span> is constant per unit effort along the route. There is no within-waypoint distance falloff to individual dolphins.</li>
+<li>Detection probability <span class="math inline">\(p\)</span> is constant per unit effort at each sample point. There is no distance falloff to individual dolphins.</li>
 <li>All survey years are aggregated before analysis. Temporal dynamics in guild membership are not modelled.</li>
 <li>Guild membership is fixed for each dolphin’s lifetime. There is no social influence on habitat use.</li>
 <li>The Poisson observation model assumes independent detections across occasions and individuals.</li>

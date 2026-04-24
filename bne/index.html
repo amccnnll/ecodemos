@@ -134,14 +134,14 @@
           <input type="range" id="sl-T" class="param-slider" min="1" max="10" step="1" value="6" />
           <span class="slider-value" id="val-T">6</span>
         </div>
-        <p class="control-hint">Survey years; each year runs 4 fresh tendril routes, so more years also expands spatial coverage across the domain</p>
+        <p class="control-hint">Survey years; each year draws 60 independent sample points from the radial effort field, so more years increase both total detections and spatial coverage</p>
 
         <div class="slider-row">
           <span class="control-label slider-label">Effort bias</span>
           <input type="range" id="sl-effortBias" class="param-slider" min="0" max="1" step="0.05" value="0.7" />
           <span class="slider-value" id="val-effortBias">0.70</span>
         </div>
-        <p class="control-hint">Survey route length; 0 = routes reach across the domain, 1 = routes stay close to the port (all effort nearshore)</p>
+        <p class="control-hint">Radial decay scale for survey effort; 1 = effort tightly clustered near port, 0 = effort spread across the full domain</p>
 
         <div class="slider-row">
           <span class="control-label slider-label">Detection p</span>

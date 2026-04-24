@@ -1,9 +1,7 @@
 // src/bne-sim.js — dolphin population generative model.
 // Pure engine: no DOM, D3, or p5 dependencies.
 
-import { mulberry32, sampleSeaPoint } from './bne-hex.js';
-
-const SQRT3 = Math.sqrt(3);
+import { mulberry32, sampleSeaPoint, hexAtXY, sampleRadialSeaPoint } from './bne-hex.js';
 
 // ── Guild preference profiles ─────────────────────────────────────────────
 // Each guild has weights [wD, wP, wR] over (depth-like, productivity, disturbance).
@@ -146,19 +144,14 @@ export function generateSimulation({
     }
   }
 
-  // ── Survey effort: tendril routes from a single port hex ─────────────
-  // Routes are tendril hex-walks in continuous space: each hex centre visited is
-  // a waypoint at a known (x, y). Effort and detections are computed per waypoint
-  // so that hex size only affects post-hoc binning, not the observation process.
-  //
-  // Physical step length between adjacent hex centres (pointy-top).
-  const delta = hexGrid.hexSize * SQRT3;
-  // Route length in continuous units; n_steps constant regardless of hex size.
-  const L_cont   = (0.10 + (1 - effortBias) * 0.40) * domainDiag;
-  const n_steps  = Math.max(3, Math.round(L_cont / delta));
+  // ── Survey effort: radial sample points from port ─────────────────────
+  // M_PER_YEAR points drawn per year from a 2D half-normal (Rayleigh) field
+  // centred on the port. sigmaEff controls the radial decay: high effortBias
+  // keeps effort nearshore, low effortBias spreads it across the domain.
+  // Hex size only affects post-hoc binning (same as the dolphin home ranges).
+  const M_PER_YEAR = 60;
+  const sigmaEff = (0.15 + (1 - effortBias) * 0.50) * domainDiag;
 
-  const HEX_DIRS  = [[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1]];
-  const hexByQR   = new Map(hexes.map(h => [`${h.q},${h.r}`, h]));
   const seaIdxMap = new Map(seaHexes.map((h, i) => [h.hex_id, i]));
 
   // Port: nearshore (distFromCoast < 0.25) sea hex closest to x-centroid.
@@ -168,62 +161,27 @@ export function generateSimulation({
   const portHex = portCandidates.reduce((best, h) =>
     Math.abs(h.x - centX) < Math.abs(best.x - centX) ? h : best);
 
-  // K_year routes per year, each with a fresh bearing offset.
-  const K_year = 4;
-
-  // Returns array of waypoint hex arrays for K routes from a given bearing offset.
-  function walkRoutes(K, bearingOffset) {
-    const routes = [];
-    for (let ri = 0; ri < K; ri++) {
-      const bearing = bearingOffset + (ri / K) * 2 * Math.PI;
-      const waypoints = [portHex];
-      let cur = portHex;
-      for (let s = 0; s < n_steps; s++) {
-        let bestHex = null, bestAligned = Infinity;
-        const candidates = [];
-        for (const [dq, dr] of HEX_DIRS) {
-          const nbr = hexByQR.get(`${cur.q + dq},${cur.r + dr}`);
-          if (!nbr || nbr.isLand) continue;
-          const angle = Math.atan2(nbr.y - cur.y, nbr.x - cur.x);
-          const diff = Math.abs(((angle - bearing + 3 * Math.PI) % (2 * Math.PI)) - Math.PI);
-          candidates.push({ hex: nbr, diff });
-          if (diff < bestAligned) { bestAligned = diff; bestHex = nbr; }
-        }
-        if (!bestHex) break;
-        const chosen = (effortRand() < 0.20 && candidates.length > 1)
-          ? candidates[(effortRand() * candidates.length) | 0].hex
-          : bestHex;
-        waypoints.push(chosen);
-        cur = chosen;
-      }
-      routes.push(waypoints);
-    }
-    return routes;
-  }
-
   // ── Observed sightings and effort ─────────────────────────────────────
-  // Effort and sightings accumulate per waypoint. Each waypoint contributes
-  // delta * Gamma(2,1) effort to its hex; detections are drawn Poisson per
-  // (waypoint × dolphin) so that hex size only determines the binning grain.
+  // Each sample point contributes Gamma(2,1) effort to its hex; detections
+  // are drawn Poisson per (point × dolphin).
   const effortHT    = new Float64Array(H * T);
   const sightingsIH = new Float64Array(Ntotal * H);
   const effortH     = new Float64Array(H);
 
   for (let t = 0; t < T; t++) {
-    const bearingOffset = effortRand() * (2 * Math.PI / K_year);
-    const routes = walkRoutes(K_year, bearingOffset);
-    for (const waypoints of routes) {
-      for (const wp of waypoints) {
-        const hi = seaIdxMap.get(wp.hex_id);
-        if (hi === undefined) continue;
-        const g1 = -Math.log(Math.max(1e-10, effortRand()));
-        const g2 = -Math.log(Math.max(1e-10, effortRand()));
-        const e_wp = delta * (g1 + g2);   // Gamma(2,1) scaled by step length
-        effortHT[hi * T + t] += e_wp;
-        for (let i = 0; i < Ntotal; i++) {
-          const mu = e_wp * detectionProb * lambdaIH[i * H + hi];
-          sightingsIH[i * H + hi] += poisson(mu, sightRand);
-        }
+    for (let m = 0; m < M_PER_YEAR; m++) {
+      const pt  = sampleRadialSeaPoint(hexGrid, portHex.x, portHex.y, sigmaEff, effortRand);
+      const hex = hexAtXY(hexGrid, pt.x, pt.y);
+      if (!hex || hex.isLand) continue;
+      const hi = seaIdxMap.get(hex.hex_id);
+      if (hi === undefined) continue;
+      const g1 = -Math.log(Math.max(1e-10, effortRand()));
+      const g2 = -Math.log(Math.max(1e-10, effortRand()));
+      const e_w = g1 + g2;   // Gamma(2,1), dimensionless
+      effortHT[hi * T + t] += e_w;
+      for (let i = 0; i < Ntotal; i++) {
+        const mu = e_w * detectionProb * lambdaIH[i * H + hi];
+        sightingsIH[i * H + hi] += poisson(mu, sightRand);
       }
     }
   }

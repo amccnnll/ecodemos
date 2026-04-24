@@ -147,7 +147,9 @@ export function generateHexGrid({ cols = 18, rows = 14, hexSize = 30, seed = 42 
   // Expose so sampleSeaPoint can run the same land/sea test without re-deriving the Perlin seed.
   const coastlineYExposed = (normX) => coastlineY(normX, domainH);
 
-  return { hexes, cols, rows, hexSize, xMin, xMax, yMin, yMax, domainW, domainH, domainDiag, nSea: seaCount, coastlineY: coastlineYExposed };
+  const hexByQR = new Map(hexes.map(h => [`${h.q},${h.r}`, h]));
+
+  return { hexes, hexByQR, cols, rows, hexSize, xMin, xMax, yMin, yMax, domainW, domainH, domainDiag, nSea: seaCount, coastlineY: coastlineYExposed };
 }
 
 // ── Sea-point sampler ─────────────────────────────────────────────────────
@@ -162,4 +164,49 @@ export function sampleSeaPoint(hexGrid, rand) {
     const relY  = y - yMin;
     if (relY >= coastlineY(normX)) return { x, y };  // sea: relY >= coastlineY → accept
   }
+}
+
+// ── Hex lookup from continuous coordinates ────────────────────────────────
+// Inverse of hexCentroid: returns the hex containing continuous point (x, y),
+// or null if the point is outside the grid. Uses the inverse offset-r formula
+// with a nearest-centroid fallback for boundary cases.
+export function hexAtXY(hexGrid, x, y) {
+  const { hexByQR, hexSize, xMin, yMin } = hexGrid;
+  const r = Math.round((y - yMin) / (hexSize * 1.5));
+  const q = Math.round((x - xMin) / (hexSize * SQRT3) - (r & 1) * 0.5);
+  const hex = hexByQR.get(`${q},${r}`);
+  if (hex) return hex;
+  // Single-ring fallback: scan neighbours and return nearest centroid.
+  const DIRS = [[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1]];
+  let best = null, bestDist = Infinity;
+  for (const [dq, dr] of DIRS) {
+    const h = hexByQR.get(`${q + dq},${r + dr}`);
+    if (!h) continue;
+    const dx = h.x - x, dy = h.y - y;
+    const d = dx * dx + dy * dy;
+    if (d < bestDist) { bestDist = d; best = h; }
+  }
+  return best;
+}
+
+// ── Radial sea-point sampler ──────────────────────────────────────────────
+// Draws survey sample points from a 2D half-normal (Rayleigh) field centred on
+// (portX, portY) with scale sigmaEff. Rejects points on land or outside the arena.
+// Falls back to the port coordinates if no valid point is found within MAX_TRIES.
+export function sampleRadialSeaPoint(hexGrid, portX, portY, sigmaEff, rand) {
+  const { xMin, xMax, yMin, yMax, domainW, coastlineY } = hexGrid;
+  const domainH = yMax - yMin;
+  const TWO_PI = 2 * Math.PI;
+  for (let attempt = 0; attempt < 200; attempt++) {
+    const r = sigmaEff * Math.sqrt(-2 * Math.log(Math.max(1e-10, rand())));
+    const theta = rand() * TWO_PI;
+    const x = portX + r * Math.cos(theta);
+    const y = portY + r * Math.sin(theta);
+    if (x < xMin || x > xMax || y < yMin || y > yMax) continue;
+    const normX = (x - xMin) / domainW;
+    const relY  = y - yMin;
+    if (relY < coastlineY(normX)) continue;
+    return { x, y };
+  }
+  return { x: portX, y: portY };
 }

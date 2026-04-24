@@ -72,17 +72,19 @@ Transients have no guild assignment ($\text{guild\_true} = -1$) and contribute n
 
 ### Survey effort and observations
 
-Effort is generated as $K = 4$ survey routes per year, each radiating outward from a single port hex (the nearshore sea hex nearest the domain's x-centroid, fixed by the landscape seed). Each route is a directed hex walk in an evenly-spaced bearing with a fresh random offset each year and 20% lateral jitter per step. Because routes are re-drawn each year, the cumulative spatial footprint grows with $T$: more years cover more of the domain, not merely more sightings in the same hexes. The **Effort bias** slider controls route length: low bias sends routes across the full domain; high bias keeps them nearshore.
+Effort is generated as $M = 60$ independent sample points per year drawn from a 2D half-normal (Rayleigh) field centred on the port hex (the nearshore sea hex nearest the domain's x-centroid, fixed by the landscape seed). The radial decay scale is:
 
-Detection is a continuous-space process: the route is treated as a sequence of waypoints at hex centres, each separated by a physical step length $\Delta = \text{hexSize} \times \sqrt{3}$. Route length is fixed in continuous units, $L = (0.10 + (1 - \text{effortBias}) \times 0.40) \times \text{domainDiag}$, giving $\lfloor L / \Delta \rceil$ steps regardless of hex size. Hex size therefore only affects the post-hoc binning of sightings, not the observation process itself.
+$$\sigma_{\text{eff}} = \bigl(0.15 + (1 - \text{effortBias}) \times 0.50\bigr) \times \text{domainDiag}$$
 
-At each waypoint $w$ in year $t$, effort and detections are drawn jointly:
+High **Effort bias** gives a tight nearshore cluster ($\sigma_{\text{eff}} \approx 0.15 \cdot \text{domainDiag}$); low bias spreads effort across the domain ($\sigma_{\text{eff}} \approx 0.65 \cdot \text{domainDiag}$). Each point is drawn by sampling a radial distance $r \sim \text{Rayleigh}(\sigma_{\text{eff}})$ and a uniform bearing $\theta \sim \text{Uniform}(0,\, 2\pi)$, rejecting points on land or outside the arena. Because points are redrawn each year, more years accumulate both sightings and spatial coverage.
 
-$$E_w \sim \Delta \cdot \Gamma(2,\,1)$$
+At each sample point $w$ in year $t$, effort and detections are drawn jointly:
+
+$$E_w \sim \Gamma(2,\,1)$$
 
 $$Y_{i,w,t} \sim \text{Poisson}\!\left(E_w \cdot p \cdot \lambda_{i,w}\right)$$
 
-where $\lambda_{i,w}$ is dolphin $i$'s latent use intensity evaluated at the waypoint's continuous position (home-range Gaussian plus guild habitat preference), and $p$ is the per-unit-effort detection probability (**Detection p** slider). Both $E_w$ and $Y_{i,w,t}$ are then binned into the hex containing $w$ by summing over all waypoints that fall in that hex. Dolphins with fewer than 4 total sightings across all hexes and years are dropped from the analysis.
+where $\lambda_{i,w}$ is dolphin $i$'s latent use intensity at the sample point's continuous position (home-range Gaussian plus guild habitat preference), and $p$ is the per-unit-effort detection probability (**Detection p** slider). Both $E_w$ and $Y_{i,w,t}$ are binned into the hex containing $w$ by inverse pointy-top offset-r formula. Hex size only determines that binning grain, not the observation process itself. Dolphins with fewer than 4 total sightings are dropped from the analysis.
 
 ---
 
@@ -173,8 +175,8 @@ where $p_{ih} = B^*_{ih}\,/\,\sum B^*_{ih}$ over hexes above the 5% threshold an
 
 | Control | Description |
 |---|---|
-| Years | Number of survey years $T$. Each year runs $K = 4$ fresh tendril routes with a new bearing offset, so more years both accumulate sightings and expand the cumulative spatial footprint of the survey. Default: 6. |
-| Effort bias | Survey route length: 0 = routes extend to the domain edge; 1 = routes stay close to the port. Default: 0.70. |
+| Years | Number of survey years $T$. Each year draws $M = 60$ independent sample points from the radial effort field, so more years both accumulate sightings and expand the cumulative spatial footprint. Default: 6. |
+| Effort bias | Radial decay scale: 1 = effort tightly clustered near port; 0 = effort spread across the full domain. Default: 0.70. |
 | Detection p | Per-visit detection probability $p$, scaled by $\lambda_{i,h}$ and effort. Default: 0.30. |
 
 ### Analysis
@@ -196,7 +198,7 @@ where $p_{ih} = B^*_{ih}\,/\,\sum B^*_{ih}$ over hexes above the 5% threshold an
 | Layer | Description |
 |---|---|
 | Environment | Composite habitat quality $Q_h$, shown on the viridis scale. |
-| Effort | Cumulative survey effort $\sum_t E_{h,t}$, shown on the yellow-orange-brown scale. The port hex is the brightest point. |
+| Effort | Cumulative survey effort $\sum_t E_{h,t}$, shown on the yellow-orange-brown scale. Shows a smooth radial gradient centred on the port; hexes near the port receive the most effort. |
 | Sightings | Raw total sightings $\sum_{i,t} Y_{i,h,t}$ over retained dolphins. Not effort-corrected; combines habitat use with survey coverage. |
 | B\* | Effort-corrected sighting index $\sum_i B^*_{i,h}$ summed over retained dolphins, on the green scale. |
 | Guild | Dominant community by B\* weight. Full colour: community holds more than 50% of hex B\*. Pale tint: plurality only. Neutral grey: insufficient data to assign a community. Warm tan: land. |
@@ -224,13 +226,13 @@ where $p_{ih} = B^*_{ih}\,/\,\sum B^*_{ih}$ over hexes above the 5% threshold an
 - **Circular network layout**: nodes are placed on a circle sorted by community or guild, with angular gaps at group boundaries. This avoids force-directed instability and makes block structure immediately visible.
 - **Per-dolphin guild affinity**: specialist/generalist distinction is implemented via different guild affinity coefficients ($c_i = 10$ vs $c_i = 5$), not different home-range sizes. This produces separable core50 distributions while keeping ARI high.
 - **Hex-resolution MAUP**: changing hex size keeps the arena footprint constant by adjusting the column and row counts. The simulation demonstrates the modifiable areal unit problem: very fine hexes reduce co-occurrence to near zero; very coarse hexes collapse all dolphins into the same cells.
-- **Continuous-space observation**: route length is fixed in continuous units ($L = (0.10 + (1 - \text{effortBias}) \times 0.40) \times \text{domainDiag}$) and detection is computed per waypoint at physical step length $\Delta = \text{hexSize} \times \sqrt{3}$. Hex size therefore only determines the binning grain of the resulting sightings matrix, not the observation process itself. Dolphin home-range centres are also sampled continuously over the sea region (independent of the hex grid), so the underlying truth is fully hex-size-invariant.
+- **Radial effort model**: $M = 60$ sample points per year are drawn from a 2D half-normal (Rayleigh) field centred on the port, with scale $\sigma_{\text{eff}} = (0.15 + (1 - \text{effortBias}) \times 0.50) \times \text{domainDiag}$. Each point contributes $\Gamma(2,1)$ effort and Poisson detections drawn from the continuous-space $\lambda_{i,w}$; hex size only determines the post-hoc binning of effort and sightings. Dolphin home-range centres are sampled continuously over the sea region, so the underlying truth is fully hex-size-invariant.
 
 ---
 
 ## Assumptions and limitations
 
-- Detection probability $p$ is constant per unit effort along the route. There is no within-waypoint distance falloff to individual dolphins.
+- Detection probability $p$ is constant per unit effort at each sample point. There is no distance falloff to individual dolphins.
 - All survey years are aggregated before analysis. Temporal dynamics in guild membership are not modelled.
 - Guild membership is fixed for each dolphin's lifetime. There is no social influence on habitat use.
 - The Poisson observation model assumes independent detections across occasions and individuals.
