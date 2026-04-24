@@ -44,8 +44,8 @@ const ARENA_H = 14 * 30; // 420 — reference arena height in grid units
 
 // Population/domain params changed → full regenerate
 export function regenerate() {
-  const cols = Math.max(10, Math.min(36, Math.round(ARENA_W / params.hexSize)));
-  const rows = Math.max(8,  Math.min(28, Math.round(ARENA_H / params.hexSize)));
+  const cols = Math.max(5, Math.min(70, Math.round(ARENA_W / params.hexSize)));
+  const rows = Math.max(4, Math.min(55, Math.round(ARENA_H / params.hexSize)));
   hexGrid  = generateHexGrid({ cols, rows, hexSize: params.hexSize, seed: params.seed });
   simData  = generateSimulation({ hexGrid, ...params, seed: params.simSeed });
   analysis = (simData && simData.retainedDolphins.length >= 2)

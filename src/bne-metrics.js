@@ -2,7 +2,7 @@
 // Pure engine: no DOM, D3, or p5 dependencies.
 
 export function computeMetrics(simData, analysis) {
-  const { retainedDolphins } = simData;
+  const { retainedDolphins, seaHexes } = simData;
   const { Bstar, communities, H } = analysis;
   const N = retainedDolphins.length;
 
@@ -54,6 +54,38 @@ export function computeMetrics(simData, analysis) {
     core50[i] = count;
   }
 
+  // ── Habitat-type spread ───────────────────────────────────────────────────
+  // B*-weighted std dev across the D_h / P_h / R_h axes, averaged in quadrature.
+  // Measures how narrow a slice of habitat-type space each dolphin uses,
+  // independent of where those hexes sit geographically.
+  // Specialists (high guildCoeff) concentrate B* on habitat-similar hexes →
+  // low spread. Generalists spread across habitat types → high spread.
+  const habitatSpread = new Float64Array(N);
+  for (let i = 0; i < N; i++) {
+    const off = i * H;
+    let wSum = 0;
+    for (let hi = 0; hi < H; hi++) wSum += Bstar[off + hi];
+    if (wSum === 0) { habitatSpread[i] = 0; continue; }
+    let muD = 0, muP = 0, muR = 0;
+    for (let hi = 0; hi < H; hi++) {
+      const w = Bstar[off + hi] / wSum;
+      muD += w * seaHexes[hi].D_h;
+      muP += w * seaHexes[hi].P_h;
+      muR += w * seaHexes[hi].R_h;
+    }
+    let vD = 0, vP = 0, vR = 0;
+    for (let hi = 0; hi < H; hi++) {
+      const w = Bstar[off + hi] / wSum;
+      const dD = seaHexes[hi].D_h - muD;
+      const dP = seaHexes[hi].P_h - muP;
+      const dR = seaHexes[hi].R_h - muR;
+      vD += w * dD * dD;
+      vP += w * dP * dP;
+      vR += w * dR * dR;
+    }
+    habitatSpread[i] = Math.sqrt((vD + vP + vR) / 3);
+  }
+
   // ── Specialist/generalist (median niche-breadth split) ───────────────────
   const sorted  = Float64Array.from(nicheBreadth).sort();
   const medianNB = sorted[Math.floor(N / 2)];
@@ -64,7 +96,7 @@ export function computeMetrics(simData, analysis) {
   const predictedLabels = communities;
   const ari = adjustedRandIndex(trueLabels, predictedLabels);
 
-  return { nicheBreadth, evenness, core50, strategy, ari, medianNB };
+  return { nicheBreadth, evenness, core50, habitatSpread, strategy, ari, medianNB };
 }
 
 // ── Adjusted Rand Index ───────────────────────────────────────────────────

@@ -180,7 +180,7 @@ window.Quarto = {
   <li><a href="#generative-model" id="toc-generative-model" class="nav-link" data-scroll-target="#generative-model">Generative model</a>
   <ul class="collapse">
   <li><a href="#domain" id="toc-domain" class="nav-link" data-scroll-target="#domain">Domain</a></li>
-  <li><a href="#guild-preference-profiles" id="toc-guild-preference-profiles" class="nav-link" data-scroll-target="#guild-preference-profiles">Guild preference profiles</a></li>
+  <li><a href="#guild-centroids-and-per-dolphin-preference-vectors" id="toc-guild-centroids-and-per-dolphin-preference-vectors" class="nav-link" data-scroll-target="#guild-centroids-and-per-dolphin-preference-vectors">Guild centroids and per-dolphin preference vectors</a></li>
   <li><a href="#dolphin-population" id="toc-dolphin-population" class="nav-link" data-scroll-target="#dolphin-population">Dolphin population</a></li>
   <li><a href="#residents-vs-transients" id="toc-residents-vs-transients" class="nav-link" data-scroll-target="#residents-vs-transients">Residents vs transients</a></li>
   <li><a href="#survey-effort-and-observations" id="toc-survey-effort-and-observations" class="nav-link" data-scroll-target="#survey-effort-and-observations">Survey effort and observations</a></li>
@@ -288,21 +288,26 @@ window.Quarto = {
 <p>A composite habitat quality index is computed for display only:</p>
 <p><span class="math display">\[Q_h = 0.4\,D_h + 0.4\,P_h - 0.25\,R_h + 0.2\]</span></p>
 </section>
-<section id="guild-preference-profiles" class="level3">
-<h3 class="anchored" data-anchor-id="guild-preference-profiles">Guild preference profiles</h3>
-<p>Each of the <span class="math inline">\(G\)</span> guilds has a weight vector <span class="math inline">\(\mathbf{w}_g = (w_{g,D},\, w_{g,P},\, w_{g,R})\)</span> over the three environmental axes, drawn from a fixed set of ecologically motivated archetypes (offshore, productive nearshore, disturbance-tolerant, coastal forager, etc.) and mixed toward the centroid <span class="math inline">\([0.5, 0.5, 0.5]\)</span> by the <strong>Overlap</strong> parameter.</p>
-<p>The raw preference score for guild <span class="math inline">\(g\)</span> in hex <span class="math inline">\(h\)</span> is:</p>
-<p><span class="math display">\[\text{raw}_{g,h} = w_{g,D}\,D_h + w_{g,P}\,P_h - w_{g,R}\,R_h\]</span></p>
-<p>This is normalised to <span class="math inline">\([0,1]\)</span> across all sea hexes to give the guild score <span class="math inline">\(s_{g,h}\)</span>.</p>
+<section id="guild-centroids-and-per-dolphin-preference-vectors" class="level3">
+<h3 class="anchored" data-anchor-id="guild-centroids-and-per-dolphin-preference-vectors">Guild centroids and per-dolphin preference vectors</h3>
+<p>Each of the <span class="math inline">\(G\)</span> guilds has a fixed centroid <span class="math inline">\(\boldsymbol{\mu}_g \in [0,1]^3\)</span> in the three-dimensional habitat preference space <span class="math inline">\((D, P, R)\)</span>, drawn from a set of ecologically motivated archetypes (offshore, productive nearshore, disturbance-tolerant, coastal forager, etc.).</p>
+<p>Each dolphin is assigned a latent cluster <span class="math inline">\(g_i\)</span> uniformly at random, then draws its own preference vector independently from a Gaussian centred on that cluster:</p>
+<p><span class="math display">\[\boldsymbol{\theta}_i \sim \mathcal{N}\!\left(\boldsymbol{\mu}_{g_i},\, \sigma_{\text{cluster}}^2\, \mathbf{I}\right), \quad \boldsymbol{\theta}_i \in [0,1]^3\]</span></p>
+<p>where components are clamped to <span class="math inline">\([0,1]\)</span> after sampling. The <strong>Overlap</strong> slider controls the dispersion:</p>
+<p><span class="math display">\[\sigma_{\text{cluster}} = 0.05 + \text{overlap} \times 0.45\]</span></p>
+<p>At overlap <span class="math inline">\(= 0\)</span>, dolphins draw from tight clusters around their centroid (<span class="math inline">\(\sigma_{\text{cluster}} = 0.05\)</span>; near-discrete behaviour). At overlap <span class="math inline">\(= 0.9\)</span>, Gaussians are wide and heavily overlapping (<span class="math inline">\(\sigma_{\text{cluster}} = 0.455\)</span>; fluid guild boundaries). Because <span class="math inline">\(\boldsymbol{\theta}_i\)</span> is per-dolphin rather than shared across a guild, two dolphins in the same latent cluster will still differ in their realised habitat preferences; those near cluster boundaries will naturally resemble dolphins in adjacent clusters.</p>
 </section>
 <section id="dolphin-population" class="level3">
 <h3 class="anchored" data-anchor-id="dolphin-population">Dolphin population</h3>
-<p>Each dolphin is assigned a guild uniformly at random, then drawn independently of guild membership: home-range centres are sampled continuously and uniformly over the sea region by rejection sampling (uniform draws in the bounding box rejected if they fall on land). This keeps the underlying population truth independent of the hex grid. Changing hex size re-bins the observations but does not re-draw dolphin positions, giving a clean demonstration of the modifiable areal unit problem. Guild signal comes entirely from habitat preference, not from spatial clustering.</p>
+<p>Home-range centres are sampled continuously and uniformly over the sea region by rejection sampling (uniform draws in the bounding box rejected if they fall on land). This keeps the underlying population truth independent of the hex grid. Changing hex size re-bins the observations but does not re-draw dolphin positions, giving a clean demonstration of the modifiable areal unit problem. Guild signal comes entirely from habitat preference, not from spatial clustering.</p>
+<p>Importantly, two dolphins in the same habitat guild need not share any geographic space. Guild membership is a statement about <em>which types of habitat</em> a dolphin prefers, not about <em>where</em> it forages; the two may be on opposite sides of the bay and still be more similar in B* profile than either is to a dolphin from a different guild in their neighbourhood.</p>
 <p>Dolphins are classified as <strong>specialists</strong> (fraction controlled by the <strong>Specialist</strong> slider) or <strong>generalists</strong>. The distinction is in habitat fidelity, not home-range size: both types share the same home-range scale (<span class="math inline">\(\sigma = 0.4 \times \text{domain diagonal}\)</span>), but specialists have a higher guild affinity coefficient (<span class="math inline">\(c_i = 10\)</span>) while generalists have a weaker one (<span class="math inline">\(c_i = 5\)</span>).</p>
-<p>The latent use intensity for dolphin <span class="math inline">\(i\)</span> in hex <span class="math inline">\(h\)</span> is:</p>
-<p><span class="math display">\[\log \lambda_{i,h} = \alpha + a_i + c_i\,s_{g_i,h} - \frac{d_{i,h}^2}{2\sigma^2}\]</span></p>
-<p>where <span class="math inline">\(\alpha = -4\)</span> is the log-scale baseline, <span class="math inline">\(a_i \sim \mathcal{N}(0,\,0.25^2)\)</span> is an individual activity level, <span class="math inline">\(c_i\)</span> is the guild affinity coefficient, and <span class="math inline">\(d_{i,h}\)</span> is the Euclidean distance from dolphin <span class="math inline">\(i\)</span>’s home-range centre to hex <span class="math inline">\(h\)</span>.</p>
-<p>Specialists with <span class="math inline">\(c_i = 10\)</span> experience <span class="math inline">\(e^{10} \approx 22{,}000\times\)</span> contrast between their best and worst hexes; generalists with <span class="math inline">\(c_i = 5\)</span> experience <span class="math inline">\(e^5 \approx 150\times\)</span>. This produces clearly different core50 distributions without requiring different home-range sizes.</p>
+<p>The raw habitat score for dolphin <span class="math inline">\(i\)</span> in hex <span class="math inline">\(h\)</span> is the dot product of <span class="math inline">\(\boldsymbol{\theta}_i\)</span> with the hex’s environmental vector, treating disturbance as a negative axis:</p>
+<p><span class="math display">\[\text{raw}_{i,h} = \theta_{i,D}\,D_h + \theta_{i,P}\,P_h - \theta_{i,R}\,R_h\]</span></p>
+<p>This is normalised to <span class="math inline">\([0,1]\)</span> across all sea hexes per dolphin, giving an individual habitat preference score <span class="math inline">\(s_{i,h}\)</span>. The latent use intensity is then:</p>
+<p><span class="math display">\[\log \lambda_{i,h} = \alpha + a_i + c_i\,s_{i,h} - \frac{d_{i,h}^2}{2\sigma^2}\]</span></p>
+<p>where <span class="math inline">\(\alpha = -4\)</span> is the log-scale baseline, <span class="math inline">\(a_i \sim \mathcal{N}(0,\,0.25^2)\)</span> is individual activity, <span class="math inline">\(c_i\)</span> is the guild affinity coefficient, and <span class="math inline">\(d_{i,h}\)</span> is distance from dolphin <span class="math inline">\(i\)</span>’s home-range centre to hex <span class="math inline">\(h\)</span>.</p>
+<p>Specialists with <span class="math inline">\(c_i = 10\)</span> experience <span class="math inline">\(e^{10} \approx 22{,}000\times\)</span> contrast between their best and worst hexes; generalists with <span class="math inline">\(c_i = 5\)</span> experience <span class="math inline">\(e^5 \approx 150\times\)</span>. This produces different habitat-type spread distributions without requiring different home-range sizes.</p>
 </section>
 <section id="residents-vs-transients" class="level3">
 <h3 class="anchored" data-anchor-id="residents-vs-transients">Residents vs transients</h3>
@@ -312,8 +317,8 @@ window.Quarto = {
 <section id="survey-effort-and-observations" class="level3">
 <h3 class="anchored" data-anchor-id="survey-effort-and-observations">Survey effort and observations</h3>
 <p>Effort is generated as <span class="math inline">\(M = 60\)</span> independent sample points per year drawn from a 2D half-normal (Rayleigh) field centred on the port hex (the nearshore sea hex nearest the domain’s x-centroid, fixed by the landscape seed). The radial decay scale is:</p>
-<p><span class="math display">\[\sigma_{\text{eff}} = \bigl(0.15 + (1 - \text{effortBias}) \times 0.50\bigr) \times \text{domainDiag}\]</span></p>
-<p>High <strong>Effort bias</strong> gives a tight nearshore cluster (<span class="math inline">\(\sigma_{\text{eff}} \approx 0.15 \cdot \text{domainDiag}\)</span>); low bias spreads effort across the domain (<span class="math inline">\(\sigma_{\text{eff}} \approx 0.65 \cdot \text{domainDiag}\)</span>). Each point is drawn by sampling a radial distance <span class="math inline">\(r \sim \text{Rayleigh}(\sigma_{\text{eff}})\)</span> and a uniform bearing <span class="math inline">\(\theta \sim \text{Uniform}(0,\, 2\pi)\)</span>, rejecting points on land or outside the arena. Because points are redrawn each year, more years accumulate both sightings and spatial coverage.</p>
+<p><span class="math display">\[\sigma_{\text{eff}} = \bigl(0.05 + (1 - \text{effortBias}) \times 0.30\bigr) \times \text{domainDiag}\]</span></p>
+<p>High <strong>Effort bias</strong> gives a tight nearshore cluster (<span class="math inline">\(\sigma_{\text{eff}} \approx 0.05 \cdot \text{domainDiag}\)</span>); low bias spreads effort across the domain (<span class="math inline">\(\sigma_{\text{eff}} \approx 0.35 \cdot \text{domainDiag}\)</span>). Each point is drawn by sampling a radial distance <span class="math inline">\(r \sim \text{Rayleigh}(\sigma_{\text{eff}})\)</span> and a uniform bearing <span class="math inline">\(\theta \sim \text{Uniform}(0,\, 2\pi)\)</span>, rejecting points on land or outside the arena. Because points are redrawn each year, more years accumulate both sightings and spatial coverage.</p>
 <p>At each sample point <span class="math inline">\(w\)</span> in year <span class="math inline">\(t\)</span>, effort and detections are drawn jointly:</p>
 <p><span class="math display">\[E_w \sim \Gamma(2,\,1)\]</span></p>
 <p><span class="math display">\[Y_{i,w,t} \sim \text{Poisson}\!\left(E_w \cdot p \cdot \lambda_{i,w}\right)\]</span></p>
@@ -389,11 +394,12 @@ window.Quarto = {
 <section id="niche-breadth-and-specialistgeneralist-scatter" class="level3">
 <h3 class="anchored" data-anchor-id="niche-breadth-and-specialistgeneralist-scatter">Niche breadth and specialist/generalist scatter</h3>
 <p>Two per-dolphin metrics are plotted in the Specialist/generalist scatter:</p>
-<p><strong>Niche breadth</strong>: number of hexes with <span class="math inline">\(B^*_{i,h} &gt; 0.05 \times \max_h B^*_{i,h}\)</span> (5% relative threshold filters Poisson noise).</p>
-<p><strong>Core50</strong>: the smallest number of hexes (sorted by descending <span class="math inline">\(B^*\)</span>) needed to accumulate 50% of dolphin <span class="math inline">\(i\)</span>’s total <span class="math inline">\(B^*\)</span>. Low core50 indicates concentrated habitat use (specialist); high core50 indicates spread-out use (generalist).</p>
-<p>Shannon evenness (computed but not plotted by default):</p>
-<p><span class="math display">\[J_i = \frac{-\displaystyle\sum_h p_{ih}\ln p_{ih}}{\ln n_i}\]</span></p>
-<p>where <span class="math inline">\(p_{ih} = B^*_{ih}\,/\,\sum B^*_{ih}\)</span> over hexes above the 5% threshold and <span class="math inline">\(n_i\)</span> is the count of such hexes.</p>
+<p><strong>Niche breadth</strong> (x-axis): number of hexes with <span class="math inline">\(B^*_{i,h} &gt; 0.05 \times \max_h B^*_{i,h}\)</span> (5% relative threshold filters Poisson noise).</p>
+<p><strong>Habitat-type spread</strong> (y-axis): the B*-weighted standard deviation of dolphin <span class="math inline">\(i\)</span>’s sightings across the three environmental axes. Let <span class="math inline">\(w_{ih} = B^*_{ih} / \sum_h B^*_{ih}\)</span>; compute the weighted mean and variance of each field:</p>
+<p><span class="math display">\[\mu_{i,k} = \sum_h w_{ih}\, E_{hk}, \qquad \sigma^2_{i,k} = \sum_h w_{ih}\,(E_{hk} - \mu_{i,k})^2, \quad k \in \{D, P, R\}\]</span></p>
+<p><span class="math display">\[\text{spread}_i = \sqrt{\frac{\sigma^2_{i,D} + \sigma^2_{i,P} + \sigma^2_{i,R}}{3}}\]</span></p>
+<p>Low spread means the dolphin’s B* is concentrated on hexes with similar environmental values, regardless of where those hexes are geographically. Specialists (high <span class="math inline">\(c_i\)</span>) are expected to concentrate on habitat-appropriate hexes, yielding lower spread than generalists. Unlike niche breadth or core50, this metric is position-independent: two dolphins on opposite sides of the bay that share a habitat-type preference receive the same low score.</p>
+<p>Pielou’s J and core50 are still computed internally but are not plotted on the scatter.</p>
 <hr>
 </section>
 </section>
@@ -440,23 +446,23 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td>N</td>
-<td>Total number of dolphins before retention filtering. Default: 60.</td>
+<td>Total number of dolphins before retention filtering. Range: 20–200. Default: 60.</td>
 </tr>
 <tr class="even">
 <td>G</td>
-<td>Number of habitat guilds (2–6). Each guild has a distinct preference profile over depth, productivity, and disturbance. Default: 4.</td>
+<td>Number of latent habitat clusters (2–6). Each has a centroid in the 3D preference space; each dolphin draws its own <span class="math inline">\(\boldsymbol{\theta}_i\)</span> from a Gaussian around its cluster’s centroid. Default: 4.</td>
 </tr>
 <tr class="odd">
 <td>Overlap</td>
-<td>Guild profile mixing coefficient (0–0.9). At 0, guilds have maximally distinct preferences; at 0.9, profiles are nearly identical and harder to separate. Default: 0.30.</td>
+<td>Cluster dispersion <span class="math inline">\(\sigma_{\text{cluster}}\)</span> (0–0.9). At 0, dolphins draw from tight Gaussians (<span class="math inline">\(\sigma = 0.05\)</span>; near-discrete guild structure); at 0.9, Gaussians are wide and cross-cluster similarity is common (<span class="math inline">\(\sigma = 0.455\)</span>). Default: 0.30.</td>
 </tr>
 <tr class="even">
 <td>Specialist</td>
-<td>Fraction of dolphins with a high guild affinity coefficient (<span class="math inline">\(c_i = 10\)</span> vs <span class="math inline">\(c_i = 5\)</span> for generalists). Specialists show lower core50. Default: 0.50.</td>
+<td>Fraction of dolphins with a high guild affinity coefficient (<span class="math inline">\(c_i = 10\)</span> vs <span class="math inline">\(c_i = 5\)</span> for generalists). Specialists concentrate B* on habitat-appropriate hexes, yielding lower habitat-type spread on the scatter. Default: 0.50.</td>
 </tr>
 <tr class="odd">
 <td>Transients</td>
-<td>Number of extra dolphins whose home-range centres are placed just outside the arena. They produce occasional edge sightings but mostly fail the ≥ 4 sightings filter. Default: 15.</td>
+<td>Number of extra dolphins whose home-range centres are placed just outside the arena. Range: 0–60. They produce occasional edge sightings but mostly fail the ≥ 4 sightings filter. Default: 15.</td>
 </tr>
 </tbody>
 </table>
@@ -477,7 +483,7 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td>Years</td>
-<td>Number of survey years <span class="math inline">\(T\)</span>. Each year draws <span class="math inline">\(M = 60\)</span> independent sample points from the radial effort field, so more years both accumulate sightings and expand the cumulative spatial footprint. Default: 6.</td>
+<td>Number of survey years <span class="math inline">\(T\)</span> (1–20). Each year draws <span class="math inline">\(M = 60\)</span> independent sample points from the radial effort field, so more years both accumulate sightings and expand the cumulative spatial footprint. Default: 6.</td>
 </tr>
 <tr class="even">
 <td>Effort bias</td>
@@ -506,7 +512,7 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td>k (kNN)</td>
-<td>Number of nearest neighbours each dolphin retains in the similarity graph fed to Louvain. Default: 8.</td>
+<td>Number of nearest neighbours each dolphin retains in the similarity graph fed to Louvain. Range: 2–30. Default: 8.</td>
 </tr>
 <tr class="even">
 <td>E_min</td>
@@ -535,7 +541,7 @@ window.Quarto = {
 <tbody>
 <tr class="odd">
 <td>Hex size</td>
-<td>Spatial resolution: the arena footprint stays constant while the number of hexes changes. Smaller hexes give finer grain (slower at large N); larger hexes give coarser grain. Default: 30 (18 × 14 grid).</td>
+<td>Spatial resolution: the arena footprint stays constant while the number of hexes changes. Range: 8–75. Smaller hexes give finer grain; larger hexes give coarser grain and a smaller cell count. Default: 30 (approx. 18 × 14 grid).</td>
 </tr>
 </tbody>
 </table>
@@ -572,7 +578,7 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>Guild</td>
-<td>Dominant community by B* weight. Full colour: community holds more than 50% of hex B*. Pale tint: plurality only. Neutral grey: insufficient data to assign a community. Warm tan: land.</td>
+<td>Dominant <em>latent cluster</em> by B* weight. Full colour: a cluster holds more than 50% of B* in the hex. Pale tint: plurality only. Neutral grey: insufficient data. Warm tan: land. This layer shows the true generative structure, not the detected communities.</td>
 </tr>
 <tr class="even">
 <td>Individual</td>
@@ -621,7 +627,7 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>Truth</td>
-<td>Nodes coloured by true simulated guild; edges show true guild co-membership (fixed by the generative model, independent of detection or analysis settings). Transients that pass the ≥ 4 sightings gate appear as grey unassigned nodes. Compare with Communities to assess ARI: if the detected communities match the guild blocks here, recovery is high.</td>
+<td>Shows <em>all</em> dolphins in the generative model (residents and transients, retained or not). Nodes are coloured by latent cluster <span class="math inline">\(g_i\)</span>; edges are drawn by Gaussian kernel on <span class="math inline">\(\boldsymbol{\theta}\)</span> similarity: <span class="math inline">\(w_{ij} = \exp(-\|\boldsymbol{\theta}_i - \boldsymbol{\theta}_j\|^2 / 2\tau^2)\)</span>, <span class="math inline">\(\tau = 0.20\)</span>. Three visual tiers: bright outline = retained (<span class="math inline">\(\geq 4\)</span> sightings, in the analysis); dim outline = resident but not retained; faint = transient. Compare with the Communities view to assess ARI. At high Overlap, cluster boundaries blur and cross-cluster edges appear, reflecting the continuous preference structure.</td>
 </tr>
 </tbody>
 </table>
@@ -635,9 +641,9 @@ window.Quarto = {
 <li><strong>Row normalisation before Jaccard</strong>: normalising B* rows to unit sum before computing similarity removes activity-level variation. Two dolphins with the same habitat preference but different total sighting counts remain equally similar.</li>
 <li><strong>Louvain, not Leiden</strong>: no vanilla-JS Leiden implementation exists with an appropriate licence. Louvain gives equivalent results at this scale and is fully reproducible given the seeded graph construction.</li>
 <li><strong>Circular network layout</strong>: nodes are placed on a circle sorted by community or guild, with angular gaps at group boundaries. This avoids force-directed instability and makes block structure immediately visible.</li>
-<li><strong>Per-dolphin guild affinity</strong>: specialist/generalist distinction is implemented via different guild affinity coefficients (<span class="math inline">\(c_i = 10\)</span> vs <span class="math inline">\(c_i = 5\)</span>), not different home-range sizes. This produces separable core50 distributions while keeping ARI high.</li>
+<li><strong>Per-dolphin guild affinity</strong>: specialist/generalist distinction is implemented via different guild affinity coefficients (<span class="math inline">\(c_i = 10\)</span> vs <span class="math inline">\(c_i = 5\)</span>), not different home-range sizes. Both types share <span class="math inline">\(\sigma = 0.4 \times \text{domainDiag}\)</span>. Specialists concentrate B* on habitat-appropriate hexes, yielding lower habitat-type spread on the scatter, independent of where those hexes sit geographically.</li>
 <li><strong>Hex-resolution MAUP</strong>: changing hex size keeps the arena footprint constant by adjusting the column and row counts. The simulation demonstrates the modifiable areal unit problem: very fine hexes reduce co-occurrence to near zero; very coarse hexes collapse all dolphins into the same cells.</li>
-<li><strong>Radial effort model</strong>: <span class="math inline">\(M = 60\)</span> sample points per year are drawn from a 2D half-normal (Rayleigh) field centred on the port, with scale <span class="math inline">\(\sigma_{\text{eff}} = (0.15 + (1 - \text{effortBias}) \times 0.50) \times \text{domainDiag}\)</span>. Each point contributes <span class="math inline">\(\Gamma(2,1)\)</span> effort and Poisson detections drawn from the continuous-space <span class="math inline">\(\lambda_{i,w}\)</span>; hex size only determines the post-hoc binning of effort and sightings. Dolphin home-range centres are sampled continuously over the sea region, so the underlying truth is fully hex-size-invariant.</li>
+<li><strong>Radial effort model</strong>: <span class="math inline">\(M = 60\)</span> sample points per year are drawn from a 2D half-normal (Rayleigh) field centred on the port, with scale <span class="math inline">\(\sigma_{\text{eff}} = (0.05 + (1 - \text{effortBias}) \times 0.30) \times \text{domainDiag}\)</span>. The Rayleigh density peaks at <span class="math inline">\(\sigma_{\text{eff}}\)</span>, so this keeps default effort clearly nearshore. Each point contributes <span class="math inline">\(\Gamma(2,1)\)</span> effort and Poisson detections drawn from the continuous-space <span class="math inline">\(\lambda_{i,w}\)</span>; hex size only determines the post-hoc binning of effort and sightings. Dolphin home-range centres are sampled continuously over the sea region, so the underlying truth is fully hex-size-invariant.</li>
 </ul>
 <hr>
 </section>

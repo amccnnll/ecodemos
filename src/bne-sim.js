@@ -209,7 +209,7 @@ export function generateSimulation({
   }
   const retainedDolphins = dolphins.filter((_, i) => totalSightings[i] >= 4);
 
-  return { dolphins, retainedDolphins, centroids, seaHexes,
+  return { dolphins, retainedDolphins, centroids, seaHexes, portHex,
            sightingsIH, effortH, effortHT, lambdaIH, totalSightings,
            N, Ntotal, H, G, T };
 }

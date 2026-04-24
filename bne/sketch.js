@@ -104,6 +104,7 @@ function updateHexLegend() {
 // ── Hex map ───────────────────────────────────────────────────────────────
 const hexContainer = document.getElementById('bne-hexmap-svg');
 let hexG = null;
+let portG = null;   // overlay group for the port hex outline
 let lastHexGrid = null;
 
 function buildHexMap() {
@@ -130,6 +131,7 @@ function buildHexMap() {
   const svg = d3.select(hexContainer).append('svg')
     .attr('width', cW).attr('height', cH);
   hexG = svg.append('g');
+  portG = svg.append('g').attr('pointer-events', 'none');
 
   hexG.selectAll('path.hex')
     .data(hexes)
@@ -268,6 +270,27 @@ function updateHexColours() {
   }
 
   hexG.selectAll('path.hex').attr('fill', d => d.isLand ? LAND_FILL : seaColour(d));
+
+  // Port hex: blue outline drawn on top of the hex fill layer.
+  // Redrawn each colour update so it survives layer switches.
+  portG.selectAll('*').remove();
+  if (sim?.portHex && state.hexGrid) {
+    const { xMin, yMin, hexSize: hs } = state.hexGrid;
+    const { hexes, xMax, yMax } = state.hexGrid;
+    const rect2 = hexContainer.getBoundingClientRect();
+    const cW2 = rect2.width || 500, cH2 = rect2.height || 460;
+    const pad2 = hs * 0.9;
+    const sc2 = Math.min((cW2 - 2*pad2) / (xMax - xMin || 1), (cH2 - 2*pad2) / (yMax - yMin || 1));
+    const offX2 = pad2 + (cW2 - 2*pad2 - (xMax - xMin)*sc2) / 2;
+    const offY2 = pad2;
+    const ph = sim.portHex;
+    portG.append('path')
+      .attr('d', hexPathString(offX2 + (ph.x - xMin)*sc2, offY2 + (ph.y - yMin)*sc2, hs * sc2 * 0.98))
+      .attr('fill', 'none')
+      .attr('stroke', '#1a6faf')
+      .attr('stroke-width', 2.5);
+  }
+
   updateHexLegend();
 }
 

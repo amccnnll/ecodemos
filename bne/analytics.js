@@ -571,7 +571,7 @@ function buildScatter() {
   }
 
   const { dolphins, communities } = anal;
-  const { nicheBreadth, evenness } = met;
+  const { nicheBreadth, habitatSpread } = met;
 
   const rect    = scatterContainer.getBoundingClientRect();
   const W       = Math.max(rect.width  || 500, 300);
@@ -581,8 +581,9 @@ function buildScatter() {
   const iH = H_chart - margin.t - margin.b;
 
   const xMax = d3.max(nicheBreadth) || 1;
+  const yMax = d3.max(habitatSpread) || 1;
   const xScale = d3.scaleLinear().domain([0, xMax * 1.06]).nice().range([0, iW]);
-  const yScale = d3.scaleLinear().domain([0, 1]).range([iH, 0]);
+  const yScale = d3.scaleLinear().domain([0, yMax * 1.10]).nice().range([iH, 0]);
 
   const svg = d3.select(scatterContainer).append('svg')
     .attr('width', W).attr('height', H_chart);
@@ -614,11 +615,11 @@ function buildScatter() {
     .attr('transform', 'rotate(-90)')
     .attr('x', -iH / 2).attr('y', -40)
     .attr('text-anchor', 'middle').attr('font-size', '11px').attr('fill', '#555')
-    .text('Pielou J (habitat evenness, 0–1)');
+    .text('Habitat-type spread (lower = specialist)');
 
   // Points
   const points = dolphins.map((d, i) => ({
-    nb: nicheBreadth[i], ev: evenness[i],
+    nb: nicheBreadth[i], hs: habitatSpread[i],
     community: communities[i], isSpecialist: d.isSpecialist,
     guild_true: d.guild_true, id: d.dolphin_id,
   }));
@@ -627,7 +628,7 @@ function buildScatter() {
     .data(points)
     .join('circle')
     .attr('cx', d => xScale(d.nb))
-    .attr('cy', d => yScale(d.ev))
+    .attr('cy', d => yScale(d.hs))
     .attr('r', 5)
     .attr('fill',         d => d.community >= 0 ? GUILD_COLS[d.community % GUILD_COLS.length] : UNASSIGNED)
     .attr('fill-opacity', 0.80)
@@ -637,7 +638,7 @@ function buildScatter() {
     .text(d => {
       const s = d.isSpecialist ? 'Specialist' : 'Generalist';
       const c = d.community >= 0 ? `Community ${d.community + 1}` : 'Unassigned';
-      return `Dolphin ${d.id} · ${s} · ${c} · breadth ${d.nb} · J ${d.ev.toFixed(3)}`;
+      return `Dolphin ${d.id} · ${s} · ${c} · breadth ${d.nb} · habitat spread ${d.hs.toFixed(3)}`;
     });
 
   // Inline legend (top-right corner)
