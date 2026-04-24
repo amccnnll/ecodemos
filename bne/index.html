@@ -100,14 +100,14 @@
           <input type="range" id="sl-G" class="param-slider" min="2" max="6" step="1" value="4" />
           <span class="slider-value" id="val-G">4</span>
         </div>
-        <p class="control-hint">Number of habitat guilds; each has a distinct preference profile over depth, productivity, and disturbance</p>
+        <p class="control-hint">Number of latent habitat clusters; each has a centroid in the 3D preference space (depth proxy, productivity, disturbance). Each dolphin draws its own preference vector from a Gaussian around its cluster's centroid.</p>
 
         <div class="slider-row">
           <span class="control-label slider-label">Overlap</span>
           <input type="range" id="sl-overlap" class="param-slider" min="0" max="0.9" step="0.05" value="0.3" />
           <span class="slider-value" id="val-overlap">0.30</span>
         </div>
-        <p class="control-hint">Guild profile mixing; 0 = maximally distinct preferences, 0.9 = nearly identical (harder to separate)</p>
+        <p class="control-hint">Dispersion of each latent cluster in preference space; 0 = tight clusters (near-discrete, easy to separate), 0.9 = widely dispersed Gaussians with heavy cross-cluster overlap</p>
 
         <div class="slider-row">
           <span class="control-label slider-label">Specialist</span>

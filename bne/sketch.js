@@ -50,6 +50,7 @@ function updateHexLegend() {
   if (!hexLegendEl) return;
   const layer = state.hexLayer;
   const anal  = state.analysis;
+  const sim   = state.simData;
   let html = '';
 
   if (layer === 'environment') {
@@ -78,16 +79,16 @@ function updateHexLegend() {
               Effort-corrected habitat-use index. E<sub>min</sub> floor prevents inflation in rarely-surveyed hexes.</span>`;
 
   } else if (layer === 'guild') {
-    if (anal) {
-      const swatches = Array.from({ length: anal.nCommunities }, (_, c) =>
-        `${swatchEl(GUILD_COLS[c % 10])} <b>C${c + 1}</b>`).join(' &thinsp; ');
+    if (sim) {
+      const swatches = Array.from({ length: sim.G }, (_, c) =>
+        `${swatchEl(GUILD_COLS[c % 10])} <b>G${c + 1}</b>`).join(' &thinsp; ');
       html = `${swatches}
-              <span class="leg-note"><b>Full colour</b> = community majority (&gt;50% of summed B* weight in that hex) &nbsp;·&nbsp;
-                <b>Pale tint</b> (55% blended to white) = plurality only (dominant community holds ≤50%) &nbsp;·&nbsp;
-                <b>neutral grey</b> = insufficient B* data to assign any community &nbsp;·&nbsp;
-                warm tan = land</span>`;
+              <span class="leg-note"><b>Latent cluster dominance</b> — colour = the true generative cluster whose retained members contribute most cumulative B* to that hex &nbsp;·&nbsp;
+                <b>Full colour</b> = majority (&gt;50% of B* weight); <b>pale tint</b> = plurality only &nbsp;·&nbsp;
+                <b>neutral grey</b> = insufficient B* data to assign any cluster &nbsp;·&nbsp;
+                Compare with the Guild layer and the Truth network view: high ARI means these two should broadly agree.</span>`;
     } else {
-      html = '<span class="leg-note">Generate a population to see the community guild map.</span>';
+      html = '<span class="leg-note">Generate a population to see the latent cluster map.</span>';
     }
 
   } else if (layer === 'individual') {
@@ -219,19 +220,21 @@ function updateHexColours() {
     seaColour = h => colBstar(lut.get(h.hex_id) ?? 0);
 
   } else if (layer === 'guild' && anal) {
-    const { Bstar, communities, N } = anal;
-    // Accumulate total B* weight and per-community weight for each sea hex
+    const { Bstar, dolphins, N } = anal;
+    // Accumulate total B* weight and per-latent-cluster weight for each sea hex.
+    // Uses guild_true (generative latent assignment), not detected communities,
+    // so this layer shows the true ecological structure on the map.
     const hexTotals = new Float64Array(H);
     const commW     = new Array(H).fill(null).map(() => new Map());
     for (let i = 0; i < N; i++) {
-      const c = communities[i]; if (c < 0) continue;
+      const c = dolphins[i].guild_true; if (c < 0) continue;
       for (let hi = 0; hi < H; hi++) {
         const w = Bstar[i * H + hi]; if (w <= 0) continue;
         commW[hi].set(c, (commW[hi].get(c) || 0) + w);
         hexTotals[hi] += w;
       }
     }
-    // Dominant community + its share of total B* weight for each hex
+    // Dominant latent cluster + its share of total B* weight for each hex
     const domResult = commW.map((m, hi) => {
       let best = -1, bestW = 0;
       for (const [c, w] of m) { if (w > bestW) { bestW = w; best = c; } }

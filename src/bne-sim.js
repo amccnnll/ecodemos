@@ -3,10 +3,13 @@
 
 import { mulberry32, sampleSeaPoint, hexAtXY, sampleRadialSeaPoint } from './bne-hex.js';
 
-// ── Guild preference profiles ─────────────────────────────────────────────
-// Each guild has weights [wD, wP, wR] over (depth-like, productivity, disturbance).
-// Guild signal comes from habitat-type preferences, NOT home-range geography.
-function makeGuildProfiles(G, overlap, rand) {
+// ── Guild centroids ───────────────────────────────────────────────────────
+// Fixed reference points in the 3D preference space (depth proxy D_h,
+// productivity P_h, disturbance R_h). Each dolphin draws its own preference
+// vector θ_i from a Gaussian centred on its latent cluster's centroid.
+// The guildOverlap slider controls the dispersion σ_cluster of that Gaussian:
+// small σ → tight clusters (near-discrete behaviour); large σ → heavy overlap.
+function makeGuildCentroids(G, rand) {
   const bases = [
     [0.9, 0.2, 0.1],  // offshore: deep, low productivity, low disturbance
     [0.1, 0.9, 0.1],  // productive nearshore: shallow, high productivity
@@ -15,17 +18,15 @@ function makeGuildProfiles(G, overlap, rand) {
     [0.8, 0.6, 0.2],  // deep productive: deep + productive
     [0.1, 0.3, 0.6],  // nearshore disturbed: shallow, moderate productivity
   ];
-  while (bases.length < G) {
-    bases.push([rand(), rand(), rand()]);
-  }
-  // Mix each base toward centroid [0.5, 0.5, 0.5] by the overlap factor
-  return bases.slice(0, G).map(base =>
-    base.map(v => (1 - overlap) * v + overlap * 0.5)
-  );
+  while (bases.length < G) { bases.push([rand(), rand(), rand()]); }
+  return bases.slice(0, G);
 }
 
-function guildScore(profile, hex) {
-  return profile[0] * hex.D_h + profile[1] * hex.P_h - profile[2] * hex.R_h;
+function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+
+function gaussian(rand) {
+  const u1 = Math.max(1e-10, rand()), u2 = rand();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
 }
 
 // ── Poisson draw ─────────────────────────────────────────────────────────
@@ -70,16 +71,11 @@ export function generateSimulation({
   if (H === 0 || N === 0) return null;
   const shortDim = Math.min(domainW, domainH);
 
-  // ── Guild profiles ────────────────────────────────────────────────────
-  const guildProfiles = makeGuildProfiles(G, guildOverlap, rand);
-
-  // Pre-compute and normalise guild preference scores per sea hex
-  const guildScores = guildProfiles.map(profile => {
-    const raw = seaHexes.map(h => guildScore(profile, h));
-    const mn = Math.min(...raw), mx = Math.max(...raw);
-    const rng = mx - mn || 1;
-    return raw.map(v => (v - mn) / rng);
-  });
+  // ── Guild centroids and dispersion ───────────────────────────────────
+  const centroids = makeGuildCentroids(G, rand);
+  // sigmaCluster: within-cluster dispersion of θ_i around its centroid.
+  // overlap=0 → tight clusters (σ=0.05); overlap=0.9 → heavy mixing (σ=0.455).
+  const sigmaCluster = 0.05 + guildOverlap * 0.45;
 
   // ── Dolphins ──────────────────────────────────────────────────────────
   // Home-range centres sampled CONTINUOUSLY over the sea region (rejection sampling)
@@ -93,14 +89,18 @@ export function generateSimulation({
     const guild = (rand() * G) | 0;
     const isSpecialist = rand() < specialistFraction;
     const { x: mu_x, y: mu_y } = sampleSeaPoint(hexGrid, rand);
-    // Specialists have stronger habitat fidelity (high guildCoeff) rather than a
-    // smaller home range. Both types roam equally; specialists just prefer their
-    // guild's habitat type more strongly.
     const gc = isSpecialist ? specCoeff : genCoeff;
     const u1 = Math.max(1e-10, rand()), u2 = rand();
     const activity = 0.25 * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    // θ_i: per-dolphin preference vector drawn from N(centroid_guild, σ_cluster² I)
+    const mu = centroids[guild];
+    const theta = [
+      clamp01(mu[0] + sigmaCluster * gaussian(rand)),
+      clamp01(mu[1] + sigmaCluster * gaussian(rand)),
+      clamp01(mu[2] + sigmaCluster * gaussian(rand)),
+    ];
     dolphins.push({ dolphin_id: i, guild_true: guild, isSpecialist, isResident: true, guildCoeff: gc,
-                    mu_x, mu_y, sigma, activity });
+                    mu_x, mu_y, sigma, activity, theta });
   }
 
   // ── Transient dolphins ────────────────────────────────────────────────
@@ -117,29 +117,40 @@ export function generateSimulation({
     else                 { mu_x = xMax + offset;           mu_y = yMin + rand() * domainH; }
     const u1 = Math.max(1e-10, rand()), u2 = rand();
     const activity = 0.25 * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    // Transients get a random θ (uniform) — used in the Truth view edges but not in λ (guildCoeff=0).
+    const theta = [rand(), rand(), rand()];
     dolphins.push({ dolphin_id: N + j, guild_true: -1, isSpecialist: false, isResident: false,
-                    guildCoeff: 0, mu_x, mu_y, sigma, activity });
+                    guildCoeff: 0, mu_x, mu_y, sigma, activity, theta });
   }
 
   const Ntotal = dolphins.length;
 
   // ── Latent use λ per dolphin × sea hex ────────────────────────────────
-  // log λ_{i,h} = -4.0 + activity + guildCoeff * guild_score + home_range_penalty
-  // Specialists: guildCoeff=10 → exp(10) ≈ 22000× contrast between best and worst
-  // hexes, so B* concentrates sharply in guild-preferred habitat (low core50).
-  // Generalists: guildCoeff=5 → exp(5) ≈ 148× contrast, B* spread more evenly.
-  // Transients: guildCoeff=0, home range outside arena → weak edge sightings only.
+  // log λ_{i,h} = -4 + activity + guildCoeff * normScore_i(h) + homeRange
+  // normScore_i(h) = min-max normalised dot product θ_i · [D_h, P_h, -R_h] so
+  // each dolphin's preferred hex is 1 and least preferred is 0.  guildCoeff
+  // then sets the contrast: specialists (10) are sharply peaked, generalists (5)
+  // moderately so, transients (0) have no habitat preference term.
   const lambdaIH = new Float64Array(Ntotal * H);
   const sig2 = 2 * sigma * sigma;
+  const rawScore = new Float64Array(H);
   for (let i = 0; i < Ntotal; i++) {
     const d = dolphins[i];
-    const g = d.guild_true;
+    // Compute raw habitat scores and find range for normalisation
+    let mn = Infinity, mx = -Infinity;
     for (let hi = 0; hi < H; hi++) {
       const hx = seaHexes[hi];
+      rawScore[hi] = d.theta[0] * hx.D_h + d.theta[1] * hx.P_h - d.theta[2] * hx.R_h;
+      if (rawScore[hi] < mn) mn = rawScore[hi];
+      if (rawScore[hi] > mx) mx = rawScore[hi];
+    }
+    const rng = mx - mn || 1;
+    for (let hi = 0; hi < H; hi++) {
+      const hx = seaHexes[hi];
+      const score = (rawScore[hi] - mn) / rng;
       const dx = hx.x - d.mu_x, dy = hx.y - d.mu_y;
       const homeRangePenalty = -(dx * dx + dy * dy) / sig2;
-      const guildTerm = g >= 0 ? d.guildCoeff * guildScores[g][hi] : 0;
-      const logLam = -4.0 + d.activity + guildTerm + homeRangePenalty;
+      const logLam = -4.0 + d.activity + d.guildCoeff * score + homeRangePenalty;
       lambdaIH[i * H + hi] = Math.exp(logLam);
     }
   }
@@ -198,7 +209,7 @@ export function generateSimulation({
   }
   const retainedDolphins = dolphins.filter((_, i) => totalSightings[i] >= 4);
 
-  return { dolphins, retainedDolphins, guildProfiles, guildScores, seaHexes,
+  return { dolphins, retainedDolphins, centroids, seaHexes,
            sightingsIH, effortH, effortHT, lambdaIH, totalSightings,
            N, Ntotal, H, G, T };
 }

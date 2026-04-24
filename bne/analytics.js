@@ -79,12 +79,15 @@ function updateNetworkLegend(view) {
               Labels C1, C2 … placed outside the ring.</span>`;
 
   } else if (view === 'truth') {
-    const G = anal ? (anal.dolphins.reduce((mx, d) => Math.max(mx, d.guild_true), -1) + 1) : 0;
+    const sim = state.simData;
+    const G = sim ? sim.G : 0;
     html = `${G ? guildSwatches(G) + ' &thinsp;' : ''}
-            <span class="leg-note"><b>Node colour = true simulated guild</b> (not the detected community) &nbsp;·&nbsp;
-              Nodes sorted by true guild; labels G1, G2 … &nbsp;·&nbsp;
-              <b>Edges = true guild co-membership</b> (fixed by the generative model; independent of detection or analysis settings) &nbsp;·&nbsp;
-              Compare with the Communities view: if detected communities align with true guilds, ARI will be high.</span>`;
+            <span class="leg-note"><b>All dolphins shown</b> (residents + transients, retained or not) &nbsp;·&nbsp;
+              <b>Node colour = latent cluster</b> (the true generative assignment each dolphin was drawn from) &nbsp;·&nbsp;
+              Nodes sorted by latent cluster; labels G1, G2 … &nbsp;·&nbsp;
+              Bright outline = retained (≥ 4 sightings and in the analysis); faint = not retained or transient &nbsp;·&nbsp;
+              <b>Edges = θ preference similarity</b> (Gaussian kernel; dolphins with similar habitat preferences are connected regardless of guild) &nbsp;·&nbsp;
+              Compare with the Communities view: if Louvain recovers the latent structure, detected C labels should align with true G labels.</span>`;
   }
 
   netLegendEl.innerHTML = html;
@@ -257,6 +260,7 @@ function buildNetwork() {
   if (view === 'bipartite') { drawBipartite(cW, cH); return; }
   if (view === 'bstar')   { drawBstarMatrix(cW, cH);   updateNetworkLegend('bstar');   return; }
   if (view === 'jaccard') { drawJaccardMatrix(cW, cH); updateNetworkLegend('jaccard'); return; }
+  if (view === 'truth')   { drawFullTruth(cW, cH); return; }
 
   // ── Static circular node-link (full / knn / communities / truth) ───────────
   const { dolphins, knnAdj, jaccard, communities, N } = anal;
@@ -270,43 +274,29 @@ function buildNetwork() {
 
   // Full and kNN views show the graph before community assignment: pass null for
   // no sorting or gaps, so the layout doesn't pre-reveal community structure.
-  // Communities and Truth sort by their respective labels with group gaps.
-  const sortField = (view === 'truth')        ? 'guild_true'
-                  : (view === 'communities')  ? 'community'
+  // Communities sorts by community label with group gaps.
+  const sortField = (view === 'communities') ? 'community'
                   : null;  // full / knn: neutral index order, no group gaps
   const nodeRadius   = Math.max(3, Math.min(7, 230 / Math.sqrt(N)));
   const layoutRadius = Math.min(cW, cH) * 0.38;
 
   placeOnCircle(nodes, sortField, cW / 2, cH / 2, layoutRadius);
 
-  // Truth view uses guild co-membership edges (fixed by the generative model, independent
-  // of detection or analysis parameters). All other views use similarity-derived edges.
-  let edges;
-  if (view === 'truth') {
-    edges = [];
-    for (let i = 0; i < N; i++)
-      for (let j = i + 1; j < N; j++)
-        if (nodes[i].guild_true >= 0 && nodes[i].guild_true === nodes[j].guild_true)
-          edges.push({ i, j, w: 0.5 });
-  } else {
-    const adjMatrix = (view === 'full') ? jaccard : knnAdj;
-    edges = [];
-    for (let i = 0; i < N; i++)
-      for (let j = i + 1; j < N; j++) {
-        const w = adjMatrix[i * N + j];
-        if (w > 0) edges.push({ i, j, w });
-      }
-  }
+  const adjMatrix = (view === 'full') ? jaccard : knnAdj;
+  const edges = [];
+  for (let i = 0; i < N; i++)
+    for (let j = i + 1; j < N; j++) {
+      const w = adjMatrix[i * N + j];
+      if (w > 0) edges.push({ i, j, w });
+    }
 
   const svg = d3.select(netContainer).append('svg')
     .attr('width', cW).attr('height', cH)
     .on('click', () => state.selectDolphin(-1));
 
-  // Communities and Truth reveal the partition; Full and kNN stay neutral.
-  const within = view === 'truth'
-    ? e => nodes[e.i].guild_true >= 0 && nodes[e.i].guild_true === nodes[e.j].guild_true
-    : e => nodes[e.i].community >= 0 && nodes[e.i].community === nodes[e.j].community;
-  const useComm = view === 'communities' || view === 'truth';
+  // Communities reveals the partition; Full and kNN stay neutral.
+  const within = e => nodes[e.i].community >= 0 && nodes[e.i].community === nodes[e.j].community;
+  const useComm = view === 'communities';
 
   // Draw between-community edges first (behind), within second (in front)
   const sortedEdges = useComm
@@ -322,23 +312,20 @@ function buildNetwork() {
     .attr('x2', e => nodes[e.j].x).attr('y2', e => nodes[e.j].y)
     .attr('stroke', e => {
       if (!useComm) return EDGE_NEUTRAL;
-      if (view === 'truth') return EDGE_NEUTRAL;
       const c = nodes[e.i].community;
       return within(e) ? GUILD_COLS[c % GUILD_COLS.length] : '#c4ccd8';
     })
     .attr('stroke-opacity', e => {
       if (useComm && within(e)) return 0.60;
-      return view === 'full' ? 0.18 : 0.40;  // full: lower opacity (dense); knn/truth: more visible
+      return view === 'full' ? 0.18 : 0.40;
     })
     .attr('stroke-width', e => Math.max(0.3, e.w * 2.5));
 
   // Nodes
   const COBALT = '#4878CF';
-  const colFn = view === 'truth'
-    ? d => d.guild_true >= 0 ? GUILD_COLS[d.guild_true % GUILD_COLS.length] : UNASSIGNED
-    : view === 'communities'
-      ? d => (d.community >= 0 ? GUILD_COLS[d.community % GUILD_COLS.length] : UNASSIGNED)
-      : () => COBALT; // full / knn: neutral cobalt before community detection
+  const colFn = view === 'communities'
+    ? d => (d.community >= 0 ? GUILD_COLS[d.community % GUILD_COLS.length] : UNASSIGNED)
+    : () => COBALT; // full / knn: neutral cobalt before community detection
 
   svg.append('g')
     .selectAll('circle')
@@ -355,12 +342,12 @@ function buildNetwork() {
     .text(d => {
       const s = d.isSpecialist ? 'Specialist' : 'Generalist';
       const c = d.community >= 0 ? `Community ${d.community + 1}` : 'Unassigned';
-      return `Dolphin ${d.id} · ${s} · True guild ${d.guild_true + 1} · ${c}`;
+      return `Dolphin ${d.id} · ${s} · ${c}`;
     });
 
-  // Labels around the ring only for coloured views (communities / truth)
-  if (view === 'communities' || view === 'truth') {
-    const groups = d3.group(nodes, d => view === 'truth' ? d.guild_true : d.community);
+  // Labels around the ring for communities view
+  if (view === 'communities') {
+    const groups = d3.group(nodes, d => d.community);
     groups.forEach((members, key) => {
       if (key < 0) return;
       const mx  = d3.mean(members, d => d.x);
@@ -375,11 +362,107 @@ function buildNetwork() {
         .attr('font-size', '10px')
         .attr('font-weight', '600')
         .attr('fill', GUILD_COLS[key % GUILD_COLS.length])
-        .text(view === 'truth' ? `G${key + 1}` : `C${key + 1}`);
+        .text(`C${key + 1}`);
     });
   }
 
   updateNetworkLegend(view);
+}
+
+// ── Full Truth network ────────────────────────────────────────────────────────
+// Shows ALL dolphins in the generative model (residents + transients,
+// retained or not) connected by θ_i similarity edges. This is the ecological
+// ground truth: the continuous preference structure that existed before the survey.
+// Contrast with the Communities view, which shows only retained dolphins coloured
+// by what Louvain could recover from observed sightings alone.
+function drawFullTruth(cW, cH) {
+  const sim = state.simData;
+  if (!sim) return;
+
+  const allDolphins = sim.dolphins;
+  const M = allDolphins.length;
+
+  const retainedIds = new Set(
+    state.analysis ? state.analysis.dolphins.map(d => d.dolphin_id) : []
+  );
+
+  const nodes = allDolphins.map(d => ({
+    id: d.dolphin_id, guild_true: d.guild_true,
+    isSpecialist: d.isSpecialist, isResident: d.isResident,
+    retained: retainedIds.has(d.dolphin_id),
+    theta: d.theta, x: 0, y: 0,
+  }));
+
+  const nodeRadius   = Math.max(3, Math.min(6, 220 / Math.sqrt(M)));
+  const layoutRadius = Math.min(cW, cH) * 0.38;
+  placeOnCircle(nodes, 'guild_true', cW / 2, cH / 2, layoutRadius);
+
+  // Gaussian kernel edges on θ_i: w = exp(-‖θ_i − θ_j‖² / 2τ²)
+  const TAU2 = 2 * 0.20 * 0.20;
+  const THRESH = 0.35;
+  const edges = [];
+  for (let i = 0; i < M; i++) {
+    for (let j = i + 1; j < M; j++) {
+      const ti = nodes[i].theta, tj = nodes[j].theta;
+      const d2 = (ti[0]-tj[0])**2 + (ti[1]-tj[1])**2 + (ti[2]-tj[2])**2;
+      const w = Math.exp(-d2 / TAU2);
+      if (w > THRESH) edges.push({ i, j, w });
+    }
+  }
+
+  const svg = d3.select(netContainer).append('svg')
+    .attr('width', cW).attr('height', cH)
+    .on('click', () => state.selectDolphin(-1));
+
+  svg.append('g')
+    .selectAll('line')
+    .data(edges)
+    .join('line')
+    .attr('x1', e => nodes[e.i].x).attr('y1', e => nodes[e.i].y)
+    .attr('x2', e => nodes[e.j].x).attr('y2', e => nodes[e.j].y)
+    .attr('stroke', '#8090a8')
+    .attr('stroke-opacity', e => e.w * 0.45)
+    .attr('stroke-width', e => Math.max(0.3, e.w * 2));
+
+  // Three visual tiers: retained (solid white outline), non-retained resident
+  // (grey outline), transient (faint fill, thin outline)
+  svg.append('g')
+    .selectAll('circle')
+    .data(nodes)
+    .join('circle')
+    .attr('cx', d => d.x).attr('cy', d => d.y)
+    .attr('r',  nodeRadius)
+    .attr('fill', d => d.guild_true >= 0 ? GUILD_COLS[d.guild_true % GUILD_COLS.length] : UNASSIGNED)
+    .attr('fill-opacity', d => d.isResident ? (d.retained ? 0.90 : 0.55) : 0.35)
+    .attr('stroke',       d => d.retained ? '#fff' : (d.isResident ? '#bbb' : '#999'))
+    .attr('stroke-width', d => d.retained ? 1.5 : 0.8)
+    .style('cursor', 'pointer')
+    .on('click', (event, d) => { event.stopPropagation(); state.selectDolphin(d.id); })
+    .append('title')
+    .text(d => {
+      const g  = d.guild_true >= 0 ? `Cluster ${d.guild_true + 1}` : 'Transient';
+      const sp = d.isSpecialist ? 'Specialist' : 'Generalist';
+      const rt = d.retained ? 'Retained (≥4 sightings)' : (d.isResident ? 'Not retained' : 'Transient');
+      return `Dolphin ${d.id} · ${g} · ${sp} · ${rt}`;
+    });
+
+  // Cluster labels
+  const groups = d3.group(nodes.filter(n => n.guild_true >= 0), d => d.guild_true);
+  groups.forEach((members, key) => {
+    const mx  = d3.mean(members, d => d.x);
+    const my  = d3.mean(members, d => d.y);
+    const ang = Math.atan2(my - cH / 2, mx - cW / 2);
+    const lr  = layoutRadius + nodeRadius + 14;
+    svg.append('text')
+      .attr('x', cW / 2 + lr * Math.cos(ang))
+      .attr('y', cH / 2 + lr * Math.sin(ang))
+      .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle')
+      .attr('font-size', '10px').attr('font-weight', '600')
+      .attr('fill', GUILD_COLS[key % GUILD_COLS.length])
+      .text(`G${key + 1}`);
+  });
+
+  updateNetworkLegend('truth');
 }
 
 // ── Jaccard similarity matrix heatmap ─────────────────────────────────────────
