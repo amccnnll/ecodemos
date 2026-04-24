@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Bipartite Network Ecology (BNE) – ecodemos docs</title>
+<title>SECR – ecodemos docs</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,6 +19,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -208,7 +242,159 @@ window.Quarto = {
   </ul></li>
   <li><a href="#implementation-notes" id="toc-implementation-notes" class="nav-link" data-scroll-target="#implementation-notes">Implementation notes</a></li>
   <li><a href="#assumptions-and-limitations" id="toc-assumptions-and-limitations" class="nav-link" data-scroll-target="#assumptions-and-limitations">Assumptions and limitations</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading">Further reading</a></li>
+  <li><a href="#overview-1" id="toc-overview-1" class="nav-link" data-scroll-target="#overview-1">Overview</a></li>
+  <li><a href="#glossary-1" id="toc-glossary-1" class="nav-link" data-scroll-target="#glossary-1">Glossary</a>
+  <ul class="collapse">
+  <li><a href="#controls-all-modes" id="toc-controls-all-modes" class="nav-link" data-scroll-target="#controls-all-modes">Controls: all modes</a></li>
+  <li><a href="#controls-predator-prey-classic-mode" id="toc-controls-predator-prey-classic-mode" class="nav-link" data-scroll-target="#controls-predator-prey-classic-mode">Controls: predator-prey (classic) mode</a></li>
+  <li><a href="#controls-dynamic-predator-prey-mode-additional" id="toc-controls-dynamic-predator-prey-mode-additional" class="nav-link" data-scroll-target="#controls-dynamic-predator-prey-mode-additional">Controls: dynamic predator-prey mode (additional)</a></li>
+  <li><a href="#controls-competition-mode" id="toc-controls-competition-mode" class="nav-link" data-scroll-target="#controls-competition-mode">Controls: competition mode</a></li>
+  <li><a href="#key-symbols" id="toc-key-symbols" class="nav-link" data-scroll-target="#key-symbols">Key symbols</a></li>
+  </ul></li>
+  <li><a href="#numerical-integration" id="toc-numerical-integration" class="nav-link" data-scroll-target="#numerical-integration">Numerical integration</a>
+  <ul class="collapse">
+  <li><a href="#rk4-step" id="toc-rk4-step" class="nav-link" data-scroll-target="#rk4-step">RK4 step</a></li>
+  <li><a href="#time-step-delta-t" id="toc-time-step-delta-t" class="nav-link" data-scroll-target="#time-step-delta-t">Time step <span class="math inline">\(\Delta t\)</span></a></li>
+  <li><a href="#speed-and-steps-per-frame" id="toc-speed-and-steps-per-frame" class="nav-link" data-scroll-target="#speed-and-steps-per-frame">Speed and steps per frame</a></li>
+  </ul></li>
+  <li><a href="#mode-equations" id="toc-mode-equations" class="nav-link" data-scroll-target="#mode-equations">Mode equations</a>
+  <ul class="collapse">
+  <li><a href="#classic-predator-prey" id="toc-classic-predator-prey" class="nav-link" data-scroll-target="#classic-predator-prey">Classic predator-prey</a></li>
+  <li><a href="#dynamic-predator-prey" id="toc-dynamic-predator-prey" class="nav-link" data-scroll-target="#dynamic-predator-prey">Dynamic predator-prey</a></li>
+  <li><a href="#competition" id="toc-competition" class="nav-link" data-scroll-target="#competition">Competition</a></li>
+  </ul></li>
+  <li><a href="#state-and-time-series" id="toc-state-and-time-series" class="nav-link" data-scroll-target="#state-and-time-series">State and time series</a></li>
+  <li><a href="#checkpoint-auto-pause" id="toc-checkpoint-auto-pause" class="nav-link" data-scroll-target="#checkpoint-auto-pause">Checkpoint auto-pause</a></li>
+  <li><a href="#controls" id="toc-controls" class="nav-link" data-scroll-target="#controls">Controls</a>
+  <ul class="collapse">
+  <li><a href="#parameter-sliders-behaviour-on-input-vs-change" id="toc-parameter-sliders-behaviour-on-input-vs-change" class="nav-link" data-scroll-target="#parameter-sliders-behaviour-on-input-vs-change">Parameter sliders: behaviour on input vs change</a></li>
+  <li><a href="#model-type" id="toc-model-type" class="nav-link" data-scroll-target="#model-type">Model type</a></li>
+  <li><a href="#reset-vs-reset-defaults" id="toc-reset-vs-reset-defaults" class="nav-link" data-scroll-target="#reset-vs-reset-defaults">Reset vs Reset Defaults</a></li>
+  <li><a href="#speed-buttons" id="toc-speed-buttons" class="nav-link" data-scroll-target="#speed-buttons">Speed buttons</a></li>
+  </ul></li>
+  <li><a href="#analytics-panels" id="toc-analytics-panels" class="nav-link" data-scroll-target="#analytics-panels">Analytics panels</a>
+  <ul class="collapse">
+  <li><a href="#time-series-chart" id="toc-time-series-chart" class="nav-link" data-scroll-target="#time-series-chart">Time series chart</a></li>
+  <li><a href="#phase-plane-chart" id="toc-phase-plane-chart" class="nav-link" data-scroll-target="#phase-plane-chart">Phase-plane chart</a></li>
+  <li><a href="#estimates-strip" id="toc-estimates-strip" class="nav-link" data-scroll-target="#estimates-strip">Estimates strip</a></li>
+  </ul></li>
+  <li><a href="#assumptions-and-limitations-1" id="toc-assumptions-and-limitations-1" class="nav-link" data-scroll-target="#assumptions-and-limitations-1">Assumptions and limitations</a></li>
+  <li><a href="#overview-2" id="toc-overview-2" class="nav-link" data-scroll-target="#overview-2">Overview</a></li>
+  <li><a href="#glossary-2" id="toc-glossary-2" class="nav-link" data-scroll-target="#glossary-2">Glossary</a>
+  <ul class="collapse">
+  <li><a href="#controls-1" id="toc-controls-1" class="nav-link" data-scroll-target="#controls-1">Controls</a></li>
+  <li><a href="#estimates-readout" id="toc-estimates-readout" class="nav-link" data-scroll-target="#estimates-readout">Estimates readout</a></li>
+  <li><a href="#key-symbols-1" id="toc-key-symbols-1" class="nav-link" data-scroll-target="#key-symbols-1">Key symbols</a></li>
+  </ul></li>
+  <li><a href="#arena-geometry" id="toc-arena-geometry" class="nav-link" data-scroll-target="#arena-geometry">Arena geometry</a></li>
+  <li><a href="#animal-placement" id="toc-animal-placement" class="nav-link" data-scroll-target="#animal-placement">Animal placement</a>
+  <ul class="collapse">
+  <li><a href="#animal-count" id="toc-animal-count" class="nav-link" data-scroll-target="#animal-count">Animal count</a></li>
+  <li><a href="#uniform-distribution-placeanimals" id="toc-uniform-distribution-placeanimals" class="nav-link" data-scroll-target="#uniform-distribution-placeanimals">Uniform distribution (<code>placeAnimals</code>)</a></li>
+  <li><a href="#clustered-distribution-placeanimalsclumped" id="toc-clustered-distribution-placeanimalsclumped" class="nav-link" data-scroll-target="#clustered-distribution-placeanimalsclumped">Clustered distribution (<code>placeAnimalsClumped</code>)</a></li>
+  <li><a href="#regular-distribution-placeanimalsregular" id="toc-regular-distribution-placeanimalsregular" class="nav-link" data-scroll-target="#regular-distribution-placeanimalsregular">Regular distribution (<code>placeAnimalsRegular</code>)</a></li>
+  </ul></li>
+  <li><a href="#seed-and-rng-architecture" id="toc-seed-and-rng-architecture" class="nav-link" data-scroll-target="#seed-and-rng-architecture">Seed and RNG architecture</a>
+  <ul class="collapse">
+  <li><a href="#placement-rng-seeded" id="toc-placement-rng-seeded" class="nav-link" data-scroll-target="#placement-rng-seeded">Placement RNG (seeded)</a></li>
+  <li><a href="#detection-rng-unseeded" id="toc-detection-rng-unseeded" class="nav-link" data-scroll-target="#detection-rng-unseeded">Detection RNG (unseeded)</a></li>
+  <li><a href="#seed-value" id="toc-seed-value" class="nav-link" data-scroll-target="#seed-value">Seed value</a></li>
+  </ul></li>
+  <li><a href="#observer-mechanics" id="toc-observer-mechanics" class="nav-link" data-scroll-target="#observer-mechanics">Observer mechanics</a>
+  <ul class="collapse">
+  <li><a href="#speed-settings" id="toc-speed-settings" class="nav-link" data-scroll-target="#speed-settings">Speed settings</a></li>
+  </ul></li>
+  <li><a href="#detection-mechanism" id="toc-detection-mechanism" class="nav-link" data-scroll-target="#detection-mechanism">Detection mechanism</a>
+  <ul class="collapse">
+  <li><a href="#one-shot-rule" id="toc-one-shot-rule" class="nav-link" data-scroll-target="#one-shot-rule">One-shot rule</a></li>
+  <li><a href="#perpendicular-distance" id="toc-perpendicular-distance" class="nav-link" data-scroll-target="#perpendicular-distance">Perpendicular distance</a></li>
+  <li><a href="#bernoulli-draw" id="toc-bernoulli-draw" class="nav-link" data-scroll-target="#bernoulli-draw">Bernoulli draw</a></li>
+  </ul></li>
+  <li><a href="#detection-functions" id="toc-detection-functions" class="nav-link" data-scroll-target="#detection-functions">Detection functions</a>
+  <ul class="collapse">
+  <li><a href="#half-normal" id="toc-half-normal" class="nav-link" data-scroll-target="#half-normal">Half-normal</a></li>
+  <li><a href="#hazard-rate" id="toc-hazard-rate" class="nav-link" data-scroll-target="#hazard-rate">Hazard-rate</a></li>
+  </ul></li>
+  <li><a href="#state-recording" id="toc-state-recording" class="nav-link" data-scroll-target="#state-recording">State recording</a></li>
+  <li><a href="#truncation-and-w-post-hoc-filtering" id="toc-truncation-and-w-post-hoc-filtering" class="nav-link" data-scroll-target="#truncation-and-w-post-hoc-filtering">Truncation and W post-hoc filtering</a></li>
+  <li><a href="#esw-computation" id="toc-esw-computation" class="nav-link" data-scroll-target="#esw-computation">ESW computation</a>
+  <ul class="collapse">
+  <li><a href="#half-normal-analytical" id="toc-half-normal-analytical" class="nav-link" data-scroll-target="#half-normal-analytical">Half-normal (analytical)</a></li>
+  <li><a href="#hazard-rate-numerical" id="toc-hazard-rate-numerical" class="nav-link" data-scroll-target="#hazard-rate-numerical">Hazard-rate (numerical)</a></li>
+  </ul></li>
+  <li><a href="#mle-fitting" id="toc-mle-fitting" class="nav-link" data-scroll-target="#mle-fitting">MLE fitting</a>
+  <ul class="collapse">
+  <li><a href="#nll-for-half-normal" id="toc-nll-for-half-normal" class="nav-link" data-scroll-target="#nll-for-half-normal">NLL for half-normal</a></li>
+  <li><a href="#nll-for-hazard-rate" id="toc-nll-for-hazard-rate" class="nav-link" data-scroll-target="#nll-for-hazard-rate">NLL for hazard-rate</a></li>
+  </ul></li>
+  <li><a href="#density-estimator" id="toc-density-estimator" class="nav-link" data-scroll-target="#density-estimator">Density estimator</a>
+  <ul class="collapse">
+  <li><a href="#per-detection-effort-in-the-convergence-chart" id="toc-per-detection-effort-in-the-convergence-chart" class="nav-link" data-scroll-target="#per-detection-effort-in-the-convergence-chart">Per-detection effort in the convergence chart</a></li>
+  </ul></li>
+  <li><a href="#analytics-panels-1" id="toc-analytics-panels-1" class="nav-link" data-scroll-target="#analytics-panels-1">Analytics panels</a>
+  <ul class="collapse">
+  <li><a href="#detection-function-chart" id="toc-detection-function-chart" class="nav-link" data-scroll-target="#detection-function-chart">1. Detection function chart</a></li>
+  <li><a href="#running-estimates-strip" id="toc-running-estimates-strip" class="nav-link" data-scroll-target="#running-estimates-strip">2. Running estimates strip</a></li>
+  <li><a href="#d-convergence-chart" id="toc-d-convergence-chart" class="nav-link" data-scroll-target="#d-convergence-chart">3. D̂ convergence chart</a></li>
+  </ul></li>
+  <li><a href="#ghost-keep-runs-mechanic" id="toc-ghost-keep-runs-mechanic" class="nav-link" data-scroll-target="#ghost-keep-runs-mechanic">Ghost / keep-runs mechanic</a></li>
+  <li><a href="#control-taxonomy" id="toc-control-taxonomy" class="nav-link" data-scroll-target="#control-taxonomy">Control taxonomy</a>
+  <ul class="collapse">
+  <li><a href="#live-update-takes-effect-without-reset" id="toc-live-update-takes-effect-without-reset" class="nav-link" data-scroll-target="#live-update-takes-effect-without-reset">Live update (takes effect without reset)</a></li>
+  <li><a href="#reset-required-takes-effect-on-next-reset-or-new-population" id="toc-reset-required-takes-effect-on-next-reset-or-new-population" class="nav-link" data-scroll-target="#reset-required-takes-effect-on-next-reset-or-new-population">Reset required (takes effect on next Reset or New Population)</a></li>
+  <li><a href="#reset-defaults" id="toc-reset-defaults" class="nav-link" data-scroll-target="#reset-defaults">Reset Defaults</a></li>
+  </ul></li>
+  <li><a href="#assumptions-and-limitations-2" id="toc-assumptions-and-limitations-2" class="nav-link" data-scroll-target="#assumptions-and-limitations-2">Assumptions and limitations</a></li>
+  <li><a href="#overview-3" id="toc-overview-3" class="nav-link" data-scroll-target="#overview-3">Overview</a></li>
+  <li><a href="#glossary-3" id="toc-glossary-3" class="nav-link" data-scroll-target="#glossary-3">Glossary</a>
+  <ul class="collapse">
+  <li><a href="#controls-2" id="toc-controls-2" class="nav-link" data-scroll-target="#controls-2">Controls</a></li>
+  <li><a href="#estimates-readout-1" id="toc-estimates-readout-1" class="nav-link" data-scroll-target="#estimates-readout-1">Estimates readout</a></li>
+  <li><a href="#key-symbols-2" id="toc-key-symbols-2" class="nav-link" data-scroll-target="#key-symbols-2">Key symbols</a></li>
+  </ul></li>
+  <li><a href="#arena-geometry-1" id="toc-arena-geometry-1" class="nav-link" data-scroll-target="#arena-geometry-1">Arena geometry</a></li>
+  <li><a href="#animal-placement-1" id="toc-animal-placement-1" class="nav-link" data-scroll-target="#animal-placement-1">Animal placement</a></li>
+  <li><a href="#detector-placement" id="toc-detector-placement" class="nav-link" data-scroll-target="#detector-placement">Detector placement</a>
+  <ul class="collapse">
+  <li><a href="#grid-layout" id="toc-grid-layout" class="nav-link" data-scroll-target="#grid-layout">Grid layout</a></li>
+  <li><a href="#random-layout" id="toc-random-layout" class="nav-link" data-scroll-target="#random-layout">Random layout</a></li>
+  <li><a href="#custom-layout" id="toc-custom-layout" class="nav-link" data-scroll-target="#custom-layout">Custom layout</a></li>
+  </ul></li>
+  <li><a href="#seed-and-rng-architecture-1" id="toc-seed-and-rng-architecture-1" class="nav-link" data-scroll-target="#seed-and-rng-architecture-1">Seed and RNG architecture</a></li>
+  <li><a href="#movement-model-ouv" id="toc-movement-model-ouv" class="nav-link" data-scroll-target="#movement-model-ouv">Movement model (OUV)</a>
+  <ul class="collapse">
+  <li><a href="#frame-level-update" id="toc-frame-level-update" class="nav-link" data-scroll-target="#frame-level-update">Frame-level update</a></li>
+  <li><a href="#wall-reflection" id="toc-wall-reflection" class="nav-link" data-scroll-target="#wall-reflection">Wall reflection</a></li>
+  <li><a href="#parameter-derivation" id="toc-parameter-derivation" class="nav-link" data-scroll-target="#parameter-derivation">Parameter derivation</a></li>
+  <li><a href="#speed-and-frames-per-occasion" id="toc-speed-and-frames-per-occasion" class="nav-link" data-scroll-target="#speed-and-frames-per-occasion">Speed and frames per occasion</a></li>
+  <li><a href="#display-smoothing" id="toc-display-smoothing" class="nav-link" data-scroll-target="#display-smoothing">Display smoothing</a></li>
+  </ul></li>
+  <li><a href="#movement-presets" id="toc-movement-presets" class="nav-link" data-scroll-target="#movement-presets">Movement presets</a></li>
+  <li><a href="#detection-function" id="toc-detection-function" class="nav-link" data-scroll-target="#detection-function">Detection function</a>
+  <ul class="collapse">
+  <li><a href="#effective-detection-σ" id="toc-effective-detection-σ" class="nav-link" data-scroll-target="#effective-detection-σ">Effective detection σ</a></li>
+  <li><a href="#detector-type-presets" id="toc-detector-type-presets" class="nav-link" data-scroll-target="#detector-type-presets">Detector type presets</a></li>
+  </ul></li>
+  <li><a href="#effective-sample-area-esa" id="toc-effective-sample-area-esa" class="nav-link" data-scroll-target="#effective-sample-area-esa">Effective sample area (ESA)</a>
+  <ul class="collapse">
+  <li><a href="#single-occasion-p_1x-y" id="toc-single-occasion-p_1x-y" class="nav-link" data-scroll-target="#single-occasion-p_1x-y">Single-occasion <span class="math inline">\(p_1(x, y)\)</span></a></li>
+  <li><a href="#k-occasion-esa" id="toc-k-occasion-esa" class="nav-link" data-scroll-target="#k-occasion-esa"><span class="math inline">\(K\)</span>-occasion ESA</a></li>
+  </ul></li>
+  <li><a href="#density-estimator-1" id="toc-density-estimator-1" class="nav-link" data-scroll-target="#density-estimator-1">Density estimator</a></li>
+  <li><a href="#analytics-panels-2" id="toc-analytics-panels-2" class="nav-link" data-scroll-target="#analytics-panels-2">Analytics panels</a>
+  <ul class="collapse">
+  <li><a href="#detection-surface-heatmap" id="toc-detection-surface-heatmap" class="nav-link" data-scroll-target="#detection-surface-heatmap">1. Detection surface heatmap</a></li>
+  <li><a href="#capture-history-matrix" id="toc-capture-history-matrix" class="nav-link" data-scroll-target="#capture-history-matrix">2. Capture history matrix</a></li>
+  <li><a href="#d-convergence-chart-1" id="toc-d-convergence-chart-1" class="nav-link" data-scroll-target="#d-convergence-chart-1">3. D̂ convergence chart</a></li>
+  <li><a href="#running-estimates-strip-1" id="toc-running-estimates-strip-1" class="nav-link" data-scroll-target="#running-estimates-strip-1">4. Running estimates strip</a></li>
+  </ul></li>
+  <li><a href="#phase-states" id="toc-phase-states" class="nav-link" data-scroll-target="#phase-states">Phase states</a></li>
+  <li><a href="#control-taxonomy-1" id="toc-control-taxonomy-1" class="nav-link" data-scroll-target="#control-taxonomy-1">Control taxonomy</a>
+  <ul class="collapse">
+  <li><a href="#live-update-no-reset-required" id="toc-live-update-no-reset-required" class="nav-link" data-scroll-target="#live-update-no-reset-required">Live update (no reset required)</a></li>
+  <li><a href="#reset-required" id="toc-reset-required" class="nav-link" data-scroll-target="#reset-required">Reset required</a></li>
+  </ul></li>
+  <li><a href="#assumptions-and-limitations-3" id="toc-assumptions-and-limitations-3" class="nav-link" data-scroll-target="#assumptions-and-limitations-3">Assumptions and limitations</a></li>
   </ul>
 </nav>
     </div>
@@ -217,7 +403,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./ds.html">Simulations</a></li><li class="breadcrumb-item"><a href="./bne.html">BNE</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Bipartite Network Ecology (BNE)</h1>
+<h1 class="title">SECR</h1>
 </div>
 
 
@@ -651,19 +837,2216 @@ window.Quarto = {
 <li>The Poisson observation model assumes independent detections across occasions and individuals.</li>
 <li>ARI is computed only over dolphins assigned to a community. Unassigned dolphins (community = -1) are excluded from both true and predicted label vectors.</li>
 </ul>
+
+
+
+<p><a href="../lv/">→ Open simulation</a></p>
+</section>
+<section id="overview-1" class="level2">
+<h2 class="anchored" data-anchor-id="overview-1">Overview</h2>
+<p>Three two-species dynamical systems integrated via RK4, displayed as a live time series and phase-plane trajectory. The three modes are:</p>
+<ul>
+<li><strong>Classic predator-prey</strong>: the standard Lotka-Volterra system with no density dependence.</li>
+<li><strong>Dynamic predator-prey</strong>: adds logistic prey growth and predator self-limitation.</li>
+<li><strong>Competition</strong>: two-species Lotka-Volterra competition with carrying capacities and interaction coefficients.</li>
+</ul>
+<p>The visualisation shows both how populations change over time and how they trace paths through state space (the phase plane).</p>
 <hr>
 </section>
-<section id="further-reading" class="level2">
-<h2 class="anchored" data-anchor-id="further-reading">Further reading</h2>
+<section id="glossary-1" class="level2">
+<h2 class="anchored" data-anchor-id="glossary-1">Glossary</h2>
+<section id="controls-all-modes" class="level3">
+<h3 class="anchored" data-anchor-id="controls-all-modes">Controls: all modes</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Speed</td>
+<td>Playback speed: Slow / Normal / Fast.</td>
+</tr>
+<tr class="even">
+<td>Preset</td>
+<td>Named parameter combinations for the current mode. Applied immediately.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\Delta t\)</span></td>
+<td>RK4 integration time step. Smaller = more accurate but slower; larger = faster but potentially unstable. Default: 0.03.</td>
+</tr>
+<tr class="even">
+<td>Unbounded time</td>
+<td>Disables the auto-pause checkpoints (default every 50 time units). Simulation runs until manually paused.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="controls-predator-prey-classic-mode" class="level3">
+<h3 class="anchored" data-anchor-id="controls-predator-prey-classic-mode">Controls: predator-prey (classic) mode</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\alpha\)</span></td>
+<td>Prey intrinsic growth rate: rate of increase of the prey population in the absence of predators. Default: 1.1.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta\)</span></td>
+<td>Predation rate: rate at which each predator removes prey per unit time. Default: 0.06.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\delta\)</span></td>
+<td>Predator conversion efficiency: prey consumed per new predator produced. Default: 0.03.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\gamma\)</span></td>
+<td>Predator death rate: intrinsic rate of decrease of predators in the absence of prey. Default: 0.7.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(N_0\)</span></td>
+<td>Initial prey population. Default: 40.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(P_0\)</span></td>
+<td>Initial predator population. Default: 9.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="controls-dynamic-predator-prey-mode-additional" class="level3">
+<h3 class="anchored" data-anchor-id="controls-dynamic-predator-prey-mode-additional">Controls: dynamic predator-prey mode (additional)</h3>
+<p>Adds logistic prey growth and predator self-limitation to the classic system.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Dynamic preset</td>
+<td>Named presets: Damped oscillations, Limit cycle, Predator collapse. All three share the same α/β/δ/γ; only K varies, isolating the effect of prey carrying capacity.</td>
+</tr>
+<tr class="even">
+<td>K (prey)</td>
+<td>Prey carrying capacity: logistic ceiling for prey growth in the absence of predators. Default: 60.</td>
+</tr>
+<tr class="odd">
+<td>m (predator)</td>
+<td>Predator self-limitation coefficient: intraspecific competition among predators. Default: 0.00.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="controls-competition-mode" class="level3">
+<h3 class="anchored" data-anchor-id="controls-competition-mode">Controls: competition mode</h3>
+<p>Replaces the predator-prey parameters with two-species competition parameters.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Competition preset</td>
+<td>Named presets: Coexistence, Species 1 wins, Species 2 wins.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(r_1\)</span></td>
+<td>Intrinsic growth rate of species 1. Default: 0.9.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(r_2\)</span></td>
+<td>Intrinsic growth rate of species 2. Default: 0.8.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(K_1\)</span></td>
+<td>Carrying capacity of species 1. Default: 75.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(K_2\)</span></td>
+<td>Carrying capacity of species 2. Default: 65.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\alpha_{12}\)</span></td>
+<td>Effect of species 2 on species 1: per-individual competitive impact. Default: 0.60.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\alpha_{21}\)</span></td>
+<td>Effect of species 1 on species 2: per-individual competitive impact. Default: 0.50.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="key-symbols" class="level3">
+<h3 class="anchored" data-anchor-id="key-symbols">Key symbols</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(N\)</span></td>
+<td>Prey (or species 1) population size.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(P\)</span></td>
+<td>Predator (or species 2) population size.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\alpha\)</span></td>
+<td>Prey growth rate (classic / dynamic modes).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta\)</span></td>
+<td>Predation rate (classic / dynamic modes).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\delta\)</span></td>
+<td>Predator conversion efficiency (classic / dynamic modes).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\gamma\)</span></td>
+<td>Predator death rate (classic / dynamic modes).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(K\)</span></td>
+<td>Carrying capacity.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(m\)</span></td>
+<td>Predator self-limitation (dynamic mode).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(r_1, r_2\)</span></td>
+<td>Species intrinsic growth rates (competition mode).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(K_1, K_2\)</span></td>
+<td>Species carrying capacities (competition mode).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\alpha_{12}, \alpha_{21}\)</span></td>
+<td>Interspecific competition coefficients (competition mode).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\Delta t\)</span></td>
+<td>RK4 integration time step.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="numerical-integration" class="level2">
+<h2 class="anchored" data-anchor-id="numerical-integration">Numerical integration</h2>
+<p>All three modes are integrated using <strong>RK4</strong> (classical fourth-order Runge-Kutta). The integration is in <code>src/lv-engine.js</code>.</p>
+<section id="rk4-step" class="level3">
+<h3 class="anchored" data-anchor-id="rk4-step">RK4 step</h3>
+<p>For a state vector <span class="math inline">\((N, P)\)</span> at time <span class="math inline">\(t\)</span> with step size <span class="math inline">\(\Delta t\)</span>:</p>
+<p><span class="math display">\[
+k_1 = f(N, P)
+\]</span></p>
+<p><span class="math display">\[
+k_2 = f\!\left(N + \tfrac{\Delta t}{2} k_{1,N},\ P + \tfrac{\Delta t}{2} k_{1,P}\right)
+\]</span></p>
+<p><span class="math display">\[
+k_3 = f\!\left(N + \tfrac{\Delta t}{2} k_{2,N},\ P + \tfrac{\Delta t}{2} k_{2,P}\right)
+\]</span></p>
+<p><span class="math display">\[
+k_4 = f\!\left(N + \Delta t\, k_{3,N},\ P + \Delta t\, k_{3,P}\right)
+\]</span></p>
+<p><span class="math display">\[
+N_{t+\Delta t} = N + \frac{\Delta t}{6}(k_{1,N} + 2k_{2,N} + 2k_{3,N} + k_{4,N})
+\]</span></p>
+<p><span class="math display">\[
+P_{t+\Delta t} = P + \frac{\Delta t}{6}(k_{1,P} + 2k_{2,P} + 2k_{3,P} + k_{4,P})
+\]</span></p>
+<p>After each step, both populations are clamped to zero from below:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">prey</span><span class="op">:</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">max</span>(<span class="dv">0</span><span class="op">,</span> nextPrey)<span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">predator</span><span class="op">:</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">max</span>(<span class="dv">0</span><span class="op">,</span> nextPred)<span class="op">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This prevents negative populations from numerical overshoot. In classic LV with large <span class="math inline">\(\beta\)</span> or small initial populations, trajectories can approach zero and this clamp becomes relevant.</p>
+</section>
+<section id="time-step-delta-t" class="level3">
+<h3 class="anchored" data-anchor-id="time-step-delta-t">Time step <span class="math inline">\(\Delta t\)</span></h3>
+<p>Slider range: 0.005 to 0.080, step 0.001, default 0.030. This is the integration step size in units of model time. Decreasing <span class="math inline">\(\Delta t\)</span> improves numerical accuracy at the cost of more computation per second of real time. Changing <span class="math inline">\(\Delta t\)</span> triggers a Reset.</p>
+</section>
+<section id="speed-and-steps-per-frame" class="level3">
+<h3 class="anchored" data-anchor-id="speed-and-steps-per-frame">Speed and steps per frame</h3>
+<p>The simulation advances by a fixed number of RK4 steps per animation frame (<code>requestAnimationFrame</code>):</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Speed</th>
+<th>Steps per frame</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Slow</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>Normal</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>Fast</td>
+<td>6</td>
+</tr>
+</tbody>
+</table>
+<p>At Normal speed and default <span class="math inline">\(\Delta t = 0.030\)</span>, the simulation advances by 0.060 model-time units per frame, approximately 3.6 model-time units per second at 60 fps.</p>
+<hr>
+</section>
+</section>
+<section id="mode-equations" class="level2">
+<h2 class="anchored" data-anchor-id="mode-equations">Mode equations</h2>
+<section id="classic-predator-prey" class="level3">
+<h3 class="anchored" data-anchor-id="classic-predator-prey">Classic predator-prey</h3>
+<p><span class="math display">\[
+\frac{dN}{dt} = \alpha N - \beta N P
+\]</span></p>
+<p><span class="math display">\[
+\frac{dP}{dt} = \delta N P - \gamma P
+\]</span></p>
+<p>Parameters:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 50%">
+<col style="width: 11%">
+<col style="width: 16%">
+<col style="width: 8%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Role</th>
+<th>Default</th>
+<th>Range</th>
+<th>Step</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\alpha\)</span></td>
+<td>Prey intrinsic growth rate</td>
+<td>1.10</td>
+<td>0.2–2.0</td>
+<td>0.01</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta\)</span></td>
+<td>Predation rate coefficient</td>
+<td>0.06</td>
+<td>0.01–0.20</td>
+<td>0.001</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\delta\)</span></td>
+<td>Predator conversion efficiency</td>
+<td>0.03</td>
+<td>0.005–0.10</td>
+<td>0.001</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\gamma\)</span></td>
+<td>Predator mortality rate</td>
+<td>0.70</td>
+<td>0.1–2.0</td>
+<td>0.01</td>
+</tr>
+</tbody>
+</table>
+<p>The system has two equilibria. The trivial one is <span class="math inline">\((0, 0)\)</span>. The non-trivial one is:</p>
+<p><span class="math display">\[
+N^* = \frac{\gamma}{\delta}, \quad P^* = \frac{\alpha}{\beta}
+\]</span></p>
+<p>In the ideal system (no numerical error, no clamping) trajectories are closed neutral cycles around <span class="math inline">\((N^*, P^*)\)</span>. In practice, RK4 at finite <span class="math inline">\(\Delta t\)</span> introduces small orbital drift.</p>
+<section id="classic-presets" class="level4">
+<h4 class="anchored" data-anchor-id="classic-presets">Classic presets</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 11%">
+<col style="width: 9%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th><span class="math inline">\(\alpha\)</span></th>
+<th><span class="math inline">\(\beta\)</span></th>
+<th><span class="math inline">\(\delta\)</span></th>
+<th><span class="math inline">\(\gamma\)</span></th>
+<th><span class="math inline">\(N_0\)</span></th>
+<th><span class="math inline">\(P_0\)</span></th>
+<th><span class="math inline">\(\Delta t\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Balanced cycles</td>
+<td>1.10</td>
+<td>0.060</td>
+<td>0.030</td>
+<td>0.70</td>
+<td>40</td>
+<td>9</td>
+<td>0.030</td>
+</tr>
+<tr class="even">
+<td>Predator crash</td>
+<td>0.30</td>
+<td>0.010</td>
+<td>0.003</td>
+<td>1.30</td>
+<td>55</td>
+<td>22</td>
+<td>0.020</td>
+</tr>
+<tr class="odd">
+<td>Prey crash</td>
+<td>0.45</td>
+<td>0.160</td>
+<td>0.060</td>
+<td>0.40</td>
+<td>22</td>
+<td>26</td>
+<td>0.020</td>
+</tr>
+<tr class="even">
+<td>High-amplitude cycles</td>
+<td>1.30</td>
+<td>0.080</td>
+<td>0.028</td>
+<td>0.75</td>
+<td>55</td>
+<td>7</td>
+<td>0.020</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="dynamic-predator-prey" class="level3">
+<h3 class="anchored" data-anchor-id="dynamic-predator-prey">Dynamic predator-prey</h3>
+<p>Adds logistic prey growth and predator self-limitation:</p>
+<p><span class="math display">\[
+\frac{dN}{dt} = \alpha N\!\left(1 - \frac{N}{K}\right) - \beta N P
+\]</span></p>
+<p><span class="math display">\[
+\frac{dP}{dt} = \delta N P - \gamma P - m P^2
+\]</span></p>
+<p>Additional parameters:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Role</th>
+<th>Default</th>
+<th>Range</th>
+<th>Step</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(K\)</span></td>
+<td>Prey carrying capacity</td>
+<td>60</td>
+<td>20–250</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(m\)</span></td>
+<td>Predator self-limitation</td>
+<td>0.000</td>
+<td>0.000–0.200</td>
+<td>0.001</td>
+</tr>
+</tbody>
+</table>
+<p>In the engine, <span class="math inline">\(K\)</span> is guarded: <code>kSafe = max(1e-6, Kdyn)</code> and <code>mSafe = max(0, mPred)</code> to prevent division by zero or negative values.</p>
+<p>Interior equilibrium (when <span class="math inline">\(m &gt; 0\)</span>):</p>
+<p>The analytics panel computes this numerically. For <span class="math inline">\(m &gt; 0\)</span>:</p>
+<p><span class="math display">\[
+N^* = \frac{\gamma + m \alpha / \beta}{\delta + m \alpha / (\beta K)}, \quad P^* = \max\!\left(0,\ \frac{\delta N^* - \gamma}{m}\right)
+\]</span></p>
+<p>This system can exhibit damped spirals, limit cycles, or collapse depending on parameter choice, unlike the neutral cycles of classic LV.</p>
+<p>The key stability criterion is whether <span class="math inline">\(N^* &gt; K/2\)</span>. When <span class="math inline">\(N^* &gt; K/2\)</span>, the interior equilibrium is stable and trajectories spiral inward (damped oscillations). When <span class="math inline">\(N^* &lt; K/2\)</span>, a limit cycle emerges (paradox of enrichment). When <span class="math inline">\(K &lt; N^* = \gamma/\delta\)</span> (no <span class="math inline">\(m\)</span>), the prey carrying capacity is too low to sustain predators and they collapse.</p>
+<section id="dynamic-presets" class="level4">
+<h4 class="anchored" data-anchor-id="dynamic-presets">Dynamic presets</h4>
+<p>All three presets share the same <span class="math inline">\(\alpha\)</span>, <span class="math inline">\(\beta\)</span>, <span class="math inline">\(\delta\)</span>, <span class="math inline">\(\gamma\)</span>, so <span class="math inline">\(N^* = \gamma/\delta = 35\)</span> is fixed. Only <span class="math inline">\(K\)</span> varies, making the comparison clean.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 26%">
+<col style="width: 10%">
+<col style="width: 8%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th><span class="math inline">\(\alpha\)</span></th>
+<th><span class="math inline">\(\beta\)</span></th>
+<th><span class="math inline">\(\delta\)</span></th>
+<th><span class="math inline">\(\gamma\)</span></th>
+<th><span class="math inline">\(K\)</span></th>
+<th><span class="math inline">\(m\)</span></th>
+<th><span class="math inline">\(N_0\)</span></th>
+<th><span class="math inline">\(P_0\)</span></th>
+<th><span class="math inline">\(\Delta t\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Damped oscillations</td>
+<td>0.80</td>
+<td>0.050</td>
+<td>0.020</td>
+<td>0.70</td>
+<td>60</td>
+<td>0</td>
+<td>10</td>
+<td>2</td>
+<td>0.030</td>
+</tr>
+<tr class="even">
+<td>Limit cycle</td>
+<td>0.80</td>
+<td>0.050</td>
+<td>0.020</td>
+<td>0.70</td>
+<td>200</td>
+<td>0</td>
+<td>50</td>
+<td>3</td>
+<td>0.020</td>
+</tr>
+<tr class="odd">
+<td>Predator collapse</td>
+<td>0.80</td>
+<td>0.050</td>
+<td>0.020</td>
+<td>0.70</td>
+<td>25</td>
+<td>0</td>
+<td>10</td>
+<td>15</td>
+<td>0.030</td>
+</tr>
+</tbody>
+</table>
+<p>Damped oscillations: <span class="math inline">\(N^* = 35 &gt; K/2 = 30\)</span>, so the equilibrium is stable. Limit cycle: <span class="math inline">\(N^* = 35 \ll K/2 = 100\)</span>, so a limit cycle forms (paradox of enrichment). Predator collapse: <span class="math inline">\(K = 25 &lt; N^* = 35\)</span>, so prey carrying capacity is too low to sustain predators.</p>
+</section>
+</section>
+<section id="competition" class="level3">
+<h3 class="anchored" data-anchor-id="competition">Competition</h3>
+<p><span class="math display">\[
+\frac{dN_1}{dt} = r_1 N_1\!\left(1 - \frac{N_1 + \alpha_{12} N_2}{K_1}\right)
+\]</span></p>
+<p><span class="math display">\[
+\frac{dN_2}{dt} = r_2 N_2\!\left(1 - \frac{N_2 + \alpha_{21} N_1}{K_2}\right)
+\]</span></p>
+<p>Parameters:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 49%">
+<col style="width: 10%">
+<col style="width: 13%">
+<col style="width: 6%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Role</th>
+<th>Default</th>
+<th>Range</th>
+<th>Step</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(r_1\)</span></td>
+<td>Species 1 growth rate</td>
+<td>0.90</td>
+<td>0.1–2.0</td>
+<td>0.01</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(r_2\)</span></td>
+<td>Species 2 growth rate</td>
+<td>0.80</td>
+<td>0.1–2.0</td>
+<td>0.01</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(K_1\)</span></td>
+<td>Species 1 carrying capacity</td>
+<td>75</td>
+<td>10–200</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(K_2\)</span></td>
+<td>Species 2 carrying capacity</td>
+<td>65</td>
+<td>10–200</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\alpha_{12}\)</span></td>
+<td>Effect of species 2 on species 1</td>
+<td>0.60</td>
+<td>0.00–2.00</td>
+<td>0.01</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\alpha_{21}\)</span></td>
+<td>Effect of species 1 on species 2</td>
+<td>0.50</td>
+<td>0.00–2.00</td>
+<td>0.01</td>
+</tr>
+</tbody>
+</table>
+<p>In the engine, both <span class="math inline">\(K\)</span> values are guarded: <code>max(1e-6, K1)</code> and <code>max(1e-6, K2)</code>.</p>
+<p>Coexistence equilibrium (when <span class="math inline">\(1 - \alpha_{12}\alpha_{21} \neq 0\)</span>):</p>
+<p><span class="math display">\[
+N_1^* = \frac{K_1 - \alpha_{12} K_2}{1 - \alpha_{12}\alpha_{21}}, \quad N_2^* = \frac{K_2 - \alpha_{21} K_1}{1 - \alpha_{12}\alpha_{21}}
+\]</span></p>
+<p>The analytics panel computes and displays these values live. The condition for stable coexistence is <span class="math inline">\(\alpha_{12} &lt; K_1/K_2\)</span> and <span class="math inline">\(\alpha_{21} &lt; K_2/K_1\)</span>.</p>
+<section id="competition-presets" class="level4">
+<h4 class="anchored" data-anchor-id="competition-presets">Competition presets</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 11%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th><span class="math inline">\(r_1\)</span></th>
+<th><span class="math inline">\(r_2\)</span></th>
+<th><span class="math inline">\(K_1\)</span></th>
+<th><span class="math inline">\(K_2\)</span></th>
+<th><span class="math inline">\(\alpha_{12}\)</span></th>
+<th><span class="math inline">\(\alpha_{21}\)</span></th>
+<th><span class="math inline">\(N_{1,0}\)</span></th>
+<th><span class="math inline">\(N_{2,0}\)</span></th>
+<th><span class="math inline">\(\Delta t\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Coexistence</td>
+<td>0.90</td>
+<td>0.80</td>
+<td>75</td>
+<td>65</td>
+<td>0.60</td>
+<td>0.50</td>
+<td>40</td>
+<td>35</td>
+<td>0.030</td>
+</tr>
+<tr class="even">
+<td>Species 1 wins</td>
+<td>1.00</td>
+<td>0.70</td>
+<td>85</td>
+<td>60</td>
+<td>0.45</td>
+<td>1.35</td>
+<td>55</td>
+<td>45</td>
+<td>0.030</td>
+</tr>
+<tr class="odd">
+<td>Species 2 wins</td>
+<td>0.70</td>
+<td>1.00</td>
+<td>60</td>
+<td>85</td>
+<td>1.30</td>
+<td>0.45</td>
+<td>45</td>
+<td>55</td>
+<td>0.030</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+</section>
+<section id="state-and-time-series" class="level2">
+<h2 class="anchored" data-anchor-id="state-and-time-series">State and time series</h2>
+<p>The state singleton (<code>lv/state.js</code>) holds current population values, the full integration parameters, and a rolling series buffer.</p>
 <ul>
-<li><a href="https://doi.org/10.1126/science.1133308">Bipartite networks in ecology (Bascompte &amp; Jordano 2007)</a></li>
-<li><a href="https://doi.org/10.1073/pnas.0601602103">Modularity and community structure in networks (Newman 2006)</a></li>
-<li><a href="https://doi.org/10.1088/1742-5468/2008/10/P10008">Louvain method for community detection (Blondel et al.&nbsp;2008)</a></li>
-<li><a href="https://www.jstor.org/stable/2389362">Habitat guilds in cetaceans (Bearzi et al.)</a></li>
+<li><code>series</code>: array of <code>{ t, prey, predator }</code> records, capped at <strong>1600 points</strong> by <code>state.series.shift()</code> when the cap is exceeded. The oldest point is removed first (FIFO). At Normal speed and default <span class="math inline">\(\Delta t\)</span>, 1600 points corresponds to approximately 48 model-time units of history.</li>
+<li><code>t</code>: current simulation time. Cumulative across runs until a Reset.</li>
+<li><code>running</code>: boolean.</li>
 </ul>
+<hr>
+</section>
+<section id="checkpoint-auto-pause" class="level2">
+<h2 class="anchored" data-anchor-id="checkpoint-auto-pause">Checkpoint auto-pause</h2>
+<p>By default, the simulation pauses automatically every 50 model-time units. This gives users a chance to observe the state before it evolves further.</p>
+<ul>
+<li><code>pauseInterval = 50</code> (fixed).</li>
+<li><code>nextPauseAt</code> is advanced by <code>pauseInterval</code> each time a pause triggers.</li>
+<li>When paused by checkpoint, <code>autoPausedAt</code> is set and the play button changes to “▶ Resume”.</li>
+<li><strong>Unbounded time</strong> checkbox disables the checkpoint: <code>setUnboundedTime(true)</code> clears <code>autoPausedAt</code> and prevents the pause check.</li>
+<li>Toggling unbounded time off during a run advances <code>nextPauseAt</code> to the next 50-boundary above the current <code>t</code>.</li>
+</ul>
+<p>The exact pause logic in <code>advanceSimulation</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="op">!</span>state<span class="op">.</span><span class="at">unboundedTime</span> <span class="op">&amp;&amp;</span> state<span class="op">.</span><span class="at">t</span> <span class="op">&gt;=</span> state<span class="op">.</span><span class="at">nextPauseAt</span>) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  state<span class="op">.</span><span class="at">running</span> <span class="op">=</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  state<span class="op">.</span><span class="at">autoPausedAt</span> <span class="op">=</span> state<span class="op">.</span><span class="at">nextPauseAt</span><span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  state<span class="op">.</span><span class="at">nextPauseAt</span> <span class="op">+=</span> state<span class="op">.</span><span class="at">pauseInterval</span><span class="op">;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">break</span><span class="op">;</span>  <span class="co">// stop the step loop for this frame</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<hr>
+</section>
+<section id="controls" class="level2">
+<h2 class="anchored" data-anchor-id="controls">Controls</h2>
+<section id="parameter-sliders-behaviour-on-input-vs-change" class="level3">
+<h3 class="anchored" data-anchor-id="parameter-sliders-behaviour-on-input-vs-change">Parameter sliders: behaviour on input vs change</h3>
+<p>All parameter sliders use a two-event pattern:</p>
+<ul>
+<li><code>input</code> event: updates the parameter value and display label immediately (live preview of the number).</li>
+<li><code>change</code> event (fires when slider drag ends): sets <code>running = false</code> and calls <code>resetState()</code>.</li>
+</ul>
+<p>This means moving a slider <strong>always resets the simulation</strong> when you release it. There is no live-update mode for parameters in LV.</p>
+</section>
+<section id="model-type" class="level3">
+<h3 class="anchored" data-anchor-id="model-type">Model type</h3>
+<p>Switching model type stops the simulation, applies the default preset for the new mode, and resets. The Complications panel shows only the section relevant to the active mode.</p>
+</section>
+<section id="reset-vs-reset-defaults" class="level3">
+<h3 class="anchored" data-anchor-id="reset-vs-reset-defaults">Reset vs Reset Defaults</h3>
+<ul>
+<li><strong>Reset</strong>: resets simulation time and populations to current initial conditions (<code>prey0</code>, <code>predator0</code>) without changing any parameters.</li>
+<li><strong>Reset Defaults</strong>: restores all parameters to the default preset for the active mode, then resets. For classic PP this is the “Balanced” preset; for dynamic PP the “Damped oscillations” preset; for competition the “Coexistence” preset.</li>
+</ul>
+</section>
+<section id="speed-buttons" class="level3">
+<h3 class="anchored" data-anchor-id="speed-buttons">Speed buttons</h3>
+<p>Speed change does not reset the simulation. It changes <code>SPEED_TO_STEPS</code> selection for the next animation frame.</p>
+<hr>
+</section>
+</section>
+<section id="analytics-panels" class="level2">
+<h2 class="anchored" data-anchor-id="analytics-panels">Analytics panels</h2>
+<p><code>lv/analytics.js</code> subscribes to state and re-renders both charts on every notification (which fires after each <code>advanceSimulation</code> call, after resets, and after parameter changes).</p>
+<section id="time-series-chart" class="level3">
+<h3 class="anchored" data-anchor-id="time-series-chart">Time series chart</h3>
+<p>Blue line: prey (species 1 in competition mode). Red line: predators (species 2). X-axis: time window over the visible <code>series</code> buffer (scrolling). Y-axis: maximum population across both series, with 5% headroom. The chart is rebuilt from scratch each frame (no incremental D3 update).</p>
+<p>The series scrolls naturally because old points are dropped from <code>series</code> when the cap is hit: the x-axis domain always spans <code>[min(t), max(t)]</code> of the current buffer.</p>
+</section>
+<section id="phase-plane-chart" class="level3">
+<h3 class="anchored" data-anchor-id="phase-plane-chart">Phase-plane chart</h3>
+<p>X-axis: prey (or species 1). Y-axis: predators (or species 2). The trajectory is drawn as a single path through all points in the current <code>series</code> buffer. A filled black dot marks the current position (last point). The chart is also rebuilt from scratch each frame. Axes expand to fit the current trajectory extent with 5% headroom.</p>
+</section>
+<section id="estimates-strip" class="level3">
+<h3 class="anchored" data-anchor-id="estimates-strip">Estimates strip</h3>
+<p>Displays current <span class="math inline">\(t\)</span>, current <span class="math inline">\(N\)</span> (prey), current <span class="math inline">\(P\)</span> (predators), and analytical equilibrium values (<span class="math inline">\(N^*\)</span>, <span class="math inline">\(P^*\)</span>). The equilibria are recomputed on every state notification from the current parameter values using the closed-form expressions above.</p>
+<hr>
+</section>
+</section>
+<section id="assumptions-and-limitations-1" class="level2">
+<h2 class="anchored" data-anchor-id="assumptions-and-limitations-1">Assumptions and limitations</h2>
+<ul>
+<li>The model is deterministic; there is no demographic stochasticity. Populations can reach fractional values.</li>
+<li>Non-negativity is enforced by clamping, not by the ODEs. In particular, classic LV has no built-in carrying capacity on prey; prey grows without bound if predator density is very low.</li>
+<li>In classic LV, the interior equilibrium is a centre (neutral stability). Integration with finite <span class="math inline">\(\Delta t\)</span> can produce slow orbital drift. Smaller <span class="math inline">\(\Delta t\)</span> reduces but does not eliminate this.</li>
+<li>The 1600-point series cap means long runs lose early history. The phase plane shows only the retained window.</li>
+<li>Parameters update live in the display but always trigger a full reset when the slider is released.</li>
+</ul>
+<p><a href="../ds/">→ Open simulation</a></p>
+</section>
+<section id="overview-2" class="level2">
+<h2 class="anchored" data-anchor-id="overview-2">Overview</h2>
+<p>An observer traverses a fixed straight transect. Animals within a strip around the transect are detected with probability that declines with perpendicular distance. The recorded distances are then used to estimate detectability and, from that, density.</p>
+<p>The simulation shows two concurrent views of the same scene:</p>
+<ul>
+<li>the omniscient view: all animal positions visible on screen, detected animals in red, missed animals in grey;</li>
+<li>the method’s view: only the perpendicular distances of detected animals are available to the estimator.</li>
+</ul>
+<hr>
+</section>
+<section id="glossary-2" class="level2">
+<h2 class="anchored" data-anchor-id="glossary-2">Glossary</h2>
+<section id="controls-1" class="level3">
+<h3 class="anchored" data-anchor-id="controls-1">Controls</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Speed</td>
+<td>Playback speed: Slow / Normal / Fast. Affects only how fast the observer traverses the transect; does not change what gets detected.</td>
+</tr>
+<tr class="even">
+<td>Seed</td>
+<td>RNG seed for animal placement (0–99999). Reset with the same seed reproduces the exact same population.</td>
+</tr>
+<tr class="odd">
+<td>🎲 New</td>
+<td>Draws a new random seed and regenerates the population.</td>
+</tr>
+<tr class="even">
+<td>Preset</td>
+<td>Named parameter set. Two groups: Cetacean scenarios (harbour porpoise, bottlenose dolphin, common dolphin, minke whale, bowhead whale) and Terrestrial surveys (songbird, shorebird, raptor, bird nest survey, snake). Applying a preset overwrites all Complications sliders and selectors.</td>
+</tr>
+<tr class="odd">
+<td>Field truth</td>
+<td>Detection function used to simulate detections: half-normal or hazard-rate. Takes effect on Reset (if mid-run, affects future detections only).</td>
+</tr>
+<tr class="even">
+<td>Model</td>
+<td>Detection function used for MLE fitting. Mismatching Field truth and Model produces biased D̂ (warning shown). Takes effect on Reset.</td>
+</tr>
+<tr class="odd">
+<td>σ</td>
+<td>Detection scale (km). For half-normal: distance at which detection probability = <span class="math inline">\(e^{-1/2} \approx 0.607\)</span>. For hazard-rate: scale of the decay. Updates live. Default: 0.25 km.</td>
+</tr>
+<tr class="even">
+<td>W</td>
+<td>Truncation distance (km). Animals beyond W are never detected; stored detections beyond W are excluded from analysis if W is later reduced. Updates live. Default: 0.50 km.</td>
+</tr>
+<tr class="odd">
+<td>b (shape)</td>
+<td>Hazard-rate shape parameter. Visible only when hazard-rate is selected. Higher b = wider flat shoulder near the transect before a sharper falloff. Default: 2.5.</td>
+</tr>
+<tr class="even">
+<td>D</td>
+<td>True animal density (animals per km²). Takes effect on Reset. Default: 50 /km².</td>
+</tr>
+<tr class="odd">
+<td>L</td>
+<td>Transect length (km). Sets the width of the arena. Takes effect on Reset. Default: 4.0 km.</td>
+</tr>
+<tr class="even">
+<td>Distribution</td>
+<td>Spatial distribution of animals: Uniform, Clustered, or Regular. Takes effect on Reset.</td>
+</tr>
+<tr class="odd">
+<td>s_clump</td>
+<td>Cluster spread as a fraction of transect length. Visible when Distribution = Clustered. Default: 0.10.</td>
+</tr>
+<tr class="even">
+<td>ρ (regularity)</td>
+<td>Grid jitter: 0 = perfect grid, 1 = maximum jitter. Visible when Distribution = Regular. Default: 0.50.</td>
+</tr>
+<tr class="odd">
+<td>Keep previous runs</td>
+<td>Overlays the previous runs’ fitted curves and D̂ traces as faded ghost lines (up to 8 retained).</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="estimates-readout" class="level3">
+<h3 class="anchored" data-anchor-id="estimates-readout">Estimates readout</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(n\)</span></td>
+<td>Count of within-<span class="math inline">\(W\)</span> detections in the current run.</td>
+</tr>
+<tr class="even">
+<td>Effort (<span class="math inline">\(L\)</span>)</td>
+<td>Observer x-position (km) at the time of the most recent detection.</td>
+</tr>
+<tr class="odd">
+<td>ESW</td>
+<td>Effective strip width (km): <span class="math inline">\(\int_0^W g(x)\,dx\)</span>. Computed from <span class="math inline">\(\hat\sigma\)</span> (or true <span class="math inline">\(\sigma\)</span> if fewer than 3 detections).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat\sigma\)</span></td>
+<td>MLE estimate of <span class="math inline">\(\sigma\)</span> (requires <span class="math inline">\(n \geq 3\)</span>; shown as — otherwise).</td>
+</tr>
+<tr class="odd">
+<td>True <span class="math inline">\(\sigma\)</span></td>
+<td>Current slider value of <span class="math inline">\(\sigma\)</span>.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat{D}\)</span></td>
+<td>Estimated density: <span class="math inline">\(n / (2L \cdot \mathrm{ESW})\)</span>.</td>
+</tr>
+<tr class="odd">
+<td>True <span class="math inline">\(D\)</span></td>
+<td>Realised density <span class="math inline">\(= \text{areaN} / (L \times H)\)</span>, which may differ slightly from the slider due to rounding.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="key-symbols-1" class="level3">
+<h3 class="anchored" data-anchor-id="key-symbols-1">Key symbols</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(g(x)\)</span></td>
+<td>Detection function: probability of detecting an animal at perpendicular distance <span class="math inline">\(x\)</span> from the transect.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\sigma\)</span></td>
+<td>Detection scale parameter (km).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(W\)</span></td>
+<td>Truncation distance (km).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathrm{ESW}\)</span></td>
+<td>Effective strip width (km).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\hat\sigma\)</span></td>
+<td>MLE estimate of <span class="math inline">\(\sigma\)</span>.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat{D}\)</span></td>
+<td>Estimated density (animals per km²).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(D\)</span></td>
+<td>True density (animals per km²).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(L\)</span></td>
+<td>Transect length / effort (km).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(n\)</span></td>
+<td>Number of within-<span class="math inline">\(W\)</span> detections.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(b\)</span></td>
+<td>Hazard-rate shape parameter (dimensionless).</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="arena-geometry" class="level2">
+<h2 class="anchored" data-anchor-id="arena-geometry">Arena geometry</h2>
+<p>The simulation canvas maps directly to a rectangle in kilometre coordinates. All positions used by the engine are stored and computed in km; pixel positions are computed only for rendering.</p>
+<ul>
+<li><strong>Transect length</strong> (<span class="math inline">\(L\)</span>, km) is set by the transect slider. This is the x-dimension of the arena: <code>arenaWKm = sliderValue</code>.</li>
+<li><strong>Arena height</strong> (<span class="math inline">\(H\)</span>, km) is derived from the canvas dimensions so that one pixel represents the same distance in both axes: <code>arenaH = canvasHeight / (canvasWidth / arenaWKm)</code>.</li>
+<li><strong>Transect</strong> runs horizontally along the centreline of the canvas: <span class="math inline">\(y = H/2\)</span> in km coordinates. It is a fixed line; the observer moves along it.</li>
+<li><strong>Pixel scale</strong>: <code>PX_PER_KM = canvasWidth / arenaWKm</code>. Recomputed on every reset (canvas width is fixed; a different transect length changes the scale).</li>
+<li><strong>Observer x-position</strong> (<code>boatX</code>) runs from 0 to <code>arenaWKm</code> in km. The observer icon is drawn at <code>boatX * PX_PER_KM</code> pixels from the left edge.</li>
+</ul>
+<hr>
+</section>
+<section id="animal-placement" class="level2">
+<h2 class="anchored" data-anchor-id="animal-placement">Animal placement</h2>
+<p>All three distribution modes call into <code>src/ds-engine.js</code>. All use the seeded placement RNG (see §RNG below). All coordinates are in km.</p>
+<section id="animal-count" class="level3">
+<h3 class="anchored" data-anchor-id="animal-count">Animal count</h3>
+<pre><code>areaN = Math.round(density * arenaWKm * arenaH)</code></pre>
+<p>After rounding, the realised true density fed to the analytics is:</p>
+<pre><code>trueD = areaN / (arenaWKm * arenaH)</code></pre>
+<p>This will differ slightly from the slider value when rounding is non-trivial.</p>
+</section>
+<section id="uniform-distribution-placeanimals" class="level3">
+<h3 class="anchored" data-anchor-id="uniform-distribution-placeanimals">Uniform distribution (<code>placeAnimals</code>)</h3>
+<p>Each of the <span class="math inline">\(n\)</span> animals is placed by two independent draws:</p>
+<pre><code>x = rng() * arenaW
+y = rng() * arenaH</code></pre>
+<p>where <code>rng()</code> returns a value in <span class="math inline">\([0, 1)\)</span> from the seeded placement RNG. The result is a realisation of a homogeneous Poisson process with no spatial structure beyond the arena boundary.</p>
+</section>
+<section id="clustered-distribution-placeanimalsclumped" class="level3">
+<h3 class="anchored" data-anchor-id="clustered-distribution-placeanimalsclumped">Clustered distribution (<code>placeAnimalsClumped</code>)</h3>
+<p>A two-level process. Parameters: <code>clumpScale</code> (slider default 0.10).</p>
+<ol type="1">
+<li><p><strong>Number of clusters</strong>: <code>nClusters = Math.max(3, Math.round(n / 6))</code>.</p></li>
+<li><p><strong>Cluster centres</strong>: each placed at <code>(rng()*arenaW, rng()*arenaH)</code> using the seeded RNG, uniform independently in each axis.</p></li>
+<li><p><strong>Animal scatter</strong>: for each animal, a cluster is chosen uniformly at random (seeded), then a displacement is drawn using the Box–Muller transform:</p>
+<pre><code>u1    = rng(),   u2 = rng()
+mag   = sigmaCluster * sqrt(-2 * log(u1))
+angle = 2π * u2
+dx    = mag * cos(angle),   dy = mag * sin(angle)</code></pre>
+<p>where <code>sigmaCluster = arenaW * clumpScale</code>. The angular direction is isotropic (circular Gaussian scatter around the cluster centre).</p></li>
+<li><p><strong>Wrap-around</strong>: animals that scatter beyond the arena edge are wrapped using modular arithmetic:</p>
+<pre><code>x = ((cx + dx) % arenaW + arenaW) % arenaW
+y = ((cy + dy) % arenaH + arenaH) % arenaH</code></pre>
+<p>This preserves the total count and keeps all animals inside the arena.</p></li>
+</ol>
+<p>The <code>clumpScale</code> slider controls <code>sigmaCluster</code> as a fraction of transect length. At <code>clumpScale = 0.10</code> (default), the cluster spread is 10% of the transect length.</p>
+</section>
+<section id="regular-distribution-placeanimalsregular" class="level3">
+<h3 class="anchored" data-anchor-id="regular-distribution-placeanimalsregular">Regular distribution (<code>placeAnimalsRegular</code>)</h3>
+<p>A perturbed grid. Parameters: <code>regularity</code> (slider default 0.50).</p>
+<ol type="1">
+<li><p><strong>Grid dimensions</strong>: <code>nCols = Math.round(sqrt(n * arenaW / arenaH))</code>, <code>nRows = Math.ceil(n / nCols)</code>. The aspect ratio of the grid matches the arena.</p></li>
+<li><p><strong>Cell size</strong>: <code>dx = arenaW / nCols</code>, <code>dy = arenaH / nRows</code>.</p></li>
+<li><p><strong>Animal position</strong>: for the <span class="math inline">\(i\)</span>-th animal, <code>col = i % nCols</code>, <code>row = floor(i / nCols)</code>:</p>
+<pre><code>x = (col + 0.5 + (rng() - 0.5) * regularity) * dx
+y = (row + 0.5 + (rng() - 0.5) * regularity) * dy</code></pre>
+<p>The jitter term <code>(rng() - 0.5) * regularity</code> is drawn from the seeded RNG.</p></li>
+</ol>
+<p>The <code>regularity</code> parameter spans two extremes:</p>
+<ul>
+<li><code>regularity = 0</code>: no jitter; animals sit exactly at grid cell centres.</li>
+<li><code>regularity = 1</code>: maximum jitter; each animal is displaced by up to ±0.5 cell widths in each axis independently. This makes spacing variable but still non-Poisson (the grid skeleton persists in expectation).</li>
+</ul>
+<p>Values in between produce intermediate over-dispersion relative to a Poisson process.</p>
+<hr>
+</section>
+</section>
+<section id="seed-and-rng-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="seed-and-rng-architecture">Seed and RNG architecture</h2>
+<p>The simulation uses <strong>two separate random number generators</strong> with different seeding strategies. This is a deliberate design choice.</p>
+<section id="placement-rng-seeded" class="level3">
+<h3 class="anchored" data-anchor-id="placement-rng-seeded">Placement RNG (seeded)</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>placementRng <span class="op">=</span> <span class="fu">createRng</span>(seed)<span class="op">;</span> <span class="co">// src/rng.js — Alea PRNG</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>All animal positions (uniform draws, cluster centres, cluster assignments, scatter displacements, grid jitter) are generated by this seeded generator. Fixing the seed and pressing Reset reproduces the exact same spatial layout of animals.</p>
+</section>
+<section id="detection-rng-unseeded" class="level3">
+<h3 class="anchored" data-anchor-id="detection-rng-unseeded">Detection RNG (unseeded)</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>detectionRng <span class="op">=</span> <span class="kw">new</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">seedrandom</span>()<span class="op">;</span> <span class="co">// fresh random seed each initSim() call</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>All Bernoulli detection draws (whether a given animal is detected when the observer passes) use this fresh, unseeded generator. Consequence: the same population can yield different detected sets on each replay, reflecting genuine sampling variability rather than just seed choice.</p>
+</section>
+<section id="seed-value" class="level3">
+<h3 class="anchored" data-anchor-id="seed-value">Seed value</h3>
+<ul>
+<li>Range: 0–99999 (five-digit integer).</li>
+<li>On page load: <code>seed = Math.floor(Math.random() * 100000)</code>, random for each browser session.</li>
+<li>Seed input field: type a value, press Enter or click away. The field strips non-digit characters and clamps to [0, 99999]. Any invalid entry reverts to the current seed.</li>
+<li>New Population button: draws a completely new random seed, then calls <code>initSim()</code>.</li>
+<li>Reset button: reads the current seed-input value and calls <code>initSim()</code>.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="observer-mechanics" class="level2">
+<h2 class="anchored" data-anchor-id="observer-mechanics">Observer mechanics</h2>
+<p>The observer moves at constant speed along the transect (<code>y = arenaH / 2</code>) from <code>boatX = 0</code> to <code>boatX = arenaWKm</code>.</p>
+<section id="speed-settings" class="level3">
+<h3 class="anchored" data-anchor-id="speed-settings">Speed settings</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Label</th>
+<th>km per frame</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Slow</td>
+<td>0.0025</td>
+</tr>
+<tr class="even">
+<td>Normal</td>
+<td>0.005</td>
+</tr>
+<tr class="odd">
+<td>Fast</td>
+<td>0.015</td>
+</tr>
+</tbody>
+</table>
+<p>At 60 fps, Normal speed traverses a 4 km transect in approximately 13 seconds of real time. The speed setting affects only playback rate; it does not change what gets detected (because of the one-shot detection rule; see §Detection below).</p>
+<p>Each frame when <code>running = true</code>, <code>advanceBoat()</code> adds the current speed increment to <code>boatX</code>. When <code>boatX &gt;= arenaWKm</code>, the run stops and the play button switches to “↺ Run again”.</p>
+<hr>
+</section>
+</section>
+<section id="detection-mechanism" class="level2">
+<h2 class="anchored" data-anchor-id="detection-mechanism">Detection mechanism</h2>
+<p>All detection logic is in <code>src/ds-engine.js</code> (<code>tryDetect</code>). The key properties are:</p>
+<section id="one-shot-rule" class="level3">
+<h3 class="anchored" data-anchor-id="one-shot-rule">One-shot rule</h3>
+<p>Detection is attempted <strong>exactly once</strong> per animal per run. The trigger condition is:</p>
+<pre><code>boatX - animal.x ∈ [0, boatSpeed)</code></pre>
+<p>In words: the observer’s current x-position has just crossed the animal’s x-position this frame. If <code>boatX - animal.x &lt; 0</code> (not yet reached) or <code>&gt;= boatSpeed</code> (already passed), the function returns false immediately and no draw is made. This ensures each animal gets precisely one Bernoulli trial per traversal, regardless of playback speed.</p>
+</section>
+<section id="perpendicular-distance" class="level3">
+<h3 class="anchored" data-anchor-id="perpendicular-distance">Perpendicular distance</h3>
+<pre><code>perpDist = |animal.y - arenaH / 2|   (km)</code></pre>
+<p>If <code>perpDist &gt; W</code>, the animal is outside the truncation strip and <code>tryDetect</code> returns false without a draw.</p>
+</section>
+<section id="bernoulli-draw" class="level3">
+<h3 class="anchored" data-anchor-id="bernoulli-draw">Bernoulli draw</h3>
+<p>If the one-shot condition is met and <code>perpDist &lt;= W</code>, a single uniform draw <code>u = detectionRng()</code> is compared to the detection probability:</p>
+<pre><code>detected = u &lt; g(perpDist, sigma)</code></pre>
+<p>where <code>g</code> is either <code>halfNormal</code> or <code>hazardRate</code> depending on the field truth function setting.</p>
+<hr>
+</section>
+</section>
+<section id="detection-functions" class="level2">
+<h2 class="anchored" data-anchor-id="detection-functions">Detection functions</h2>
+<p>Both functions are implemented in <code>src/stats.js</code>.</p>
+<section id="half-normal" class="level3">
+<h3 class="anchored" data-anchor-id="half-normal">Half-normal</h3>
+<p><span class="math display">\[
+g(x,\sigma) = \exp\!\left(-\frac{x^2}{2\sigma^2}\right)
+\]</span></p>
+<ul>
+<li><span class="math inline">\(g(0,\sigma) = 1\)</span> for all <span class="math inline">\(\sigma\)</span>: perfect detectability on the transect line.</li>
+<li><span class="math inline">\(\sigma\)</span> (km) is the distance at which detection probability falls to <span class="math inline">\(e^{-1/2} \approx 0.607\)</span>.</li>
+<li>Slider range: 0.05–0.50 km, step 0.01, default 0.25 km.</li>
+</ul>
+</section>
+<section id="hazard-rate" class="level3">
+<h3 class="anchored" data-anchor-id="hazard-rate">Hazard-rate</h3>
+<p><span class="math display">\[
+g(x,\sigma,b) = 1 - \exp\!\left[-\left(\frac{\sigma}{x}\right)^b\right]
+\]</span></p>
+<ul>
+<li>At <span class="math inline">\(x = 0\)</span>: <code>hazardRate</code> returns 1 (special-cased to avoid division by zero).</li>
+<li><span class="math inline">\(b\)</span> controls the shape of the “shoulder” near the transect. Higher <span class="math inline">\(b\)</span> gives a wider flat shoulder followed by a sharper drop.</li>
+<li><span class="math inline">\(b\)</span> slider range: 1.0–10.0, step 0.1, default 2.5.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="state-recording" class="level2">
+<h2 class="anchored" data-anchor-id="state-recording">State recording</h2>
+<p>When a detection fires, <code>recordDetection(perpDist, boatX)</code> is called:</p>
+<ul>
+<li><code>perpDist</code>: perpendicular distance in km (raw, not yet filtered by W).</li>
+<li><code>boatX</code>: observer x-position in km <strong>at the moment of detection</strong>.</li>
+</ul>
+<p>Both values are appended to parallel arrays in the shared state singleton (<code>ds/state.js</code>):</p>
+<pre><code>state.detectedDistances[]   // perpendicular distances, all raw detections
+state.detectedEfforts[]     // boatX at each detection</code></pre>
+<p>These arrays grow monotonically during a run. They are cleared on reset (<code>resetState()</code>).</p>
+<hr>
+</section>
+<section id="truncation-and-w-post-hoc-filtering" class="level2">
+<h2 class="anchored" data-anchor-id="truncation-and-w-post-hoc-filtering">Truncation and W post-hoc filtering</h2>
+<p>The truncation distance <span class="math inline">\(W\)</span> has two roles:</p>
+<ol type="1">
+<li><p><strong>Hard truncation during detection</strong>: <code>tryDetect</code> returns false when <code>perpDist &gt; W</code>. No draw is made; the animal is never recorded.</p></li>
+<li><p><strong>Post-hoc filtering in analytics</strong>: the analytics layer refilters stored distances on every state change:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>filteredDists <span class="op">=</span> detectedDistances<span class="op">.</span><span class="fu">filter</span>((d) <span class="kw">=&gt;</span> d <span class="op">&lt;=</span> W)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This means if <span class="math inline">\(W\)</span> is decreased after some detections have been stored, those beyond-W distances are excluded from the histogram, MLE, and D̂ history, even though they were recorded. If <span class="math inline">\(W\)</span> is increased, detections from earlier in the run that were beyond the old W (but within the new W) will not appear, because they were never recorded in the first place.</p></li>
+</ol>
+<p>The consequence is asymmetric: lowering <span class="math inline">\(W\)</span> live re-analyses with a smaller sample; raising <span class="math inline">\(W\)</span> live has no effect on data already collected.</p>
+<hr>
+</section>
+<section id="esw-computation" class="level2">
+<h2 class="anchored" data-anchor-id="esw-computation">ESW computation</h2>
+<section id="half-normal-analytical" class="level3">
+<h3 class="anchored" data-anchor-id="half-normal-analytical">Half-normal (analytical)</h3>
+<p><span class="math display">\[
+\mathrm{ESW}(\sigma, W) = \sigma\sqrt{\frac{\pi}{2}}\;\mathrm{erf}\!\left(\frac{W}{\sigma\sqrt{2}}\right)
+\]</span></p>
+<p>The error function is computed via the Abramowitz &amp; Stegun polynomial approximation (max error <span class="math inline">\(1.5 \times 10^{-7}\)</span>).</p>
+</section>
+<section id="hazard-rate-numerical" class="level3">
+<h3 class="anchored" data-anchor-id="hazard-rate-numerical">Hazard-rate (numerical)</h3>
+<p>200-step trapezoid rule over <span class="math inline">\([0, W]\)</span>:</p>
+<p><span class="math display">\[
+\mathrm{ESW}(\sigma, b, W) \approx \sum_{i=0}^{199} \frac{g(x_i) + g(x_{i+1})}{2}\,\Delta x, \quad \Delta x = W/200
+\]</span></p>
+<p>where <span class="math inline">\(g\)</span> is <code>hazardRate(x, sigma, b)</code>.</p>
+<hr>
+</section>
+</section>
+<section id="mle-fitting" class="level2">
+<h2 class="anchored" data-anchor-id="mle-fitting">MLE fitting</h2>
+<p><code>fitSigmaMLE</code> in <code>src/stats.js</code> finds the <span class="math inline">\(\hat{\sigma}\)</span> that minimises the negative log-likelihood. The analytics layer calls it when there are <strong>at least 3</strong> within-W detections; fewer returns <code>null</code> and <code>σ̂</code> is shown as “—”.</p>
+<p>The search uses <strong>golden-section</strong> over a fixed interval <span class="math inline">\([\sigma_{\min}, \sigma_{\max}]\)</span>. The shape parameter <span class="math inline">\(b\)</span> is <strong>not optimised</strong>; it is held at the current slider value throughout.</p>
+<section id="nll-for-half-normal" class="level3">
+<h3 class="anchored" data-anchor-id="nll-for-half-normal">NLL for half-normal</h3>
+<p><span class="math display">\[
+\mathrm{NLL}(\sigma) = n\log\bigl[\mathrm{ESW}(\sigma,W)\bigr] + \sum_{i=1}^{n}\frac{d_i^2}{2\sigma^2}
+\]</span></p>
+</section>
+<section id="nll-for-hazard-rate" class="level3">
+<h3 class="anchored" data-anchor-id="nll-for-hazard-rate">NLL for hazard-rate</h3>
+<p><span class="math display">\[
+\mathrm{NLL}(\sigma) = n\log\bigl[\mathrm{ESW}(\sigma,b,W)\bigr] - \sum_{i=1}^{n}\log\bigl[g_{\mathrm{HR}}(d_i,\sigma,b)\bigr]
+\]</span></p>
+<p>In both cases, <span class="math inline">\(d_i\)</span> are the within-W perpendicular distances and ESW is computed by the respective method above.</p>
+<hr>
+</section>
+</section>
+<section id="density-estimator" class="level2">
+<h2 class="anchored" data-anchor-id="density-estimator">Density estimator</h2>
+<p><code>estimateDensity(n, L, sigma, W, modelFn, b)</code> in <code>src/stats.js</code> returns:</p>
+<p><span class="math display">\[
+\hat{D} = \frac{n}{2L\,\mathrm{ESW}(\hat\sigma, W)}
+\]</span></p>
+<p>where <span class="math inline">\(L\)</span> is effort in km, <span class="math inline">\(n\)</span> is the count of within-W detections, and ESW uses <span class="math inline">\(\hat\sigma\)</span> if fitted, or the true <span class="math inline">\(\sigma\)</span> slider value if fewer than 3 detections are available.</p>
+<section id="per-detection-effort-in-the-convergence-chart" class="level3">
+<h3 class="anchored" data-anchor-id="per-detection-effort-in-the-convergence-chart">Per-detection effort in the convergence chart</h3>
+<p>The D̂ convergence chart does <strong>not</strong> use the final transect length as effort. Instead, for each successive within-W detection, the chart plots the density estimate using effort = <code>boatX</code> at the moment that detection was made. For the <span class="math inline">\(k\)</span>-th within-W detection, <span class="math inline">\(L_k\)</span> = observer x-position (km) when the <span class="math inline">\(k\)</span>-th animal was detected.</p>
+<p>This means the convergence trace shows how <span class="math inline">\(\hat{D}\)</span> evolves as data accumulates during the survey, including the effect of early noise when <span class="math inline">\(n\)</span> is small.</p>
+<p>The full D̂ history array is rebuilt from scratch on every state-change event (each detection, and whenever W, σ, b, or model function changes).</p>
+<hr>
+</section>
+</section>
+<section id="analytics-panels-1" class="level2">
+<h2 class="anchored" data-anchor-id="analytics-panels-1">Analytics panels</h2>
+<p>Three panels are drawn by <code>ds/analytics.js</code> using D3. They subscribe to state and re-render on every change.</p>
+<section id="detection-function-chart" class="level3">
+<h3 class="anchored" data-anchor-id="detection-function-chart">1. Detection function chart</h3>
+<ul>
+<li><p><strong>Blue solid curve</strong>: the field truth detection function <span class="math inline">\(g(x, \sigma_{\rm true})\)</span>, drawn with the currently selected field truth function and the true <span class="math inline">\(\sigma\)</span> value.</p></li>
+<li><p><strong>Pink dashed curve</strong>: the MLE-fitted function <span class="math inline">\(g(x, \hat\sigma)\)</span>, drawn with the model function when <span class="math inline">\(\hat\sigma\)</span> is available (<span class="math inline">\(n \geq 3\)</span>).</p></li>
+<li><p><strong>Histogram bars</strong> (light blue, 10 equal bins over <span class="math inline">\([0, W]\)</span>): observed within-W distances. Bar heights are normalised to the <span class="math inline">\(g(x)\)</span> scale using the formula:</p>
+<pre><code>scale = n * binWidth / ESW_truth
+barHeight[i] = binCount[i] / scale</code></pre>
+<p>so that a perfect half-normal detection function would make the histogram lie on the true curve.</p></li>
+<li><p><strong>Ghost fitted curves</strong>: if “Keep previous runs” is checked, past fitted curves are shown as progressively more transparent pink dashed lines (up to 8 past runs retained, oldest most faded).</p></li>
+<li><p>The x-axis domain updates to the current W value; the y-axis domain expands if bar heights exceed 1.1.</p></li>
+</ul>
+</section>
+<section id="running-estimates-strip" class="level3">
+<h3 class="anchored" data-anchor-id="running-estimates-strip">2. Running estimates strip</h3>
+<p>Displays six values updated live:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 90%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(n\)</span></td>
+<td>count of within-W detections</td>
+</tr>
+<tr class="even">
+<td>Effort</td>
+<td><code>boatX</code> progress (km); updates <code>state.transectLength</code> on each detection from <code>detectedEfforts[last]</code> (see note below)</td>
+</tr>
+<tr class="odd">
+<td>ESW</td>
+<td>computed from <span class="math inline">\(\hat\sigma\)</span> (or true <span class="math inline">\(\sigma\)</span> if no fit) and current W</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat\sigma\)</span></td>
+<td>MLE estimate (km), or “—” if <span class="math inline">\(n &lt; 3\)</span></td>
+</tr>
+<tr class="odd">
+<td>True <span class="math inline">\(\sigma\)</span></td>
+<td>slider value</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat{D}\)</span></td>
+<td>last entry in the D̂ history</td>
+</tr>
+<tr class="odd">
+<td>True <span class="math inline">\(D\)</span></td>
+<td><code>trueD = areaN / (arenaWKm * arenaH)</code></td>
+</tr>
+</tbody>
+</table>
+<p>The “Effort” readout is the boatX at the time of the last detection, not the total traversed distance. During a run, it thus reflects distance surveyed up to the most recent animal found.</p>
+</section>
+<section id="d-convergence-chart" class="level3">
+<h3 class="anchored" data-anchor-id="d-convergence-chart">3. D̂ convergence chart</h3>
+<ul>
+<li><strong>Green line</strong>: D̂ vs cumulative within-W detections for the current run.</li>
+<li><strong>Red dashed horizontal line</strong>: true D.</li>
+<li><strong>Ghost traces</strong>: previous runs overlaid as faded green lines (same cap and fade logic as detection function ghosts).</li>
+<li>Axes use expand-only domain tracking; they grow when data goes outside the current range but never contract mid-run. On hard reset (no data, no ghosts) the axes snap back to their initial defaults.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="ghost-keep-runs-mechanic" class="level2">
+<h2 class="anchored" data-anchor-id="ghost-keep-runs-mechanic">Ghost / keep-runs mechanic</h2>
+<p>The “Keep previous runs” checkbox controls ghost retention. Ghosts are managed entirely within <code>analytics.js</code>; they are not stored in the shared state singleton.</p>
+<p>When a reset is detected (state goes from <span class="math inline">\(n &gt; 0\)</span> to <span class="math inline">\(n = 0\)</span>):</p>
+<ul>
+<li>If the checkbox is checked, the current run’s D̂ history and fitted <span class="math inline">\(\hat\sigma\)</span> are saved as a ghost object: <code>{ dhatHistory, sigmaHat, trueD, modelFn, b }</code>.</li>
+<li>The ghost list is capped at <strong>8 entries</strong> (oldest removed when limit is exceeded).</li>
+<li>Ghost curves on the detection function chart record the model function active at the time of that run, so a run fitted with hazard-rate is always displayed with hazard-rate even if the model is later changed.</li>
+</ul>
+<p>“Clear runs” empties the ghost list immediately and forces a redraw.</p>
+<hr>
+</section>
+<section id="control-taxonomy" class="level2">
+<h2 class="anchored" data-anchor-id="control-taxonomy">Control taxonomy</h2>
+<section id="live-update-takes-effect-without-reset" class="level3">
+<h3 class="anchored" data-anchor-id="live-update-takes-effect-without-reset">Live update (takes effect without reset)</h3>
+<p>These controls change simulation parameters immediately. Analytics are rebuilt from stored detections on the next state notification.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 7%">
+<col style="width: 75%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Variable</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\sigma\)</span> slider</td>
+<td><code>sigma</code></td>
+<td>Changes both the truth curve and MLE fitting</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(W\)</span> slider</td>
+<td><code>W</code></td>
+<td>Restricts or expands the truncation strip; all stored detections are refiltered</td>
+</tr>
+<tr class="odd">
+<td>Field truth function</td>
+<td><code>truthFn</code></td>
+<td>Changes which <span class="math inline">\(g(x)\)</span> governs future detection draws and the blue truth curve</td>
+</tr>
+<tr class="even">
+<td>Model function</td>
+<td><code>modelFn</code></td>
+<td>Changes which <span class="math inline">\(g(x)\)</span> is fitted by MLE and shown as the pink curve</td>
+</tr>
+<tr class="odd">
+<td>Shape <span class="math inline">\(b\)</span></td>
+<td><code>b</code></td>
+<td>Affects hazard-rate detection and MLE (only visible when truth or model is hazard-rate)</td>
+</tr>
+</tbody>
+</table>
+<p>Note: changing <code>sigma</code> or <code>truthFn</code> live affects future detections for the current run (if still in progress), not past ones that are already stored.</p>
+</section>
+<section id="reset-required-takes-effect-on-next-reset-or-new-population" class="level3">
+<h3 class="anchored" data-anchor-id="reset-required-takes-effect-on-next-reset-or-new-population">Reset required (takes effect on next Reset or New Population)</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Variable</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Density <span class="math inline">\(D\)</span></td>
+<td><code>density</code></td>
+</tr>
+<tr class="even">
+<td>Transect length <span class="math inline">\(L\)</span></td>
+<td><code>arenaWKm</code></td>
+</tr>
+<tr class="odd">
+<td>Distribution type</td>
+<td><code>distribution</code></td>
+</tr>
+<tr class="even">
+<td>Clump scale <span class="math inline">\(s_{\rm clump}\)</span></td>
+<td><code>clumpScale</code></td>
+</tr>
+<tr class="odd">
+<td>Regularity <span class="math inline">\(\rho\)</span></td>
+<td><code>regularity</code></td>
+</tr>
+<tr class="even">
+<td>Seed</td>
+<td><code>seed</code></td>
+</tr>
+</tbody>
+</table>
+<p>Changing these updates the displayed readout immediately but the population is only regenerated when <code>initSim()</code> is called (via Reset, New Population, or Run Again after completion).</p>
+</section>
+<section id="reset-defaults" class="level3">
+<h3 class="anchored" data-anchor-id="reset-defaults">Reset Defaults</h3>
+<p>Resets <strong>all</strong> controls to their factory defaults, then calls Reset:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\sigma\)</span></td>
+<td>0.25 km</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(W\)</span></td>
+<td>0.50 km</td>
+</tr>
+<tr class="odd">
+<td>Density</td>
+<td>50 /km²</td>
+</tr>
+<tr class="even">
+<td>Transect length</td>
+<td>4.0 km</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(b\)</span></td>
+<td>2.5</td>
+</tr>
+<tr class="even">
+<td>Field truth function</td>
+<td>Half-normal</td>
+</tr>
+<tr class="odd">
+<td>Model function</td>
+<td>Half-normal</td>
+</tr>
+<tr class="even">
+<td>Distribution</td>
+<td>Uniform</td>
+</tr>
+<tr class="odd">
+<td>Clump scale</td>
+<td>0.10</td>
+</tr>
+<tr class="even">
+<td>Regularity</td>
+<td>0.50</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="assumptions-and-limitations-2" class="level2">
+<h2 class="anchored" data-anchor-id="assumptions-and-limitations-2">Assumptions and limitations</h2>
+<ul>
+<li>Animals are <strong>static</strong> throughout a run. There is no movement model.</li>
+<li>The transect is a <strong>fixed straight line</strong> through the centre of the arena.</li>
+<li>Each animal receives <strong>exactly one Bernoulli trial</strong> per traversal. Multiple passes are not modelled.</li>
+<li><span class="math inline">\(g(0) = 1\)</span> holds in both half-normal and hazard-rate modes.</li>
+<li>The MLE holds <span class="math inline">\(b\)</span> fixed; joint optimisation of <span class="math inline">\((\sigma, b)\)</span> is not implemented.</li>
+<li>The hazard-rate ESW uses a fixed 200-step numerical integration; for very small <span class="math inline">\(b\)</span> or extreme parameter combinations, this approximation may be imprecise.</li>
+<li>The detector sees <strong>perpendicular distance only</strong>: no forward detection angle or acoustic range model.</li>
+<li>There is no measurement error; recorded distances are exact.</li>
+</ul>
+<p><a href="../secr/">→ Open simulation</a></p>
+</section>
+<section id="overview-3" class="level2">
+<h2 class="anchored" data-anchor-id="overview-3">Overview</h2>
+<p>Animals move within a two-dimensional arena and are sampled by a fixed detector array across repeated occasions. Density is estimated from who was caught, at which detectors, and on which occasions, with no assumption of a fixed observable strip.</p>
+<p>Detection is spatial and imperfect:</p>
+<ul>
+<li>each individual has a latent activity centre that is never directly observed;</li>
+<li>detectors sample probabilistically around those centres over multiple occasions;</li>
+<li>the estimator infers density from capture histories and detector geometry alone.</li>
+</ul>
+<hr>
+</section>
+<section id="glossary-3" class="level2">
+<h2 class="anchored" data-anchor-id="glossary-3">Glossary</h2>
+<section id="controls-2" class="level3">
+<h3 class="anchored" data-anchor-id="controls-2">Controls</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Speed</td>
+<td>Playback speed: Slow / Normal / Fast.</td>
+</tr>
+<tr class="even">
+<td>Seed</td>
+<td>RNG seed for animal and detector placement. Reset = same layout. 🎲 New = new population and layout.</td>
+</tr>
+<tr class="odd">
+<td>Detector type</td>
+<td>Named preset that adjusts <span class="math inline">\(g_0\)</span> and <span class="math inline">\(\sigma\)</span> to approximate a sensor type: Default, Camera trap, Live trap, Acoustic detector.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(g_0\)</span></td>
+<td>Baseline detection probability at zero distance from an animal’s activity centre (0.05–1.0). Updates live. Default: 0.20.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\sigma\)</span></td>
+<td>Home range / detection scale (km). Controls how steeply detection probability drops with distance from the activity centre. Updates live. Default: 0.15 km.</td>
+</tr>
+<tr class="even">
+<td>N</td>
+<td>Number of animals in the arena. Takes effect on Reset. Default: 10.</td>
+</tr>
+<tr class="odd">
+<td>K</td>
+<td>Number of sampling occasions per run. Takes effect on Reset. Default: 10.</td>
+</tr>
+<tr class="even">
+<td>Movement</td>
+<td>Named movement preset: Typical resident, Sedentary, Wide-ranging, or Nomad. Sets <span class="math inline">\(\tau\)</span> and <span class="math inline">\(f\)</span>.</td>
+</tr>
+<tr class="odd">
+<td>τ (mobility)</td>
+<td>Home range crossing time in occasions. Low <span class="math inline">\(\tau\)</span> = restless / fast-moving; high <span class="math inline">\(\tau\)</span> = sedentary. Takes effect immediately. Default: 5 occ.</td>
+</tr>
+<tr class="even">
+<td>f (fidelity)</td>
+<td>Site fidelity multiplier: tightens the effective home range around the activity centre. Higher = tighter. Default: 1.0×.</td>
+</tr>
+<tr class="odd">
+<td>Detectors</td>
+<td>Detector layout: Grid (regular array), Random (random placement), or Click to place (interactive). Takes effect on Reset.</td>
+</tr>
+<tr class="even">
+<td>n_grid</td>
+<td>Grid dimension (<span class="math inline">\(N \times N\)</span>). Visible when Detectors = Grid (3–7, default 4). Takes effect on Reset.</td>
+</tr>
+<tr class="odd">
+<td>Show detection surface</td>
+<td>Overlays the spatial detection probability surface <span class="math inline">\(p(x,y)\)</span> on the simulation canvas. Updates live when <span class="math inline">\(g_0\)</span>, <span class="math inline">\(\sigma\)</span>, or detectors change.</td>
+</tr>
+<tr class="even">
+<td>Show activity centres</td>
+<td>Shows true activity centres (•) and estimated centres (×, mean of capturing detector positions) for each individual.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="estimates-readout-1" class="level3">
+<h3 class="anchored" data-anchor-id="estimates-readout-1">Estimates readout</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Occasion (<span class="math inline">\(k\)</span>)</td>
+<td>Current occasion index.</td>
+</tr>
+<tr class="even">
+<td>Individuals (<span class="math inline">\(M\)</span>)</td>
+<td>Number of distinct animals detected at least once so far.</td>
+</tr>
+<tr class="odd">
+<td>Captures</td>
+<td>Total capture events across all individuals and occasions.</td>
+</tr>
+<tr class="even">
+<td>ESA</td>
+<td>Effective sampling area (km²): <span class="math inline">\(\int\!\int p(x,y)\,dx\,dy\)</span> over the arena, given current <span class="math inline">\(g_0\)</span>, <span class="math inline">\(\sigma\)</span>, and detector layout.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\hat{D}\)</span></td>
+<td>Estimated density: <span class="math inline">\(M / \mathrm{ESA}\)</span>.</td>
+</tr>
+<tr class="even">
+<td>True <span class="math inline">\(D\)</span></td>
+<td>True density = <span class="math inline">\(N / \text{arena area}\)</span>.</td>
+</tr>
+<tr class="odd">
+<td>Home range (<span class="math inline">\(\pi\sigma^2\)</span>)</td>
+<td>Area of a circle with radius <span class="math inline">\(\sigma\)</span>: approximate home range size (km²).</td>
+</tr>
+<tr class="even">
+<td>Recapture rate</td>
+<td>Proportion of capture events involving a previously-detected individual.</td>
+</tr>
+<tr class="odd">
+<td>Coverage (<span class="math inline">\(M/N\)</span>)</td>
+<td>Proportion of the true population detected at least once.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="key-symbols-2" class="level3">
+<h3 class="anchored" data-anchor-id="key-symbols-2">Key symbols</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(g_0\)</span></td>
+<td>Baseline detection probability at zero distance (dimensionless, 0–1).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\sigma\)</span></td>
+<td>Detection / home range scale (km).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\tau\)</span></td>
+<td>Mobility parameter: home range crossing time (occasions).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(f\)</span></td>
+<td>Site fidelity multiplier (dimensionless).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(K\)</span></td>
+<td>Number of occasions.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(N\)</span></td>
+<td>True number of animals.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(M\)</span></td>
+<td>Number of detected individuals.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathrm{ESA}\)</span></td>
+<td>Effective sampling area (km²).</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\hat{D}\)</span></td>
+<td>Estimated density (animals per km²).</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(D\)</span></td>
+<td>True density (animals per km²).</td>
+</tr>
+<tr class="odd">
+<td>Activity centre</td>
+<td>Latent centre of an individual’s home range; never directly observed.</td>
+</tr>
+<tr class="even">
+<td>Capture history</td>
+<td>Record of which individual was detected at which detector on which occasion.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="arena-geometry-1" class="level2">
+<h2 class="anchored" data-anchor-id="arena-geometry-1">Arena geometry</h2>
+<p>The arena is a square with side length <code>ARENA_KM = 2.0 km</code>. It is divided into two zones:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Zone</th>
+<th>Variable</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Inner study area</td>
+<td><code>INNER_KM</code></td>
+<td>1.2 km × 1.2 km</td>
+</tr>
+<tr class="even">
+<td>Buffer zone (each side)</td>
+<td><code>BUFFER_KM</code></td>
+<td>0.4 km</td>
+</tr>
+</tbody>
+</table>
+<p>The buffer is <code>≈ 2.7σ</code> at the default <code>σ = 0.15 km</code>. This is a standard SECR convention: animals whose activity centres lie within <code>~2σ</code> of the detector array contribute meaningfully to detections. Animals further out are effectively invisible.</p>
+<p>The canvas is a square. <code>PX_PER_KM = canvasSize / ARENA_KM</code>. All world coordinates are in km; pixel coordinates are computed for display only using <code>worldToPx(wx, wy)</code>.</p>
+<p>Inner study area corners: <code>(innerX0, innerY0) = (BUFFER_KM, BUFFER_KM) = (0.4, 0.4)</code>.</p>
+<hr>
+</section>
+<section id="animal-placement-1" class="level2">
+<h2 class="anchored" data-anchor-id="animal-placement-1">Animal placement</h2>
+<p><code>placeAnimals(N, ARENA_KM, ARENA_KM, placementRng)</code> in <code>src/secr-engine.js</code>.</p>
+<p>Each of the <span class="math inline">\(N\)</span> animals is placed by drawing activity-centre coordinates uniformly:</p>
+<pre><code>cx = rng() * arenaW
+cy = rng() * arenaH</code></pre>
+<p>The animal starts exactly at its activity centre: <code>x = cx</code>, <code>y = cy</code>. Velocity is initialised to zero: <code>vx = 0</code>, <code>vy = 0</code>.</p>
+<p>Activity centres span the <strong>full</strong> arena (inner + buffer), not just the inner study area. This is correct: real populations extend beyond any detector array, and some of those individuals can still be detected.</p>
+<p>The true density is <code>trueD = N / (ARENA_KM²) = N / 4.0</code> animals/km².</p>
+<hr>
+</section>
+<section id="detector-placement" class="level2">
+<h2 class="anchored" data-anchor-id="detector-placement">Detector placement</h2>
+<p><code>placeDetectors(layout, innerW, innerH, innerX0, innerY0, rng, gridN, nRandom)</code> in <code>src/secr-engine.js</code>.</p>
+<p>All detectors are placed <strong>within the inner study area</strong> only.</p>
+<section id="grid-layout" class="level3">
+<h3 class="anchored" data-anchor-id="grid-layout">Grid layout</h3>
+<p><code>gridN × gridN</code> detectors on a regular grid. Cell size <code>dx = innerW / gridN</code>, <code>dy = innerH / gridN</code>. Each detector at:</p>
+<pre><code>x = innerX0 + (col + 0.5) * dx
+y = innerY0 + (row + 0.5) * dy</code></pre>
+<p>Default <code>gridN = 4</code> → 16 detectors. Range: 3–7, giving 9–49 detectors.</p>
+</section>
+<section id="random-layout" class="level3">
+<h3 class="anchored" data-anchor-id="random-layout">Random layout</h3>
+<p>16 detectors placed by independent uniform draws within the inner study area:</p>
+<pre><code>x = innerX0 + rng() * innerW
+y = innerY0 + rng() * innerH</code></pre>
+<p>Uses the seeded placement RNG.</p>
+</section>
+<section id="custom-layout" class="level3">
+<h3 class="anchored" data-anchor-id="custom-layout">Custom layout</h3>
+<p>Detectors are managed directly by sketch.js. Clicking within the inner study area places a new detector; clicking an existing detector removes it. Pressing “Remove all” calls <code>clearDetectorsFn()</code> which empties the array and notifies analytics. Custom detectors are preserved through Reset (the positions are re-indexed but not regenerated).</p>
+<hr>
+</section>
+</section>
+<section id="seed-and-rng-architecture-1" class="level2">
+<h2 class="anchored" data-anchor-id="seed-and-rng-architecture-1">Seed and RNG architecture</h2>
+<p>Three separate RNGs are used:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 26%">
+<col style="width: 40%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>RNG</th>
+<th>Seeding</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>placementRng = createRng(seed)</code></td>
+<td>Seeded (Alea PRNG)</td>
+<td>Animal centres, grid/random detector positions</td>
+</tr>
+<tr class="even">
+<td><code>movementRng = new Math.seedrandom()</code></td>
+<td>Fresh unseeded each <code>initSim()</code></td>
+<td>Per-frame OUV movement steps</td>
+</tr>
+<tr class="odd">
+<td><code>detectionRng = new Math.seedrandom()</code></td>
+<td>Fresh unseeded each <code>initSim()</code></td>
+<td>Bernoulli detection draws each occasion</td>
+</tr>
+</tbody>
+</table>
+<p>Same seed → same animal and detector layout. Movement paths and detection outcomes vary on every replay, even with the same seed.</p>
+<p>Seed range: 0–99999. Each browser session starts with a random seed. Entering and committing a seed value in the input field immediately calls <code>initSim()</code>.</p>
+<hr>
+</section>
+<section id="movement-model-ouv" class="level2">
+<h2 class="anchored" data-anchor-id="movement-model-ouv">Movement model (OUV)</h2>
+<p>Each frame during a run, every animal takes one <code>stepAnimal()</code> call from <code>src/secr-engine.js</code>. The model is Ornstein-Uhlenbeck in velocity space (OUV), also called an Ornstein-Uhlenbeck process in position via second-order Langevin dynamics.</p>
+<section id="frame-level-update" class="level3">
+<h3 class="anchored" data-anchor-id="frame-level-update">Frame-level update</h3>
+<pre><code>u1 = max(rng(), 1e-10),   u2 = rng()
+r  = sqrt(-2 * log(u1)),  θ = 2π * u2
+nx = r * cos(θ) * noiseScale          // Box-Muller N(0, noiseScale²)
+ny = r * sin(θ) * noiseScale
 
-
-
+vx_new = vx * (1 - drag) + springStr * (cx - x) + nx
+vy_new = vy * (1 - drag) + springStr * (cy - y) + ny
+x_new  = x + vx_new
+y_new  = y + vy_new</code></pre>
+<p>where <code>drag = 0.08</code> is a fixed constant.</p>
+</section>
+<section id="wall-reflection" class="level3">
+<h3 class="anchored" data-anchor-id="wall-reflection">Wall reflection</h3>
+<p>If an animal would exit the arena, its position is reflected and the outward velocity component is negated:</p>
+<pre><code>if x &lt; 0:       x = -x,           vx = -vx
+if x &gt; arenaW:  x = 2*arenaW - x, vx = -vx
+(same for y)</code></pre>
+</section>
+<section id="parameter-derivation" class="level3">
+<h3 class="anchored" data-anchor-id="parameter-derivation">Parameter derivation</h3>
+<p><code>springStr</code> and <code>noiseScale</code> are computed each frame from the slider values:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> fpk <span class="op">=</span> FRAMES_PER_OCC[speed]<span class="op">;</span> <span class="co">// frames per occasion</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> drag <span class="op">=</span> <span class="fl">0.08</span><span class="op">;</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> springStr <span class="op">=</span> drag <span class="op">/</span> (tau <span class="op">*</span> fpk)<span class="op">;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> noiseScale <span class="op">=</span> sigma <span class="op">*</span> drag <span class="op">*</span> <span class="fu">sqrt</span>(<span class="dv">2</span> <span class="op">/</span> (fidelity <span class="op">*</span> tau <span class="op">*</span> fpk))<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The derivation comes from the overdamped continuous-time Langevin equation:</p>
+<ul>
+<li>Position autocorrelation time <span class="math inline">\(\tau_x = \mathrm{drag} / K_s\)</span>, so <span class="math inline">\(K_s = \mathrm{drag}/(\tau \cdot \mathrm{fpk})\)</span>.</li>
+<li>Equilibrium variance: <span class="math inline">\(\mathrm{Var}(x) = \mathrm{noiseScale}^2 / (2 K_s \cdot \mathrm{drag}) = \sigma^2 / \mathrm{fidelity}\)</span>.</li>
+</ul>
+<p>This gives:</p>
+<ul>
+<li><span class="math inline">\(\tau\)</span> (occasions): controls position autocorrelation time (how long the animal takes to cross its home range).</li>
+<li>fidelity: controls noise amplitude and range tightness. Higher fidelity = smaller effective home range radius = <span class="math inline">\(\sigma / \sqrt{\mathrm{fidelity}}\)</span>.</li>
+</ul>
+</section>
+<section id="speed-and-frames-per-occasion" class="level3">
+<h3 class="anchored" data-anchor-id="speed-and-frames-per-occasion">Speed and frames per occasion</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Label</th>
+<th>Frames per occasion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Slow</td>
+<td>120</td>
+</tr>
+<tr class="even">
+<td>Normal</td>
+<td>60</td>
+</tr>
+<tr class="odd">
+<td>Fast</td>
+<td>15</td>
+</tr>
+</tbody>
+</table>
+<p>At 60 fps and Normal speed, each occasion takes 1 second of real time.</p>
+</section>
+<section id="display-smoothing" class="level3">
+<h3 class="anchored" data-anchor-id="display-smoothing">Display smoothing</h3>
+<p>The physics simulation runs at <code>true</code> positions <code>(x, y)</code>. A separate display position <code>(dx, dy)</code> is lerped toward the true position each frame:</p>
+<pre><code>dx_new = dx + 0.15 * (x - dx)
+dy_new = dy + 0.15 * (y - dy)</code></pre>
+<p>The <code>DISPLAY_LERP = 0.15</code> factor creates smooth animation without affecting the detection computation. Detection uses <code>(cx, cy)</code>, not <code>(dx, dy)</code>.</p>
+<hr>
+</section>
+</section>
+<section id="movement-presets" class="level2">
+<h2 class="anchored" data-anchor-id="movement-presets">Movement presets</h2>
+<p>Presets set <span class="math inline">\(\tau\)</span> and fidelity simultaneously.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 19%">
+<col style="width: 8%">
+<col style="width: 59%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Preset</th>
+<th><span class="math inline">\(\tau\)</span> (occasions)</th>
+<th>Fidelity</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Resident</td>
+<td>5.0</td>
+<td>1.0</td>
+<td>Default. Moderate range size, moderate return.</td>
+</tr>
+<tr class="even">
+<td>Sedentary</td>
+<td>6.0</td>
+<td>3.0</td>
+<td>Tighter home range (radius ÷ √3). Slower crossing time.</td>
+</tr>
+<tr class="odd">
+<td>Wide-ranging</td>
+<td>2.0</td>
+<td>0.4</td>
+<td>Larger effective range (radius × √2.5). Faster crossing.</td>
+</tr>
+<tr class="even">
+<td>Nomad</td>
+<td>1.0</td>
+<td>0.2</td>
+<td>Very fast, large range; barely constrained to a centre.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="detection-function" class="level2">
+<h2 class="anchored" data-anchor-id="detection-function">Detection function</h2>
+<p>One occasion = one call to <code>tryDetectsOnOccasion(animals, detectors, g0, sigmaEff, rng)</code>.</p>
+<p>For every (animal <span class="math inline">\(i\)</span>, detector <span class="math inline">\(j\)</span>) pair:</p>
+<ol type="1">
+<li><p>Distance from the animal’s <strong>activity centre</strong> to the detector:</p>
+<pre><code>d_ij = hypot(animal.cx - detector.x, animal.cy - detector.y)</code></pre></li>
+<li><p>Detection probability:</p>
+<pre><code>g_ij = g0 * halfNormal(d_ij, sigmaEff)
+     = g0 * exp(-d_ij² / (2 * sigmaEff²))</code></pre></li>
+<li><p>Bernoulli draw: <code>detected = detectionRng() &lt; g_ij</code>.</p></li>
+<li><p>If detected: record <code>{ animalId, detectorId }</code>.</p></li>
+</ol>
+<p>Each animal can be detected by <strong>multiple detectors on the same occasion</strong>. Each (animal, detector, occasion) triple produces one capture event. The capture history therefore records the detector index too, not just presence/absence.</p>
+<p>Detection is based on <code>(cx, cy)</code> (the latent activity centre), not on the display position <code>(dx, dy)</code> or the physics position <code>(x, y)</code>. This is consistent with the SECR model: the detection function <span class="math inline">\(g(d)\)</span> is a marginalised home-range detection function, integrating over all locations within the home range that a centre at <span class="math inline">\((c_x, c_y)\)</span> implies.</p>
+<section id="effective-detection-σ" class="level3">
+<h3 class="anchored" data-anchor-id="effective-detection-σ">Effective detection σ</h3>
+<pre><code>sigmaEff = sigma / sqrt(fidelity)</code></pre>
+<p>Higher fidelity compresses the home range. <code>sigmaEff</code> is passed to <code>tryDetectsOnOccasion</code> and to all ESA computations. The UI slider reads <code>sigma</code>; the underlying detection range is automatically adjusted.</p>
+</section>
+<section id="detector-type-presets" class="level3">
+<h3 class="anchored" data-anchor-id="detector-type-presets">Detector type presets</h3>
+<p>These set <code>g0</code> and <code>sigma</code> simultaneously.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 6%">
+<col style="width: 18%">
+<col style="width: 59%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Preset</th>
+<th><span class="math inline">\(g_0\)</span></th>
+<th><span class="math inline">\(\sigma\)</span> (km)</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Default</td>
+<td>0.20</td>
+<td>0.15</td>
+<td>Balanced starting point</td>
+</tr>
+<tr class="even">
+<td>Camera trap</td>
+<td>0.25</td>
+<td>0.08</td>
+<td>High detection within narrow field</td>
+</tr>
+<tr class="odd">
+<td>Live trap</td>
+<td>0.40</td>
+<td>0.05</td>
+<td>Very localised, high if animal passes</td>
+</tr>
+<tr class="even">
+<td>Acoustic</td>
+<td>0.12</td>
+<td>0.40</td>
+<td>Wide detection radius, moderate probability</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+</section>
+<section id="effective-sample-area-esa" class="level2">
+<h2 class="anchored" data-anchor-id="effective-sample-area-esa">Effective sample area (ESA)</h2>
+<section id="single-occasion-p_1x-y" class="level3">
+<h3 class="anchored" data-anchor-id="single-occasion-p_1x-y">Single-occasion <span class="math inline">\(p_1(x, y)\)</span></h3>
+<p>The probability that an animal with activity centre at <span class="math inline">\((c_x, c_y)\)</span> is detected by at least one detector on a single occasion:</p>
+<p><span class="math display">\[
+p_1(c_x, c_y) = 1 - \prod_{j=1}^{J} \bigl(1 - g_0 \cdot g(d_j)\bigr)
+\]</span></p>
+<p>where <span class="math inline">\(d_j = \|(c_x, c_y) - \text{det}_j\|\)</span> and <span class="math inline">\(g(d) = \exp(-d^2 / 2\sigma_{\rm eff}^2)\)</span>.</p>
+<p>This is computed as a log-sum for numerical stability:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>logNonDetect <span class="op">+=</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="op">-</span> g0 <span class="op">*</span> <span class="fu">halfNormal</span>(d<span class="op">,</span> sigma) <span class="op">+</span> <span class="fl">1e-15</span>)<span class="op">;</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>p1 <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> <span class="fu">exp</span>(logNonDetect)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="k-occasion-esa" class="level3">
+<h3 class="anchored" data-anchor-id="k-occasion-esa"><span class="math inline">\(K\)</span>-occasion ESA</h3>
+<p>The probability of being caught <strong>at least once</strong> across <span class="math inline">\(k\)</span> independent occasions:</p>
+<p><span class="math display">\[
+p_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k
+\]</span></p>
+<p>ESA is then the numerical integral over the full arena:</p>
+<p><span class="math display">\[
+\mathrm{ESA}(k) = \sum_{\rm cells} \bigl[1 - (1 - p_1)^k\bigr] \cdot \Delta A
+\]</span></p>
+<p>The arena is discretised into <strong>60 × 60 = 3600 cells</strong> for ESA computation (both in the analytics D̂ historical series and in the estimates strip). <code>cellArea = arenaW * arenaH / (60 * 60)</code>.</p>
+<p>For the D̂ convergence chart, the detection surface (<code>p_1</code> for each cell) is computed once and reused for all <span class="math inline">\(k = 1, 2, \ldots, k_{\rm current}\)</span>, by applying the <span class="math inline">\(k\)</span>-exponent formula cell-by-cell. This avoids recomputing the surface <span class="math inline">\(k\)</span> times.</p>
+<p>The estimates strip uses <code>computeESA_K</code> from <code>src/secr-engine.js</code>, which is equivalent: a grid reduction over the surface.</p>
+<hr>
+</section>
+</section>
+<section id="density-estimator-1" class="level2">
+<h2 class="anchored" data-anchor-id="density-estimator-1">Density estimator</h2>
+<p><span class="math display">\[
+\hat{D}(k) = \frac{M(k)}{\mathrm{ESA}(k)}
+\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(M(k)\)</span> = number of <strong>unique</strong> animal IDs in captures with occasion <span class="math inline">\(\leq k\)</span>.</li>
+<li><span class="math inline">\(\mathrm{ESA}(k)\)</span> = <span class="math inline">\(K\)</span>-occasion ESA using <code>sigmaEff</code> and the current detector layout.</li>
+</ul>
+<p><span class="math inline">\(\hat{D}\)</span> is plotted at each completed occasion as a convergence trace. True density is <code>N / ARENA_KM²</code>.</p>
+<p>This is an educational estimator only: it uses the true <span class="math inline">\(g_0\)</span> and <span class="math inline">\(\sigma\)</span> parameters and does not fit a likelihood model to the capture histories. A full SECR MLE would estimate <span class="math inline">\(g_0\)</span>, <span class="math inline">\(\sigma\)</span>, and <span class="math inline">\(D\)</span> from the data.</p>
+<hr>
+</section>
+<section id="analytics-panels-2" class="level2">
+<h2 class="anchored" data-anchor-id="analytics-panels-2">Analytics panels</h2>
+<p>Four panels rendered by <code>secr/analytics.js</code> using D3. They subscribe to the shared state and re-render on every notification (detector change, parameter change, or occasion completion). Position updates do not trigger re-renders.</p>
+<section id="detection-surface-heatmap" class="level3">
+<h3 class="anchored" data-anchor-id="detection-surface-heatmap">1. Detection surface heatmap</h3>
+<p>Shows the single-occasion detection probability <span class="math inline">\(p_1(c_x, c_y)\)</span> over the full arena as a 50 × 50 colour grid using the YlOrRd D3 colour scale. A cell is transparent if <span class="math inline">\(p &lt; 0.001\)</span>.</p>
+<p>The heatmap redraws whenever <code>g0</code>, <code>sigma</code>/<code>sigmaEff</code>, or the detector layout changes. It is skipped entirely when the “Show detection surface” overlay is not visible; this avoids expensive grid computation on every occasion tick.</p>
+<p>The inner study area boundary is overlaid as a dashed blue rectangle. Detector positions are overlaid as small blue dots.</p>
+</section>
+<section id="capture-history-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="capture-history-matrix">2. Capture history matrix</h3>
+<p>One row per captured animal (in order of first capture), one column per completed occasion. Cells show a coloured background and the detector IDs (comma-separated) for all detectors that caught the animal on that occasion. Empty occasions show a grey cell.</p>
+<p>Row labels are coloured boxes A–J matching the per-animal colours used in the simulation display.</p>
+</section>
+<section id="d-convergence-chart-1" class="level3">
+<h3 class="anchored" data-anchor-id="d-convergence-chart-1">3. D̂ convergence chart</h3>
+<p>Green line: <span class="math inline">\(\hat{D}(k)\)</span> for <span class="math inline">\(k = 1, \ldots, k_{\rm current}\)</span>. Red dashed horizontal line: true <span class="math inline">\(D\)</span>. X-axis: occasion index. Y-axis has expand-only tracking as in the DS module.</p>
+</section>
+<section id="running-estimates-strip-1" class="level3">
+<h3 class="anchored" data-anchor-id="running-estimates-strip-1">4. Running estimates strip</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(k\)</span></td>
+<td>Current / target occasions</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(M\)</span></td>
+<td>Unique individuals caught</td>
+</tr>
+<tr class="odd">
+<td>Total captures</td>
+<td>Count of all (animal, detector, occasion) events</td>
+</tr>
+<tr class="even">
+<td>ESA</td>
+<td><span class="math inline">\(k\)</span>-occasion ESA (km²) at current <span class="math inline">\(k\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\hat{D}\)</span></td>
+<td><span class="math inline">\(M / \mathrm{ESA}(k)\)</span></td>
+</tr>
+<tr class="even">
+<td>True <span class="math inline">\(D\)</span></td>
+<td><span class="math inline">\(N / \mathrm{ARENA\_KM}^2\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Additional derived quantities shown below the table:</p>
+<ul>
+<li>Estimated home-range area: <span class="math inline">\(\pi \sigma_{\rm eff}^2\)</span> (km²).</li>
+<li>Mean recapture rate: total captures / (<span class="math inline">\(M \times k\)</span>), computed only when <span class="math inline">\(M &gt; 0\)</span> and <span class="math inline">\(k &gt; 0\)</span>.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="phase-states" class="level2">
+<h2 class="anchored" data-anchor-id="phase-states">Phase states</h2>
+<p>The simulation has four phases, tracked in <code>phase</code>:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>State</th>
+<th>Label</th>
+<th>Transition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>idle</code></td>
+<td>▶ Run</td>
+<td>After <code>initSim()</code>, before first Run press</td>
+</tr>
+<tr class="even">
+<td><code>running</code></td>
+<td>⏸ Pause</td>
+<td>While occasions are ticking</td>
+</tr>
+<tr class="odd">
+<td><code>paused</code></td>
+<td>▶ Resume</td>
+<td>After Pause press</td>
+</tr>
+<tr class="even">
+<td><code>complete</code></td>
+<td>↺ Run again</td>
+<td>After <code>currentK &gt;= targetK</code></td>
+</tr>
+</tbody>
+</table>
+<p>“Run again” (pressed when complete) adds another <code>K</code> occasions to <code>targetK</code> and continues on the same population; it does <strong>not</strong> reset the animals or detectors.</p>
+<hr>
+</section>
+<section id="control-taxonomy-1" class="level2">
+<h2 class="anchored" data-anchor-id="control-taxonomy-1">Control taxonomy</h2>
+<section id="live-update-no-reset-required" class="level3">
+<h3 class="anchored" data-anchor-id="live-update-no-reset-required">Live update (no reset required)</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 65%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(g_0\)</span> slider</td>
+<td>Updates detection probability and surface immediately</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\sigma\)</span> slider</td>
+<td>Updates <code>sigmaEff</code>, detection surface, and ESA immediately</td>
+</tr>
+<tr class="odd">
+<td>Fidelity <span class="math inline">\(f\)</span> slider</td>
+<td>Updates <code>sigmaEff</code> (via <code>sigma / √f</code>) and surface</td>
+</tr>
+<tr class="even">
+<td>Detector type preset</td>
+<td>Sets <span class="math inline">\(g_0\)</span> and <span class="math inline">\(\sigma\)</span>; same as moving those two sliders</td>
+</tr>
+<tr class="odd">
+<td>Show detection surface checkbox</td>
+<td>Toggles heatmap visibility; triggers redraw</td>
+</tr>
+<tr class="even">
+<td>Show activity centres checkbox</td>
+<td>Toggles centroid overlay</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="reset-required" class="level3">
+<h3 class="anchored" data-anchor-id="reset-required">Reset required</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 34%">
+<col style="width: 65%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Control</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(N\)</span> slider</td>
+<td>Number of animals (placement regenerated)</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(K\)</span> slider</td>
+<td>Occasions per run</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\tau\)</span> slider</td>
+<td>Movement timescale (affects movement physics)</td>
+</tr>
+<tr class="even">
+<td>Distribution layout</td>
+<td>Grid / random / custom</td>
+</tr>
+<tr class="odd">
+<td>Grid size <span class="math inline">\(n_{\rm grid}\)</span></td>
+<td>Only applicable in grid mode</td>
+</tr>
+<tr class="even">
+<td>Seed</td>
+<td>Entirely new placement</td>
+</tr>
+</tbody>
+</table>
+<p>Add/remove detectors in custom mode is the one exception: detector changes take effect immediately without a full reset, because <code>updateDetectors()</code> notifies the analytics and the surface redraws.</p>
+<hr>
+</section>
+</section>
+<section id="assumptions-and-limitations-3" class="level2">
+<h2 class="anchored" data-anchor-id="assumptions-and-limitations-3">Assumptions and limitations</h2>
+<ul>
+<li>The density estimator uses known true <span class="math inline">\(g_0\)</span> and <span class="math inline">\(\sigma\)</span>. A real SECR analysis would estimate these from the capture histories.</li>
+<li><span class="math inline">\(g(d)\)</span> is half-normal only. No other detection function is implemented.</li>
+<li>The movement model is the same for all individuals; there is no individual variation in <span class="math inline">\(\tau\)</span> or fidelity.</li>
+<li>The arena has reflecting boundaries. In reality, populations extend beyond any study area.</li>
+<li>Multiple detections of the same individual by the same detector on different occasions are tracked independently. The capture history records every (animal, detector, occasion) event, not just first capture.</li>
+<li>Habitat is uniform; <code>habitatFn = () =&gt; 1</code> throughout.</li>
+</ul>
 </section>
 
 </main> <!-- /main -->

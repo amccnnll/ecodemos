@@ -32,7 +32,7 @@ a {
 .nav-title {
   font-weight: 600;
   margin-right: auto;
-  color: inherit;
+  color: #008539;
   text-decoration: none;
 }
 
@@ -418,6 +418,7 @@ a {
 /* Scatter panel sits in the grid, below the sim + metrics rows */
 .module-layout--bne .bne-analytics {
   grid-area: scatter;
+  max-width: none;
   margin: 0;
   padding: 6px 8px 16px;
   background: #fff;
