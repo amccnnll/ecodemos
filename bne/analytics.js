@@ -488,7 +488,7 @@ function buildScatter() {
   }
 
   const { dolphins, communities } = anal;
-  const { nicheBreadth, core50 } = met;
+  const { nicheBreadth, evenness } = met;
 
   const rect    = scatterContainer.getBoundingClientRect();
   const W       = Math.max(rect.width  || 500, 300);
@@ -498,9 +498,8 @@ function buildScatter() {
   const iH = H_chart - margin.t - margin.b;
 
   const xMax = d3.max(nicheBreadth) || 1;
-  const yMax = d3.max(core50) || 1;
   const xScale = d3.scaleLinear().domain([0, xMax * 1.06]).nice().range([0, iW]);
-  const yScale = d3.scaleLinear().domain([0, yMax * 1.08]).nice().range([iH, 0]);
+  const yScale = d3.scaleLinear().domain([0, 1]).range([iH, 0]);
 
   const svg = d3.select(scatterContainer).append('svg')
     .attr('width', W).attr('height', H_chart);
@@ -526,17 +525,17 @@ function buildScatter() {
   // Axis labels
   g.append('text').attr('x', iW / 2).attr('y', iH + 36)
     .attr('text-anchor', 'middle').attr('font-size', '11px').attr('fill', '#555')
-    .text('Niche breadth (hexes with non-zero B*)');
+    .text('Niche breadth (hexes with B* > 5% of peak)');
 
   g.append('text')
     .attr('transform', 'rotate(-90)')
     .attr('x', -iH / 2).attr('y', -40)
     .attr('text-anchor', 'middle').attr('font-size', '11px').attr('fill', '#555')
-    .text('Core₅₀ (hexes for 50% of B*)');
+    .text('Pielou J (habitat evenness, 0–1)');
 
   // Points
   const points = dolphins.map((d, i) => ({
-    nb: nicheBreadth[i], c50: core50[i],
+    nb: nicheBreadth[i], ev: evenness[i],
     community: communities[i], isSpecialist: d.isSpecialist,
     guild_true: d.guild_true, id: d.dolphin_id,
   }));
@@ -545,7 +544,7 @@ function buildScatter() {
     .data(points)
     .join('circle')
     .attr('cx', d => xScale(d.nb))
-    .attr('cy', d => yScale(d.c50))
+    .attr('cy', d => yScale(d.ev))
     .attr('r', 5)
     .attr('fill',         d => d.community >= 0 ? GUILD_COLS[d.community % GUILD_COLS.length] : UNASSIGNED)
     .attr('fill-opacity', 0.80)
@@ -555,7 +554,7 @@ function buildScatter() {
     .text(d => {
       const s = d.isSpecialist ? 'Specialist' : 'Generalist';
       const c = d.community >= 0 ? `Community ${d.community + 1}` : 'Unassigned';
-      return `Dolphin ${d.id} · ${s} · ${c} · breadth ${d.nb} · core50 ${d.c50}`;
+      return `Dolphin ${d.id} · ${s} · ${c} · breadth ${d.nb} · J ${d.ev.toFixed(3)}`;
     });
 
   // Inline legend (top-right corner)

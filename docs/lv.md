@@ -2,7 +2,7 @@
 title: "Lotka-Volterra (LV)"
 ---
 
-[→ Open simulation](../lv/)
+[→ Open simulation](../lv/) &nbsp;·&nbsp; [GitHub repository](https://github.com/amccnnll/ecodemos)
 
 ## Overview
 

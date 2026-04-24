@@ -2,7 +2,7 @@
 title: "SECR"
 ---
 
-[→ Open simulation](../secr/)
+[→ Open simulation](../secr/) &nbsp;·&nbsp; [GitHub repository](https://github.com/amccnnll/ecodemos)
 
 ## Overview
 

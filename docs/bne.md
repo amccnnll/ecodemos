@@ -2,7 +2,7 @@
 title: "Bipartite Network Ecology (BNE)"
 ---
 
-[→ Open simulation](../bne/)
+[→ Open simulation](../bne/) &nbsp;·&nbsp; [GitHub repository](https://github.com/amccnnll/ecodemos)
 
 ## Overview
 

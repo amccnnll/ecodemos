@@ -3,6 +3,8 @@ title: "ecodemos documentation"
 toc: false
 ---
 
+[GitHub repository](https://github.com/amccnnll/ecodemos)
+
 Reference documentation for all current simulations.
 
 ## Simulations

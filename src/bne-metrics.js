@@ -13,8 +13,7 @@ export function computeMetrics(simData, analysis) {
   for (let i = 0; i < N; i++) {
     const off = i * H;
     // Relative threshold: only count hexes with B* > 5% of this dolphin's peak.
-    // Removes Poisson-noise incidentals from niche calculations, giving genuine
-    // specialist/generalist separation rather than every dolphin appearing broad.
+    // Removes Poisson-noise incidentals from the niche breadth count.
     let maxB = 0;
     for (let hi = 0; hi < H; hi++) { if (Bstar[off + hi] > maxB) maxB = Bstar[off + hi]; }
     const thresh = maxB * 0.05;
@@ -25,13 +24,19 @@ export function computeMetrics(simData, analysis) {
       if (v > thresh) { total += v; nonZero++; }
     }
     nicheBreadth[i] = nonZero;
-    if (nonZero <= 1 || total === 0) { evenness[i] = 0; continue; }
-    let shannon = 0;
+
+    // Pielou's J over ALL H sea hexes (0 * log(0) = 0 convention).
+    // Normalising by log(H) rather than log(nonZero) keeps a constant
+    // denominator so specialists (concentrated B*) score lower than generalists.
+    let totalAll = 0;
+    for (let hi = 0; hi < H; hi++) { const v = Bstar[off + hi]; if (v > 0) totalAll += v; }
+    if (totalAll === 0 || H <= 1) { evenness[i] = 0; continue; }
+    let shannonAll = 0;
     for (let hi = 0; hi < H; hi++) {
       const v = Bstar[off + hi];
-      if (v > thresh) { const p = v / total; shannon -= p * Math.log(p); }
+      if (v > 0) { const p = v / totalAll; shannonAll -= p * Math.log(p); }
     }
-    evenness[i] = shannon / Math.log(nonZero);
+    evenness[i] = shannonAll / Math.log(H);
   }
 
   // ── Core50: hexes needed to capture 50% of total B* (sorted descending) ─

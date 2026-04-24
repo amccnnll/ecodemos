@@ -150,7 +150,9 @@ export function generateSimulation({
   // keeps effort nearshore, low effortBias spreads it across the domain.
   // Hex size only affects post-hoc binning (same as the dolphin home ranges).
   const M_PER_YEAR = 60;
-  const sigmaEff = (0.15 + (1 - effortBias) * 0.50) * domainDiag;
+  // Rayleigh sigma: density peaks AT sigmaEff, so keep it well below the sea extent.
+  // effortBias=1 → tightly nearshore; effortBias=0 → spread across domain.
+  const sigmaEff = (0.05 + (1 - effortBias) * 0.30) * domainDiag;
 
   const seaIdxMap = new Map(seaHexes.map((h, i) => [h.hex_id, i]));
 

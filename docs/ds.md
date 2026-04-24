@@ -2,7 +2,7 @@
 title: "Distance Sampling (DS)"
 ---
 
-[→ Open simulation](../ds/)
+[→ Open simulation](../ds/) &nbsp;·&nbsp; [GitHub repository](https://github.com/amccnnll/ecodemos)
 
 ## Overview
 
