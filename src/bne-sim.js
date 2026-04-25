@@ -76,6 +76,9 @@ export function generateSimulation({
   // sigmaCluster: within-cluster dispersion of θ_i around its centroid.
   // overlap=0 → tight clusters (σ=0.05); overlap=0.9 → heavy mixing (σ=0.455).
   const sigmaCluster = 0.05 + guildOverlap * 0.45;
+  // Specialists draw θ from a tighter Gaussian than generalists: their habitat
+  // preferences are more peaked on the guild's axes, not just amplified.
+  const specialistThetaScale = 0.4;
 
   // ── Dolphins ──────────────────────────────────────────────────────────
   // Home-range centres sampled CONTINUOUSLY over the sea region (rejection sampling)
@@ -92,12 +95,14 @@ export function generateSimulation({
     const gc = isSpecialist ? specCoeff : genCoeff;
     const u1 = Math.max(1e-10, rand()), u2 = rand();
     const activity = 0.25 * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-    // θ_i: per-dolphin preference vector drawn from N(centroid_guild, σ_cluster² I)
+    // θ_i: per-dolphin preference vector drawn from N(centroid_guild, σ_θ² I).
+    // Specialists use a tighter σ_θ so their preferences sit closer to the guild centroid.
     const mu = centroids[guild];
+    const sigmaTheta = isSpecialist ? sigmaCluster * specialistThetaScale : sigmaCluster;
     const theta = [
-      clamp01(mu[0] + sigmaCluster * gaussian(rand)),
-      clamp01(mu[1] + sigmaCluster * gaussian(rand)),
-      clamp01(mu[2] + sigmaCluster * gaussian(rand)),
+      clamp01(mu[0] + sigmaTheta * gaussian(rand)),
+      clamp01(mu[1] + sigmaTheta * gaussian(rand)),
+      clamp01(mu[2] + sigmaTheta * gaussian(rand)),
     ];
     dolphins.push({ dolphin_id: i, guild_true: guild, isSpecialist, isResident: true, guildCoeff: gc,
                     mu_x, mu_y, sigma, activity, theta });

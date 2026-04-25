@@ -118,7 +118,7 @@
 
         <div class="slider-row">
           <span class="control-label slider-label">Transients</span>
-          <input type="range" id="sl-nTransients" class="param-slider" min="0" max="60" step="1" value="15" />
+          <input type="range" id="sl-nTransients" class="param-slider" min="0" max="60" step="1" value="2" />
           <span class="slider-value" id="val-nTransients">15</span>
         </div>
         <p class="control-hint">Transient visitors with no resident home range; mostly filtered out by the ≥ 4 sightings gate, but contribute to the raw sightings layer</p>
@@ -206,7 +206,7 @@
     <div class="bne-analytics">
       <div class="bne-scatter-panel">
         <h3 class="panel-title">Specialist / generalist</h3>
-        <p class="panel-subtitle">x = niche breadth (hexes with B* &gt; 5% of peak) &nbsp;·&nbsp; y = habitat-type spread (B*-weighted std dev across D<sub>h</sub>/P<sub>h</sub>/R<sub>h</sub>; lower = B* concentrated on habitat-similar hexes, independent of location) &nbsp;·&nbsp; colour = detected community &nbsp;·&nbsp; dark ring = specialist in the generative model (guild affinity coefficient 10× vs 5× for generalists)</p>
+        <p class="panel-subtitle">x = niche breadth (hexes with B* &gt; 5% of peak) &nbsp;·&nbsp; y = Pielou's J evenness of B* across hexes (low = concentrated, high = even) &nbsp;·&nbsp; size = √(total sightings); small dots flag low-data dolphins whose position may be noise &nbsp;·&nbsp; colour = detected community &nbsp;·&nbsp; dark ring = specialist in the generative model (sharper θ around guild centroid plus higher guild affinity coefficient: 10 vs 5 for generalists) &nbsp;·&nbsp; transients excluded</p>
         <div id="chart-bne-scatter"></div>
       </div>
     </div>

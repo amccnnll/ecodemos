@@ -46,13 +46,13 @@ Each of the $G$ guilds has a fixed centroid $\boldsymbol{\mu}_g \in [0,1]^3$ in 
 
 Each dolphin is assigned a latent cluster $g_i$ uniformly at random, then draws its own preference vector independently from a Gaussian centred on that cluster:
 
-$$\boldsymbol{\theta}_i \sim \mathcal{N}\!\left(\boldsymbol{\mu}_{g_i},\, \sigma_{\text{cluster}}^2\, \mathbf{I}\right), \quad \boldsymbol{\theta}_i \in [0,1]^3$$
+$$\boldsymbol{\theta}_i \sim \mathcal{N}\!\left(\boldsymbol{\mu}_{g_i},\, \sigma_{\theta,i}^2\, \mathbf{I}\right), \quad \boldsymbol{\theta}_i \in [0,1]^3$$
 
-where components are clamped to $[0,1]$ after sampling. The **Overlap** slider controls the dispersion:
+where components are clamped to $[0,1]$ after sampling. The dispersion depends on the **Overlap** slider and on whether the dolphin is a specialist:
 
-$$\sigma_{\text{cluster}} = 0.05 + \text{overlap} \times 0.45$$
+$$\sigma_{\text{cluster}} = 0.05 + \text{overlap} \times 0.45, \qquad \sigma_{\theta,i} = \begin{cases} 0.4\,\sigma_{\text{cluster}} & \text{specialist} \\ \sigma_{\text{cluster}} & \text{generalist} \end{cases}$$
 
-At overlap $= 0$, dolphins draw from tight clusters around their centroid ($\sigma_{\text{cluster}} = 0.05$; near-discrete behaviour). At overlap $= 0.9$, Gaussians are wide and heavily overlapping ($\sigma_{\text{cluster}} = 0.455$; fluid guild boundaries). Because $\boldsymbol{\theta}_i$ is per-dolphin rather than shared across a guild, two dolphins in the same latent cluster will still differ in their realised habitat preferences; those near cluster boundaries will naturally resemble dolphins in adjacent clusters.
+At overlap $= 0$, generalists draw from tight clusters around their centroid ($\sigma_{\text{cluster}} = 0.05$; near-discrete behaviour). At overlap $= 0.9$, generalist Gaussians are wide and heavily overlapping ($\sigma_{\text{cluster}} = 0.455$; fluid guild boundaries). Specialists always draw from a Gaussian 2.5 times tighter, so their preference vectors sit closer to the guild centroid; two specialists in the same guild are therefore more alike than two generalists in the same guild. Because $\boldsymbol{\theta}_i$ is per-dolphin rather than shared, dolphins near cluster boundaries will naturally resemble dolphins in adjacent clusters.
 
 ### Dolphin population
 
@@ -60,7 +60,7 @@ Home-range centres are sampled continuously and uniformly over the sea region by
 
 Importantly, two dolphins in the same habitat guild need not share any geographic space. Guild membership is a statement about *which types of habitat* a dolphin prefers, not about *where* it forages; the two may be on opposite sides of the bay and still be more similar in B\* profile than either is to a dolphin from a different guild in their neighbourhood.
 
-Dolphins are classified as **specialists** (fraction controlled by the **Specialist** slider) or **generalists**. The distinction is in habitat fidelity, not home-range size: both types share the same home-range scale ($\sigma = 0.4 \times \text{domain diagonal}$), but specialists have a higher guild affinity coefficient ($c_i = 10$) while generalists have a weaker one ($c_i = 5$).
+Dolphins are classified as **specialists** (fraction controlled by the **Specialist** slider) or **generalists**. Both share the same home-range scale ($\sigma = 0.4 \times \text{domain diagonal}$): each can range across the bay. The specialist/generalist distinction is in *habitat fidelity*, expressed two ways. First, specialists have a higher guild affinity coefficient ($c_i = 10$ vs $c_i = 5$ for generalists), amplifying habitat contrast in $\lambda$. Second, specialists draw $\boldsymbol{\theta}_i$ from a tighter Gaussian around the guild centroid (see above), so their preference vectors are more peaked on the guild's habitat axes rather than idiosyncratically spread. Together these mean a specialist concentrates time in a handful of habitat-appropriate hexes (which may be on opposite sides of the bay), while a generalist has weaker, more individual preferences and spreads more evenly across the available habitat.
 
 The raw habitat score for dolphin $i$ in hex $h$ is the dot product of $\boldsymbol{\theta}_i$ with the hex's environmental vector, treating disturbance as a negative axis:
 
@@ -72,7 +72,7 @@ $$\log \lambda_{i,h} = \alpha + a_i + c_i\,s_{i,h} - \frac{d_{i,h}^2}{2\sigma^2}
 
 where $\alpha = -4$ is the log-scale baseline, $a_i \sim \mathcal{N}(0,\,0.25^2)$ is individual activity, $c_i$ is the guild affinity coefficient, and $d_{i,h}$ is distance from dolphin $i$'s home-range centre to hex $h$.
 
-Specialists with $c_i = 10$ experience $e^{10} \approx 22{,}000\times$ contrast between their best and worst hexes; generalists with $c_i = 5$ experience $e^5 \approx 150\times$. This produces different habitat-type spread distributions without requiring different home-range sizes.
+Specialists with $c_i = 10$ experience $e^{10} \approx 22{,}000\times$ contrast between their best and worst hexes; generalists with $c_i = 5$ experience $e^5 \approx 150\times$. Combined with the tighter $\boldsymbol{\theta}$ draw, specialists end up with sharply peaked $\lambda$ on a small set of preferred hexes, while generalists' $\lambda$ varies more smoothly across the domain.
 
 ### Residents vs transients
 
@@ -148,19 +148,19 @@ where $A_{ij}$ is the edge weight, $k_i$ is the weighted degree, $m = \frac{1}{2
 
 ### Niche breadth and specialist/generalist scatter
 
-Two per-dolphin metrics are plotted in the Specialist/generalist scatter:
+Two per-dolphin metrics are plotted in the Specialist/generalist scatter. Transient dolphins (no resident home range) are excluded.
 
 **Niche breadth** (x-axis): number of hexes with $B^*_{i,h} > 0.05 \times \max_h B^*_{i,h}$ (5% relative threshold filters Poisson noise).
 
-**Habitat-type spread** (y-axis): the B\*-weighted standard deviation of dolphin $i$'s sightings across the three environmental axes. Let $w_{ih} = B^*_{ih} / \sum_h B^*_{ih}$; compute the weighted mean and variance of each field:
+**Pielou's J** (y-axis): the Shannon evenness of dolphin $i$'s normalised B\* distribution across the hexes they use. Let $w_{ih} = B^*_{ih} / \sum_h B^*_{ih}$ and let $H_i$ be the set of hexes with $w_{ih} > 0$:
 
-$$\mu_{i,k} = \sum_h w_{ih}\, E_{hk}, \qquad \sigma^2_{i,k} = \sum_h w_{ih}\,(E_{hk} - \mu_{i,k})^2, \quad k \in \{D, P, R\}$$
+$$J_i = \frac{-\sum_{h \in H_i} w_{ih} \ln w_{ih}}{\ln |H_i|}$$
 
-$$\text{spread}_i = \sqrt{\frac{\sigma^2_{i,D} + \sigma^2_{i,P} + \sigma^2_{i,R}}{3}}$$
+$J = 0$ means all B\* concentrates on a single hex; $J = 1$ means B\* is spread evenly. Specialists are expected to sit at low $J$ (concentrated on a few preferred hexes), generalists at high $J$ (even spread).
 
-Low spread means the dolphin's B\* is concentrated on hexes with similar environmental values, regardless of where those hexes are geographically. Specialists (high $c_i$) are expected to concentrate on habitat-appropriate hexes, yielding lower spread than generalists. Unlike niche breadth or core50, this metric is position-independent: two dolphins on opposite sides of the bay that share a habitat-type preference receive the same low score.
+Each point's radius encodes $\sqrt{\text{total sightings}}$, so small dots mark dolphins whose B\* profile rests on few records and may sit anywhere on the chart by chance. This is the diagnostic for whether an unusual scatter position reflects real concentration or just data sparsity. In real photo-ID work the niche-breadth × $J$ scatter is itself the metric used to *define* specialist behaviour: the truth-overlay ring shows whether the metric correctly identifies the dolphins the simulation marked as specialists.
 
-Pielou's J and core50 are still computed internally but are not plotted on the scatter.
+`habitatSpread` and `core50` are also computed internally and may be surfaced in future diagnostic views.
 
 ---
 
@@ -180,8 +180,8 @@ Pielou's J and core50 are still computed internally but are not plotted on the s
 | N | Total number of dolphins before retention filtering. Range: 20–200. Default: 60. |
 | G | Number of latent habitat clusters (2–6). Each has a centroid in the 3D preference space; each dolphin draws its own $\boldsymbol{\theta}_i$ from a Gaussian around its cluster's centroid. Default: 4. |
 | Overlap | Cluster dispersion $\sigma_{\text{cluster}}$ (0–0.9). At 0, dolphins draw from tight Gaussians ($\sigma = 0.05$; near-discrete guild structure); at 0.9, Gaussians are wide and cross-cluster similarity is common ($\sigma = 0.455$). Default: 0.30. |
-| Specialist | Fraction of dolphins with a high guild affinity coefficient ($c_i = 10$ vs $c_i = 5$ for generalists). Specialists concentrate B\* on habitat-appropriate hexes, yielding lower habitat-type spread on the scatter. Default: 0.50. |
-| Transients | Number of extra dolphins whose home-range centres are placed just outside the arena. Range: 0–60. They produce occasional edge sightings but mostly fail the ≥ 4 sightings filter. Default: 15. |
+| Specialist | Fraction of dolphins flagged as specialists. Specialists differ from generalists in two ways: a higher guild affinity coefficient ($c_i = 10$ vs $c_i = 5$), and a 2.5 times tighter $\boldsymbol{\theta}$ draw around the guild centroid. Together these produce sharply peaked $\lambda$ on a small set of preferred hexes. Default: 0.50. |
+| Transients | Number of extra dolphins whose home-range centres are placed just outside the arena. Range: 0–60. They produce occasional edge sightings but mostly fail the ≥ 4 sightings filter. Default: 2. |
 
 ### Survey
 
@@ -236,7 +236,7 @@ Pielou's J and core50 are still computed internally but are not plotted on the s
 - **Row normalisation before Jaccard**: normalising B\* rows to unit sum before computing similarity removes activity-level variation. Two dolphins with the same habitat preference but different total sighting counts remain equally similar.
 - **Louvain, not Leiden**: no vanilla-JS Leiden implementation exists with an appropriate licence. Louvain gives equivalent results at this scale and is fully reproducible given the seeded graph construction.
 - **Circular network layout**: nodes are placed on a circle sorted by community or guild, with angular gaps at group boundaries. This avoids force-directed instability and makes block structure immediately visible.
-- **Per-dolphin guild affinity**: specialist/generalist distinction is implemented via different guild affinity coefficients ($c_i = 10$ vs $c_i = 5$), not different home-range sizes. Both types share $\sigma = 0.4 \times \text{domainDiag}$. Specialists concentrate B\* on habitat-appropriate hexes, yielding lower habitat-type spread on the scatter, independent of where those hexes sit geographically.
+- **Specialist mechanism**: implemented as both a tighter $\boldsymbol{\theta}$ draw around the guild centroid ($\sigma_{\theta} = 0.4 \times \sigma_{\text{cluster}}$) *and* a higher guild affinity coefficient ($c_i = 10$ vs $c_i = 5$). The tighter draw makes specialist preferences peaked on the guild's habitat axes; the higher coefficient amplifies the resulting contrast in $\lambda$. Spatial home range ($\sigma = 0.4 \times \text{domainDiag}$) is identical for both groups: a specialist still ranges across the bay, but their time concentrates on a small set of habitat-matching hexes that may be spatially scattered.
 - **Hex-resolution MAUP**: changing hex size keeps the arena footprint constant by adjusting the column and row counts. The simulation demonstrates the modifiable areal unit problem: very fine hexes reduce co-occurrence to near zero; very coarse hexes collapse all dolphins into the same cells.
 - **Radial effort model**: $M = 60$ sample points per year are drawn from a 2D half-normal (Rayleigh) field centred on the port, with scale $\sigma_{\text{eff}} = (0.05 + (1 - \text{effortBias}) \times 0.30) \times \text{domainDiag}$. The Rayleigh density peaks at $\sigma_{\text{eff}}$, so this keeps default effort clearly nearshore. Each point contributes $\Gamma(2,1)$ effort and Poisson detections drawn from the continuous-space $\lambda_{i,w}$; hex size only determines the post-hoc binning of effort and sightings. Dolphin home-range centres are sampled continuously over the sea region, so the underlying truth is fully hex-size-invariant.
 

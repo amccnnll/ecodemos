@@ -571,7 +571,8 @@ function buildScatter() {
   }
 
   const { dolphins, communities } = anal;
-  const { nicheBreadth, habitatSpread } = met;
+  const { nicheBreadth, evenness } = met;
+  const totalSightings = state.simData ? state.simData.totalSightings : null;
 
   const rect    = scatterContainer.getBoundingClientRect();
   const W       = Math.max(rect.width  || 500, 300);
@@ -580,10 +581,12 @@ function buildScatter() {
   const iW = W - margin.l - margin.r;
   const iH = H_chart - margin.t - margin.b;
 
-  const xMax = d3.max(nicheBreadth) || 1;
-  const yMax = d3.max(habitatSpread) || 1;
+  // Residents only — transients have no habitat preference term so they add noise.
+  const residentIdx = dolphins.map((d, i) => i).filter(i => dolphins[i].isResident !== false);
+
+  const xMax = d3.max(residentIdx, i => nicheBreadth[i]) || 1;
   const xScale = d3.scaleLinear().domain([0, xMax * 1.06]).nice().range([0, iW]);
-  const yScale = d3.scaleLinear().domain([0, yMax * 1.10]).nice().range([iH, 0]);
+  const yScale = d3.scaleLinear().domain([0, 1]).range([iH, 0]);
 
   const svg = d3.select(scatterContainer).append('svg')
     .attr('width', W).attr('height', H_chart);
@@ -615,21 +618,27 @@ function buildScatter() {
     .attr('transform', 'rotate(-90)')
     .attr('x', -iH / 2).attr('y', -40)
     .attr('text-anchor', 'middle').attr('font-size', '11px').attr('fill', '#555')
-    .text('Habitat-type spread (lower = specialist)');
+    .text("Pielou's J (lower = specialist, higher = even use)");
 
-  // Points
-  const points = dolphins.map((d, i) => ({
-    nb: nicheBreadth[i], hs: habitatSpread[i],
-    community: communities[i], isSpecialist: d.isSpecialist,
-    guild_true: d.guild_true, id: d.dolphin_id,
+  // Points — residents only. Radius encodes total sightings so we can see
+  // whether unusual scatter positions are driven by real concentration or
+  // by data sparsity.
+  const points = residentIdx.map(i => ({
+    nb: nicheBreadth[i], j: evenness[i],
+    community: communities[i], isSpecialist: dolphins[i].isSpecialist,
+    guild_true: dolphins[i].guild_true, id: dolphins[i].dolphin_id,
+    n: totalSightings ? totalSightings[dolphins[i].dolphin_id] : 0,
   }));
+
+  const maxN = d3.max(points, d => d.n) || 1;
+  const rScale = d3.scaleSqrt().domain([0, maxN]).range([2.5, 9]);
 
   g.selectAll('circle')
     .data(points)
     .join('circle')
     .attr('cx', d => xScale(d.nb))
-    .attr('cy', d => yScale(d.hs))
-    .attr('r', 5)
+    .attr('cy', d => yScale(d.j))
+    .attr('r', d => rScale(d.n))
     .attr('fill',         d => d.community >= 0 ? GUILD_COLS[d.community % GUILD_COLS.length] : UNASSIGNED)
     .attr('fill-opacity', 0.80)
     .attr('stroke',       d => d.isSpecialist ? '#333' : 'none')
@@ -638,7 +647,7 @@ function buildScatter() {
     .text(d => {
       const s = d.isSpecialist ? 'Specialist' : 'Generalist';
       const c = d.community >= 0 ? `Community ${d.community + 1}` : 'Unassigned';
-      return `Dolphin ${d.id} · ${s} · ${c} · breadth ${d.nb} · habitat spread ${d.hs.toFixed(3)}`;
+      return `Dolphin ${d.id} · ${s} · ${c} · breadth ${d.nb} hexes · J ${d.j.toFixed(3)} · ${d.n} sightings`;
     });
 
   // Inline legend (top-right corner)
@@ -666,8 +675,22 @@ function buildScatter() {
   leg.append('text').attr('x', -87).attr('y', symY + 23).attr('font-size', '9px').attr('fill', '#444')
     .text('Generalist (true)');
 
+  // Size legend (radius = sqrt sightings)
+  const sizeY = symY + 36;
+  leg.append('text').attr('x', -100).attr('y', sizeY).attr('font-size', '9px').attr('fill', '#444')
+    .text('Size = √(sightings)');
+  const sizeMarks = [Math.max(1, Math.round(maxN * 0.1)), Math.max(2, Math.round(maxN * 0.5)), Math.max(3, Math.round(maxN))];
+  let sx = -95;
+  for (const v of sizeMarks) {
+    leg.append('circle').attr('cx', sx).attr('cy', sizeY + 14).attr('r', rScale(v))
+      .attr('fill', '#aaa').attr('fill-opacity', 0.45).attr('stroke', '#888').attr('stroke-width', 0.5);
+    leg.append('text').attr('x', sx).attr('y', sizeY + 30).attr('text-anchor', 'middle')
+      .attr('font-size', '8px').attr('fill', '#666').text(v);
+    sx += 22;
+  }
+
   // Legend box background (drawn first — insert before legend content)
-  const legH = nComm * 14 + 46;
+  const legH = nComm * 14 + 90;
   leg.insert('rect', ':first-child')
     .attr('x', -105).attr('y', -4).attr('width', 108).attr('height', legH)
     .attr('rx', 3).attr('fill', 'rgba(255,255,255,0.88)').attr('stroke', '#ddd').attr('stroke-width', 0.5);
