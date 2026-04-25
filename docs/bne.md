@@ -65,9 +65,11 @@ Dolphins are classified as _specialists_ (fraction controlled by the _Specialist
 - **Specialists** have a single sharp peak ($K_i = 1$) in habitat space, with a narrow width $\kappa_{\text{spec}}$.
 - **Generalists** have multiple peaks ($K_i = K_{\text{gen}}$, default 2), representing disjoint habitat types (e.g. shallow foraging plus deep refuge), with a peak width $\kappa_{\text{gen}}$.
 
-The habitat score for dolphin $i$ in hex $h$ evaluates a Gaussian mixture across their preferred peaks:
+The habitat score evaluates a Gaussian mixture across their preferred peaks, which is then normalised so each dolphin's maximum score across all available hexes is exactly 1:
 
-$$ \text{score}_i(h) = \sum_{k=1}^{K*i} \frac{1}{K_i} \exp\left( - \frac{\|\mathbf{e}\_h - \boldsymbol{\mu}*{i,k}\|^2}{2\kappa_i^2} \right) $$
+$$ \text{raw_score}_i(h) = \sum_{k=1}^{K*i} \frac{1}{K_i} \exp\left( - \frac{\|\mathbf{e}\_h - \boldsymbol{\mu}*{i,k}\|^2}{2\kappa_i^2} \right) $$
+
+$$ \text{score}_i(h) = \frac{\text{raw_score}\_i(h)}{\max_{h'} \text{raw_score}\_i(h')} $$
 
 where $\mathbf{e}_h = [D_h, P_h, 1 - R_h]$ is the environmental vector of the hex, and $\kappa_i$ is the peak width. Treating disturbance as a flipped axis ($1 - R_h$) means a high coordinate represents avoiding disturbance. The latent use intensity is then:
 
@@ -186,7 +188,7 @@ Each point's radius encodes $\sqrt{\text{total sightings}}$, so small dots mark 
 | Specialist | Fraction of dolphins flagged as specialists. Specialists differ from generalists by having a single, typically sharper peak ($K = 1$, $\kappa = \kappa_{\text{spec}}$) in habitat space, concentrating their time on a narrow set of preferred hexes. Generalists have multiple peaks ($K = K_{\text{gen}}$). Default: 0.50. |
 | Transients | Number of extra dolphins whose home-range centres are placed just outside the arena. Range: 0–60. They produce occasional edge sightings but mostly fail the ≥ 4 sightings filter. Default: 2.                                                                                                                               |
 | K_gen      | Number of peaks in habitat space for generalists (specialists fixed at 1). Range: 1–4. Default: 2.                                                                                                                                                                                                                           |
-| κ_spec     | Habitat peak width for specialists. Lower values produce sharper spatial niche breadth. Range: 0.05–0.40. Default: 0.15.                                                                                                                                                                                                     |
+| κ_spec     | Habitat peak width for specialists. Lower values produce sharper spatial niche breadth. Range: 0.05–0.40. Default: 0.08.                                                                                                                                                                                                     |
 | κ_gen      | Habitat peak width for generalists. Range: 0.05–0.40. Default: 0.15.                                                                                                                                                                                                                                                         |
 
 ### Survey

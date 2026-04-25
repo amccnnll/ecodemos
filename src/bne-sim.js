@@ -160,6 +160,9 @@ export function generateSimulation({
     const baseFactor = lambdaBase * Math.exp(d.activity);
     const twoKappa2 = 2 * d.kappa * d.kappa;
     
+    const rawScores = new Float64Array(H);
+    let maxScore = 0;
+    
     for (let hi = 0; hi < H; hi++) {
       let score = 0;
       for (let k = 0; k < d.peaks.length; k++) {
@@ -167,12 +170,18 @@ export function generateSimulation({
         const dist2 = (envD[hi] - pk[0])**2 + (envP[hi] - pk[1])**2 + (envR[hi] - pk[2])**2;
         score += d.weights[k] * Math.exp(-dist2 / twoKappa2);
       }
-      
+      rawScores[hi] = score;
+      if (score > maxScore) maxScore = score;
+    }
+    
+    const normFactor = maxScore > 0 ? 1.0 / maxScore : 1.0;
+
+    for (let hi = 0; hi < H; hi++) {
       const hx = seaHexes[hi];
       const dx = hx.x - d.mu_x, dy = hx.y - d.mu_y;
       const hrTerm = Math.exp(-(dx * dx + dy * dy) / sig2);
       
-      lambdaIH[i * H + hi] = baseFactor * score * hrTerm;
+      lambdaIH[i * H + hi] = baseFactor * (rawScores[hi] * normFactor) * hrTerm;
     }
   }
 
