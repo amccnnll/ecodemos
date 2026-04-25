@@ -57,8 +57,10 @@ export function generateSimulation({
   effortBias    = 0.7,
   detectionProb = 0.3,
   sigmaScale    = 0.40,  // uniform home-range scale as fraction of domain diagonal
-  specCoeff     = 10.0,  // guild affinity strength for specialists (strong habitat fidelity)
-  genCoeff      = 5.0,   // guild affinity strength for generalists (weaker fidelity)
+  K_gen         = 2,     // generalist number of preferred habitat peaks
+  kappaSpec     = 0.15,  // habitat peak width for specialists
+  kappaGen      = 0.15,  // habitat peak width for generalists
+  lambdaBase    = 0.6,   // baseline rate for sighting calibration
   seed          = 42,
 } = {}) {
   const rand       = mulberry32((seed + 100) | 0);
@@ -73,12 +75,9 @@ export function generateSimulation({
 
   // ── Guild centroids and dispersion ───────────────────────────────────
   const centroids = makeGuildCentroids(G, rand);
-  // sigmaCluster: within-cluster dispersion of θ_i around its centroid.
+  // sigmaCluster: within-cluster dispersion of preference peaks around their centroid.
   // overlap=0 → tight clusters (σ=0.05); overlap=0.9 → heavy mixing (σ=0.455).
   const sigmaCluster = 0.05 + guildOverlap * 0.45;
-  // Specialists draw θ from a tighter Gaussian than generalists: their habitat
-  // preferences are more peaked on the guild's axes, not just amplified.
-  const specialistThetaScale = 0.4;
 
   // ── Dolphins ──────────────────────────────────────────────────────────
   // Home-range centres sampled CONTINUOUSLY over the sea region (rejection sampling)
@@ -92,20 +91,28 @@ export function generateSimulation({
     const guild = (rand() * G) | 0;
     const isSpecialist = rand() < specialistFraction;
     const { x: mu_x, y: mu_y } = sampleSeaPoint(hexGrid, rand);
-    const gc = isSpecialist ? specCoeff : genCoeff;
     const u1 = Math.max(1e-10, rand()), u2 = rand();
     const activity = 0.25 * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-    // θ_i: per-dolphin preference vector drawn from N(centroid_guild, σ_θ² I).
-    // Specialists use a tighter σ_θ so their preferences sit closer to the guild centroid.
+    
+    // Generative model: Gaussian mixture in habitat space.
+    // Specialists have a single sharp peak; generalists have multiple peaks.
+    const K_i = isSpecialist ? 1 : K_gen;
+    const kappa = isSpecialist ? kappaSpec : kappaGen;
+    const peaks = [];
+    const weights = [];
     const mu = centroids[guild];
-    const sigmaTheta = isSpecialist ? sigmaCluster * specialistThetaScale : sigmaCluster;
-    const theta = [
-      clamp01(mu[0] + sigmaTheta * gaussian(rand)),
-      clamp01(mu[1] + sigmaTheta * gaussian(rand)),
-      clamp01(mu[2] + sigmaTheta * gaussian(rand)),
-    ];
-    dolphins.push({ dolphin_id: i, guild_true: guild, isSpecialist, isResident: true, guildCoeff: gc,
-                    mu_x, mu_y, sigma, activity, theta });
+    
+    for (let k = 0; k < K_i; k++) {
+      peaks.push([
+        clamp01(mu[0] + sigmaCluster * gaussian(rand)),
+        clamp01(mu[1] + sigmaCluster * gaussian(rand)),
+        clamp01(mu[2] + sigmaCluster * gaussian(rand)),
+      ]);
+      weights.push(1.0 / K_i);
+    }
+    
+    dolphins.push({ dolphin_id: i, guild_true: guild, isSpecialist, isResident: true,
+                    mu_x, mu_y, sigma, activity, peaks, weights, kappa });
   }
 
   // ── Transient dolphins ────────────────────────────────────────────────
@@ -122,41 +129,50 @@ export function generateSimulation({
     else                 { mu_x = xMax + offset;           mu_y = yMin + rand() * domainH; }
     const u1 = Math.max(1e-10, rand()), u2 = rand();
     const activity = 0.25 * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-    // Transients get a random θ (uniform) — used in the Truth view edges but not in λ (guildCoeff=0).
-    const theta = [rand(), rand(), rand()];
+    
+    // Transients get a random uniform peak (K=1) so the Truth view kernel can evaluate them.
+    const peaks = [[rand(), rand(), rand()]];
+    const weights = [1.0];
+    const kappa = kappaGen;
     dolphins.push({ dolphin_id: N + j, guild_true: -1, isSpecialist: false, isResident: false,
-                    guildCoeff: 0, mu_x, mu_y, sigma, activity, theta });
+                    mu_x, mu_y, sigma, activity, peaks, weights, kappa });
   }
 
   const Ntotal = dolphins.length;
 
   // ── Latent use λ per dolphin × sea hex ────────────────────────────────
-  // log λ_{i,h} = -4 + activity + guildCoeff * normScore_i(h) + homeRange
-  // normScore_i(h) = min-max normalised dot product θ_i · [D_h, P_h, -R_h] so
-  // each dolphin's preferred hex is 1 and least preferred is 0.  guildCoeff
-  // then sets the contrast: specialists (10) are sharply peaked, generalists (5)
-  // moderately so, transients (0) have no habitat preference term.
+  // λ_ih = λ_base * exp(activity) * score_i(h) * exp(homeRangePenalty)
+  // score_i(h) is the mixture likelihood evaluated at the hex's environmental vector.
   const lambdaIH = new Float64Array(Ntotal * H);
   const sig2 = 2 * sigma * sigma;
-  const rawScore = new Float64Array(H);
+  
+  const envD = new Float64Array(H);
+  const envP = new Float64Array(H);
+  const envR = new Float64Array(H);
+  for (let hi = 0; hi < H; hi++) {
+    envD[hi] = seaHexes[hi].D_h;
+    envP[hi] = seaHexes[hi].P_h;
+    envR[hi] = 1.0 - seaHexes[hi].R_h; // high envR coord = avoid disturbance
+  }
+
   for (let i = 0; i < Ntotal; i++) {
     const d = dolphins[i];
-    // Compute raw habitat scores and find range for normalisation
-    let mn = Infinity, mx = -Infinity;
+    const baseFactor = lambdaBase * Math.exp(d.activity);
+    const twoKappa2 = 2 * d.kappa * d.kappa;
+    
     for (let hi = 0; hi < H; hi++) {
+      let score = 0;
+      for (let k = 0; k < d.peaks.length; k++) {
+        const pk = d.peaks[k];
+        const dist2 = (envD[hi] - pk[0])**2 + (envP[hi] - pk[1])**2 + (envR[hi] - pk[2])**2;
+        score += d.weights[k] * Math.exp(-dist2 / twoKappa2);
+      }
+      
       const hx = seaHexes[hi];
-      rawScore[hi] = d.theta[0] * hx.D_h + d.theta[1] * hx.P_h - d.theta[2] * hx.R_h;
-      if (rawScore[hi] < mn) mn = rawScore[hi];
-      if (rawScore[hi] > mx) mx = rawScore[hi];
-    }
-    const rng = mx - mn || 1;
-    for (let hi = 0; hi < H; hi++) {
-      const hx = seaHexes[hi];
-      const score = (rawScore[hi] - mn) / rng;
       const dx = hx.x - d.mu_x, dy = hx.y - d.mu_y;
-      const homeRangePenalty = -(dx * dx + dy * dy) / sig2;
-      const logLam = -4.0 + d.activity + d.guildCoeff * score + homeRangePenalty;
-      lambdaIH[i * H + hi] = Math.exp(logLam);
+      const hrTerm = Math.exp(-(dx * dx + dy * dy) / sig2);
+      
+      lambdaIH[i * H + hi] = baseFactor * score * hrTerm;
     }
   }
 

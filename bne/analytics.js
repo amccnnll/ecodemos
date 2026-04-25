@@ -86,7 +86,7 @@ function updateNetworkLegend(view) {
               <b>Node colour = latent cluster</b> (the true generative assignment each dolphin was drawn from) &nbsp;·&nbsp;
               Nodes sorted by latent cluster; labels G1, G2 … &nbsp;·&nbsp;
               Bright outline = retained (≥ 4 sightings and in the analysis); faint = not retained or transient &nbsp;·&nbsp;
-              <b>Edges = θ preference similarity</b> (Gaussian kernel; dolphins with similar habitat preferences are connected regardless of guild) &nbsp;·&nbsp;
+              <b>Edges = mixture preference similarity</b> (Gaussian kernel; dolphins with similar habitat preferences are connected regardless of guild) &nbsp;·&nbsp;
               Compare with the Communities view: if Louvain recovers the latent structure, detected C labels should align with true G labels.</span>`;
   }
 
@@ -390,22 +390,28 @@ function drawFullTruth(cW, cH) {
     id: d.dolphin_id, guild_true: d.guild_true,
     isSpecialist: d.isSpecialist, isResident: d.isResident,
     retained: retainedIds.has(d.dolphin_id),
-    theta: d.theta, x: 0, y: 0,
+    peaks: d.peaks, weights: d.weights, x: 0, y: 0,
   }));
 
   const nodeRadius   = Math.max(3, Math.min(6, 220 / Math.sqrt(M)));
   const layoutRadius = Math.min(cW, cH) * 0.38;
   placeOnCircle(nodes, 'guild_true', cW / 2, cH / 2, layoutRadius);
 
-  // Gaussian kernel edges on θ_i: w = exp(-‖θ_i − θ_j‖² / 2τ²)
+  // Mixture-mixture kernel: expected similarity across all pairs of peaks
   const TAU2 = 2 * 0.20 * 0.20;
   const THRESH = 0.35;
   const edges = [];
   for (let i = 0; i < M; i++) {
     for (let j = i + 1; j < M; j++) {
-      const ti = nodes[i].theta, tj = nodes[j].theta;
-      const d2 = (ti[0]-tj[0])**2 + (ti[1]-tj[1])**2 + (ti[2]-tj[2])**2;
-      const w = Math.exp(-d2 / TAU2);
+      let w = 0;
+      const pi = nodes[i].peaks, wi = nodes[i].weights;
+      const pj = nodes[j].peaks, wj = nodes[j].weights;
+      for (let k1 = 0; k1 < pi.length; k1++) {
+        for (let k2 = 0; k2 < pj.length; k2++) {
+          const d2 = (pi[k1][0] - pj[k2][0])**2 + (pi[k1][1] - pj[k2][1])**2 + (pi[k1][2] - pj[k2][2])**2;
+          w += wi[k1] * wj[k2] * Math.exp(-d2 / TAU2);
+        }
+      }
       if (w > THRESH) edges.push({ i, j, w });
     }
   }

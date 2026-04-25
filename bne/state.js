@@ -8,6 +8,7 @@ export const params = {
   cols: 18, rows: 14, hexSize: 30, seed: 42,
   // Population
   N: 60, G: 4, guildOverlap: 0.3, specialistFraction: 0.5, nTransients: 2, simSeed: 42,
+  K_gen: 2, kappaSpec: 0.15, kappaGen: 0.15, lambdaBase: 0.6,
   // Survey
   T: 6, effortBias: 0.7, detectionProb: 0.3,
   // Analysis
