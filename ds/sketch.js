@@ -351,8 +351,10 @@ new p5(function (p) {
 
 function syncBSlider() {
   const show = truthFn === 'hazardRate' || modelFn === 'hazardRate';
-  const row = document.getElementById('row-b');
-  if (row) row.style.display = show ? 'flex' : 'none';
+  const row  = document.getElementById('row-b');
+  const hint = document.getElementById('hint-b');
+  if (row)  row.style.display  = show ? 'flex'  : 'none';
+  if (hint) hint.style.display = show ? 'block' : 'none';
 }
 
 function syncMismatchWarning() {
@@ -361,10 +363,14 @@ function syncMismatchWarning() {
 }
 
 function syncDistributionSliders() {
-  const clumpRow = document.getElementById('row-clump-scale');
-  const regRow   = document.getElementById('row-regularity');
-  if (clumpRow) clumpRow.style.display = distribution === 'clustered' ? 'flex' : 'none';
-  if (regRow)   regRow.style.display   = distribution === 'regular'   ? 'flex' : 'none';
+  const clumpRow  = document.getElementById('row-clump-scale');
+  const regRow    = document.getElementById('row-regularity');
+  const clumpHint = document.getElementById('hint-clump');
+  const regHint   = document.getElementById('hint-regularity');
+  if (clumpRow)  clumpRow.style.display  = distribution === 'clustered' ? 'flex'  : 'none';
+  if (regRow)    regRow.style.display    = distribution === 'regular'   ? 'flex'  : 'none';
+  if (clumpHint) clumpHint.style.display = distribution === 'clustered' ? 'block' : 'none';
+  if (regHint)   regHint.style.display   = distribution === 'regular'   ? 'block' : 'none';
 }
 
 // Field truth and model selectors — live update

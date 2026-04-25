@@ -8,9 +8,9 @@ title: "Lotka-Volterra (LV)"
 
 Three two-species dynamical systems integrated via RK4, displayed as a live time series and phase-plane trajectory. The three modes are:
 
-- **Classic predator-prey**: the standard Lotka-Volterra system with no density dependence.
-- **Dynamic predator-prey**: adds logistic prey growth and predator self-limitation.
-- **Competition**: two-species Lotka-Volterra competition with carrying capacities and interaction coefficients.
+- *Classic predator-prey*: the standard Lotka-Volterra system with no density dependence.
+- *Dynamic predator-prey*: adds logistic prey growth and predator self-limitation.
+- *Competition*: two-species Lotka-Volterra competition with carrying capacities and interaction coefficients.
 
 The visualisation shows both how populations change over time and how they trace paths through state space (the phase plane).
 
@@ -83,7 +83,7 @@ Replaces the predator-prey parameters with two-species competition parameters.
 
 ## Numerical integration
 
-All three modes are integrated using **RK4** (classical fourth-order Runge-Kutta). The integration is in `src/lv-engine.js`.
+All three modes are integrated using *RK4* (classical fourth-order Runge-Kutta). The integration is in `src/lv-engine.js`.
 
 ### RK4 step
 
@@ -272,7 +272,8 @@ The analytics panel computes and displays these values live. The condition for s
 
 The state singleton (`lv/state.js`) holds current population values, the full integration parameters, and a rolling series buffer.
 
-- `series`: array of `{ t, prey, predator }` records, capped at **1600 points** by `state.series.shift()` when the cap is exceeded. The oldest point is removed first (FIFO). At Normal speed and default $\Delta t$, 1600 points corresponds to approximately 48 model-time units of history.
+- `series`: array of `{ t, prey, predator }` records, capped at *1600 points* by `state.series.shift()` when the cap is exceeded. The oldest point is removed first (FIFO). At Normal speed and default $\Delta t$, 1600 points corresponds to approximately 48 model-time units of history. Used by the time-series chart.
+- `phaseSeries`: separate array of `{ prey, predator }` records for the phase-plane chart, capped at 200,000 points. Because the cap is much higher, the phase plane retains the full trajectory of long runs where the time-series chart would have already scrolled.
 - `t`: current simulation time. Cumulative across runs until a Reset.
 - `running`: boolean.
 
@@ -285,7 +286,7 @@ By default, the simulation pauses automatically every 50 model-time units. This 
 - `pauseInterval = 50` (fixed).
 - `nextPauseAt` is advanced by `pauseInterval` each time a pause triggers.
 - When paused by checkpoint, `autoPausedAt` is set and the play button changes to "▶ Resume".
-- **Unbounded time** checkbox disables the checkpoint: `setUnboundedTime(true)` clears `autoPausedAt` and prevents the pause check.
+- *Unbounded time* checkbox disables the checkpoint: `setUnboundedTime(true)` clears `autoPausedAt` and prevents the pause check.
 - Toggling unbounded time off during a run advances `nextPauseAt` to the next 50-boundary above the current `t`.
 
 The exact pause logic in `advanceSimulation`:
@@ -310,7 +311,7 @@ All parameter sliders use a two-event pattern:
 - `input` event: updates the parameter value and display label immediately (live preview of the number).
 - `change` event (fires when slider drag ends): sets `running = false` and calls `resetState()`.
 
-This means moving a slider **always resets the simulation** when you release it. There is no live-update mode for parameters in LV.
+This means moving a slider *always resets the simulation* when you release it. There is no live-update mode for parameters in LV.
 
 ### Model type
 
@@ -318,8 +319,8 @@ Switching model type stops the simulation, applies the default preset for the ne
 
 ### Reset vs Reset Defaults
 
-- **Reset**: resets simulation time and populations to current initial conditions (`prey0`, `predator0`) without changing any parameters.
-- **Reset Defaults**: restores all parameters to the default preset for the active mode, then resets. For classic PP this is the "Balanced" preset; for dynamic PP the "Damped oscillations" preset; for competition the "Coexistence" preset.
+- *Reset*: resets simulation time and populations to current initial conditions (`prey0`, `predator0`) without changing any parameters.
+- *Reset Defaults*: restores all parameters to the default preset for the active mode, then resets. For classic PP this is the "Balanced" preset; for dynamic PP the "Damped oscillations" preset; for competition the "Coexistence" preset.
 
 ### Speed buttons
 
@@ -339,7 +340,7 @@ The series scrolls naturally because old points are dropped from `series` when t
 
 ### Phase-plane chart
 
-X-axis: prey (or species 1). Y-axis: predators (or species 2). The trajectory is drawn as a single path through all points in the current `series` buffer. A filled black dot marks the current position (last point). The chart is also rebuilt from scratch each frame. Axes expand to fit the current trajectory extent with 5% headroom.
+X-axis: prey (or species 1). Y-axis: predators (or species 2). The trajectory is drawn as a single path through all points in the `phaseSeries` buffer (up to 200,000 points). A filled black dot marks the current position (last point). The chart is also rebuilt from scratch each frame. Axes expand to fit the current trajectory extent with 5% headroom.
 
 ### Estimates strip
 
@@ -352,5 +353,5 @@ Displays current $t$, current $N$ (prey), current $P$ (predators), and analytica
 - The model is deterministic; there is no demographic stochasticity. Populations can reach fractional values.
 - Non-negativity is enforced by clamping, not by the ODEs. In particular, classic LV has no built-in carrying capacity on prey; prey grows without bound if predator density is very low.
 - In classic LV, the interior equilibrium is a centre (neutral stability). Integration with finite $\Delta t$ can produce slow orbital drift. Smaller $\Delta t$ reduces but does not eliminate this.
-- The 1600-point series cap means long runs lose early history. The phase plane shows only the retained window.
+- The 1600-point `series` cap means long runs lose early history in the time-series chart. The phase plane uses a separate `phaseSeries` buffer (200,000 points) and retains the full trajectory of typical runs.
 - Parameters update live in the display but always trigger a full reset when the slider is released.

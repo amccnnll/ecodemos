@@ -47,8 +47,8 @@ Detection is spatial and imperfect:
 | ESA | Effective sampling area (km²): $\int\!\int p(x,y)\,dx\,dy$ over the arena, given current $g_0$, $\sigma$, and detector layout. |
 | $\hat{D}$ | Estimated density: $M / \mathrm{ESA}$. |
 | True $D$ | True density = $N / \text{arena area}$. |
-| Home range ($\pi\sigma^2$) | Area of a circle with radius $\sigma$: approximate home range size (km²). |
-| Recapture rate | Proportion of capture events involving a previously-detected individual. |
+| Home range ($\pi\sigma_{\rm eff}^2$) | Area of a circle with radius $\sigma_{\rm eff} = \sigma / \sqrt{f}$: approximate home range size (km²). |
+| Recapture rate | Total capture events divided by ($M \times k$): average captures per individual per occasion. |
 | Coverage ($M/N$) | Proportion of the true population detected at least once. |
 
 ### Key symbols
@@ -100,7 +100,7 @@ cy = rng() * arenaH
 
 The animal starts exactly at its activity centre: `x = cx`, `y = cy`. Velocity is initialised to zero: `vx = 0`, `vy = 0`.
 
-Activity centres span the **full** arena (inner + buffer), not just the inner study area. This is correct: real populations extend beyond any detector array, and some of those individuals can still be detected.
+Activity centres span the *full* arena (inner + buffer), not just the inner study area. This is correct: real populations extend beyond any detector array, and some of those individuals can still be detected.
 
 The true density is `trueD = N / (ARENA_KM²) = N / 4.0` animals/km².
 
@@ -110,7 +110,7 @@ The true density is `trueD = N / (ARENA_KM²) = N / 4.0` animals/km².
 
 `placeDetectors(layout, innerW, innerH, innerX0, innerY0, rng, gridN, nRandom)` in `src/secr-engine.js`.
 
-All detectors are placed **within the inner study area** only.
+All detectors are placed *within the inner study area* only.
 
 ### Grid layout
 
@@ -249,7 +249,7 @@ One occasion = one call to `tryDetectsOnOccasion(animals, detectors, g0, sigmaEf
 
 For every (animal $i$, detector $j$) pair:
 
-1. Distance from the animal's **activity centre** to the detector:
+1. Distance from the animal's *activity centre* to the detector:
    ```
    d_ij = hypot(animal.cx - detector.x, animal.cy - detector.y)
    ```
@@ -261,7 +261,7 @@ For every (animal $i$, detector $j$) pair:
 3. Bernoulli draw: `detected = detectionRng() < g_ij`.
 4. If detected: record `{ animalId, detectorId }`.
 
-Each animal can be detected by **multiple detectors on the same occasion**. Each (animal, detector, occasion) triple produces one capture event. The capture history therefore records the detector index too, not just presence/absence.
+Each animal can be detected by *multiple detectors on the same occasion*. Each (animal, detector, occasion) triple produces one capture event. The capture history therefore records the detector index too, not just presence/absence.
 
 Detection is based on `(cx, cy)` (the latent activity centre), not on the display position `(dx, dy)` or the physics position `(x, y)`. This is consistent with the SECR model: the detection function $g(d)$ is a marginalised home-range detection function, integrating over all locations within the home range that a centre at $(c_x, c_y)$ implies.
 
@@ -307,7 +307,7 @@ p1 = 1 - exp(logNonDetect);
 
 ### $K$-occasion ESA
 
-The probability of being caught **at least once** across $k$ independent occasions:
+The probability of being caught *at least once* across $k$ independent occasions:
 
 $$
 p_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k
@@ -319,7 +319,7 @@ $$
 \mathrm{ESA}(k) = \sum_{\rm cells} \bigl[1 - (1 - p_1)^k\bigr] \cdot \Delta A
 $$
 
-The arena is discretised into **60 × 60 = 3600 cells** for ESA computation (both in the analytics D̂ historical series and in the estimates strip). `cellArea = arenaW * arenaH / (60 * 60)`.
+The arena is discretised into *60 × 60 = 3600 cells* for ESA computation (both in the analytics D̂ historical series and in the estimates strip). `cellArea = arenaW * arenaH / (60 * 60)`.
 
 For the D̂ convergence chart, the detection surface (`p_1` for each cell) is computed once and reused for all $k = 1, 2, \ldots, k_{\rm current}$, by applying the $k$-exponent formula cell-by-cell. This avoids recomputing the surface $k$ times.
 
@@ -335,7 +335,7 @@ $$
 
 where:
 
-- $M(k)$ = number of **unique** animal IDs in captures with occasion $\leq k$.
+- $M(k)$ = number of *unique* animal IDs in captures with occasion $\leq k$.
 - $\mathrm{ESA}(k)$ = $K$-occasion ESA using `sigmaEff` and the current detector layout.
 
 $\hat{D}$ is plotted at each completed occasion as a convergence trace. True density is `N / ARENA_KM²`.
@@ -395,7 +395,7 @@ The simulation has four phases, tracked in `phase`:
 | `paused`   | ▶ Resume    | After Pause press                         |
 | `complete` | ↺ Run again | After `currentK >= targetK`               |
 
-"Run again" (pressed when complete) adds another `K` occasions to `targetK` and continues on the same population; it does **not** reset the animals or detectors.
+"Run again" (pressed when complete) adds another `K` occasions to `targetK` and continues on the same population; it does *not* reset the animals or detectors.
 
 ---
 
@@ -408,6 +408,7 @@ The simulation has four phases, tracked in `phase`:
 | $g_0$ slider                    | Updates detection probability and surface immediately      |
 | $\sigma$ slider                 | Updates `sigmaEff`, detection surface, and ESA immediately |
 | Fidelity $f$ slider             | Updates `sigmaEff` (via `sigma / √f`) and surface          |
+| $\tau$ slider                   | Updates spring strength and noise scale for movement immediately |
 | Detector type preset            | Sets $g_0$ and $\sigma$; same as moving those two sliders  |
 | Show detection surface checkbox | Toggles heatmap visibility; triggers redraw                |
 | Show activity centres checkbox  | Toggles centroid overlay                                   |
@@ -418,7 +419,6 @@ The simulation has four phases, tracked in `phase`:
 | ------------------------ | --------------------------------------------- |
 | $N$ slider               | Number of animals (placement regenerated)     |
 | $K$ slider               | Occasions per run                             |
-| $\tau$ slider            | Movement timescale (affects movement physics) |
 | Distribution layout      | Grid / random / custom                        |
 | Grid size $n_{\rm grid}$ | Only applicable in grid mode                  |
 | Seed                     | Entirely new placement                        |

@@ -62,55 +62,64 @@
             <option value="highCycles">High-amplitude cycles</option>
           </select>
         </div>
+        <p class="control-hint">named parameter set: loads α, β, δ, γ, N₀, and P₀ for a named scenario; overwrites current values; takes effect on Reset</p>
 
         <div class="slider-row" id="row-alpha">
           <span class="control-label slider-label" id="label-alpha">α</span>
           <input type="range" id="slider-alpha" class="param-slider" min="0.2" max="2.0" step="0.01" value="1.1" />
           <span class="slider-value" id="val-alpha">1.10</span>
         </div>
+        <p class="control-hint">prey intrinsic growth rate: rate at which prey reproduce in the absence of predators; takes effect on Reset</p>
 
         <div class="slider-row" id="row-beta">
           <span class="control-label slider-label" id="label-beta">β</span>
           <input type="range" id="slider-beta" class="param-slider" min="0.01" max="0.2" step="0.001" value="0.06" />
           <span class="slider-value" id="val-beta">0.06</span>
         </div>
+        <p class="control-hint">predation rate: rate at which predators consume prey per encounter; takes effect on Reset</p>
 
         <div class="slider-row" id="row-delta">
           <span class="control-label slider-label" id="label-delta">δ</span>
           <input type="range" id="slider-delta" class="param-slider" min="0.005" max="0.1" step="0.001" value="0.03" />
           <span class="slider-value" id="val-delta">0.03</span>
         </div>
+        <p class="control-hint">predator growth efficiency: fraction of consumed prey converted into new predators; takes effect on Reset</p>
 
         <div class="slider-row" id="row-gamma">
           <span class="control-label slider-label" id="label-gamma">γ</span>
           <input type="range" id="slider-gamma" class="param-slider" min="0.1" max="2.0" step="0.01" value="0.7" />
           <span class="slider-value" id="val-gamma">0.70</span>
         </div>
+        <p class="control-hint">predator mortality rate: per-capita rate at which predators die in the absence of prey; takes effect on Reset</p>
 
         <div class="slider-row">
           <span class="control-label slider-label">Δt</span>
           <input type="range" id="slider-dt" class="param-slider" min="0.005" max="0.08" step="0.001" value="0.03" />
           <span class="slider-value" id="val-dt">0.03</span>
         </div>
+        <p class="control-hint">RK4 integration step size: smaller values improve numerical accuracy; larger values run faster but may diverge; takes effect on Reset</p>
 
         <div class="slider-row">
           <span class="control-label slider-label" id="label-prey0">N₀</span>
           <input type="range" id="slider-prey0" class="param-slider" min="5" max="120" step="1" value="40" />
           <span class="slider-value" id="val-prey0">40</span>
         </div>
+        <p class="control-hint">initial prey population at t = 0; takes effect on Reset</p>
 
         <div class="slider-row">
           <span class="control-label slider-label" id="label-pred0">P₀</span>
           <input type="range" id="slider-predator0" class="param-slider" min="1" max="60" step="1" value="9" />
           <span class="slider-value" id="val-predator0">9</span>
         </div>
+        <p class="control-hint">initial predator population at t = 0; takes effect on Reset</p>
 
         <label class="checkbox-row">
           <input type="checkbox" id="checkbox-unbounded-time" />
           Unbounded time
         </label>
+        <p class="control-hint">disables automatic pause at 50-time-unit checkpoints, letting the simulation run continuously</p>
 
-        <p class="seed-hint">All parameters apply on Reset. RK4 integration is used for numerical stability.</p>
+        <p class="seed-hint">All parameters take effect on Reset. RK4 integration is used for numerical stability.</p>
         <p class="seed-hint">Auto-pause checkpoints occur every 50 time units.</p>
 
         <button id="btn-reset-defaults" class="btn-secondary btn-reset-defaults">↺ Reset default parameters</button>
@@ -118,7 +127,7 @@
 
       <div class="controls-divider"></div>
 
-      <details class="controls-advanced" id="lv-complications">
+      <details class="controls-advanced" id="lv-complications" open>
         <summary class="controls-advanced-summary">Complications</summary>
         <div class="controls-section controls-advanced-body">
 
@@ -130,6 +139,7 @@
               <option value="competition">Competition</option>
             </select>
           </div>
+          <p class="control-hint">equation variant: Predator-prey = classic Lotka-Volterra, Dynamic = adds prey carrying capacity and predator mortality, Competition = two-species competition; takes effect on Reset</p>
 
           <div class="select-row" id="row-dynamic-preset" style="display:none">
             <span class="control-label">Dynamic preset</span>
@@ -146,12 +156,14 @@
               <input type="range" id="slider-kdyn" class="param-slider" min="20" max="250" step="1" value="60" />
               <span class="slider-value" id="val-kdyn">60</span>
             </div>
+            <p class="control-hint">prey carrying capacity: maximum sustainable prey population in the absence of predators; takes effect on Reset</p>
 
             <div class="slider-row">
               <span class="control-label slider-label">m (predator)</span>
               <input type="range" id="slider-mpred" class="param-slider" min="0" max="0.2" step="0.001" value="0" />
               <span class="slider-value" id="val-mpred">0.00</span>
             </div>
+            <p class="control-hint">predator background mortality: per-capita death rate independent of prey availability; takes effect on Reset</p>
           </div>
 
           <div class="select-row" id="row-competition-preset" style="display:none">
@@ -169,36 +181,42 @@
               <input type="range" id="slider-r1" class="param-slider" min="0.1" max="2.0" step="0.01" value="0.9" />
               <span class="slider-value" id="val-r1">0.90</span>
             </div>
+            <p class="control-hint">intrinsic growth rate of species 1 in the absence of competition; takes effect on Reset</p>
 
             <div class="slider-row">
               <span class="control-label slider-label">r₂</span>
               <input type="range" id="slider-r2" class="param-slider" min="0.1" max="2.0" step="0.01" value="0.8" />
               <span class="slider-value" id="val-r2">0.80</span>
             </div>
+            <p class="control-hint">intrinsic growth rate of species 2 in the absence of competition; takes effect on Reset</p>
 
             <div class="slider-row">
               <span class="control-label slider-label">K₁</span>
               <input type="range" id="slider-k1" class="param-slider" min="10" max="200" step="1" value="75" />
               <span class="slider-value" id="val-k1">75</span>
             </div>
+            <p class="control-hint">carrying capacity of species 1 in the absence of competition; takes effect on Reset</p>
 
             <div class="slider-row">
               <span class="control-label slider-label">K₂</span>
               <input type="range" id="slider-k2" class="param-slider" min="10" max="200" step="1" value="65" />
               <span class="slider-value" id="val-k2">65</span>
             </div>
+            <p class="control-hint">carrying capacity of species 2 in the absence of competition; takes effect on Reset</p>
 
             <div class="slider-row">
               <span class="control-label slider-label">α₁₂</span>
               <input type="range" id="slider-a12" class="param-slider" min="0" max="2" step="0.01" value="0.60" />
               <span class="slider-value" id="val-a12">0.60</span>
             </div>
+            <p class="control-hint">effect of species 2 on species 1: α₁₂ > 1 means each species-2 individual suppresses species 1 more than a conspecific would; takes effect on Reset</p>
 
             <div class="slider-row">
               <span class="control-label slider-label">α₂₁</span>
               <input type="range" id="slider-a21" class="param-slider" min="0" max="2" step="0.01" value="0.50" />
               <span class="slider-value" id="val-a21">0.50</span>
             </div>
+            <p class="control-hint">effect of species 1 on species 2: α₂₁ > 1 means each species-1 individual suppresses species 2 more than a conspecific would; takes effect on Reset</p>
           </div>
 
         </div>

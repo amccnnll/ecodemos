@@ -85,12 +85,13 @@
             </optgroup>
           </select>
         </div>
+        <p class="control-hint">named parameter sets — sets all sliders to a realistic scenario; overwrites current values</p>
       </div>
 
       <div class="controls-divider"></div>
 
-      <!-- Complications (collapsed by default) -->
-      <details class="controls-advanced">
+      <!-- Complications (open by default) -->
+      <details class="controls-advanced" open>
         <summary class="controls-advanced-summary">Complications</summary>
         <div class="controls-section controls-advanced-body">
 
@@ -101,6 +102,8 @@
               <option value="hazardRate">Hazard rate</option>
             </select>
           </div>
+          <p class="control-hint">detection function used to simulate whether each animal is detected; governs the true shape of g(x)</p>
+
           <div class="select-row">
             <span class="control-label">Model</span>
             <select id="select-model-fn" class="fn-select">
@@ -109,6 +112,7 @@
             </select>
           </div>
           <p id="mismatch-warning" class="mismatch-warning" style="display:none">⚠ Model mismatch — D̂ may be biased</p>
+          <p class="control-hint">detection function used by the MLE estimator to fit σ̂ and compute D̂; mismatching Field truth introduces bias</p>
 
           <div class="slider-row">
             <span class="control-label slider-label">σ</span>
@@ -117,6 +121,7 @@
                    aria-label="Detection scale σ (km)" />
             <span class="slider-value" id="val-sigma">0.25 km</span>
           </div>
+          <p class="control-hint">detection scale (km): for half-normal, the distance at which g(x) ≈ 0.61; updates live</p>
 
           <div class="slider-row">
             <span class="control-label slider-label">W</span>
@@ -125,6 +130,7 @@
                    aria-label="Truncation distance W (km)" />
             <span class="slider-value" id="val-w">0.50 km</span>
           </div>
+          <p class="control-hint">truncation distance (km): animals beyond W are never detected; the analysis also ignores detections past this distance; updates live</p>
 
           <div class="slider-row" id="row-b" style="display:none">
             <span class="control-label slider-label">b (shape)</span>
@@ -133,6 +139,7 @@
                    aria-label="Hazard-rate shape parameter b" />
             <span class="slider-value" id="val-b">2.5</span>
           </div>
+          <p class="control-hint" id="hint-b" style="display:none">hazard-rate shape: higher b gives a wider flat shoulder near the transect before a sharper drop; updates live</p>
 
           <div class="slider-row">
             <span class="control-label slider-label">D</span>
@@ -141,6 +148,7 @@
                    aria-label="Animal density (per km²)" />
             <span class="slider-value" id="val-density">50 /km²</span>
           </div>
+          <p class="control-hint">true animal density (animals per km²): sets how many animals are placed; takes effect on Reset</p>
 
           <div class="slider-row">
             <span class="control-label slider-label">L</span>
@@ -149,6 +157,7 @@
                    aria-label="Transect length (km)" />
             <span class="slider-value" id="val-transect">4.0 km</span>
           </div>
+          <p class="control-hint">transect length (km): sets the width of the arena and total survey effort; takes effect on Reset</p>
 
           <div class="select-row">
             <span class="control-label">Distribution</span>
@@ -158,6 +167,7 @@
               <option value="regular">Regular</option>
             </select>
           </div>
+          <p class="control-hint">spatial distribution of animals: Uniform = random, Clustered = aggregated groups, Regular = over-dispersed grid; takes effect on Reset</p>
 
           <div class="slider-row" id="row-clump-scale" style="display:none">
             <span class="control-label slider-label">s_clump</span>
@@ -166,6 +176,7 @@
                    aria-label="Cluster spread as fraction of transect length" />
             <span class="slider-value" id="val-clump-scale">0.10</span>
           </div>
+          <p class="control-hint" id="hint-clump" style="display:none">cluster spread as a fraction of transect length: larger values create looser, more spread-out groups</p>
 
           <div class="slider-row" id="row-regularity" style="display:none">
             <span class="control-label slider-label">ρ (regularity)</span>
@@ -174,6 +185,7 @@
                    aria-label="Grid jitter: 0 = perfect grid, 1 = Poisson" />
             <span class="slider-value" id="val-regularity">0.50</span>
           </div>
+          <p class="control-hint" id="hint-regularity" style="display:none">grid jitter: 0 = animals sit exactly on grid points, 1 = maximum random displacement within each cell</p>
 
           <p class="seed-hint">σ, W, detection functions and b update live. All other parameters take effect on Reset.</p>
 
@@ -185,6 +197,7 @@
             <input type="checkbox" id="checkbox-keep-runs" />
             <label for="checkbox-keep-runs" class="control-label">Keep previous runs</label>
           </div>
+          <p class="control-hint">overlays past runs' fitted curves and D̂ traces as faded ghost lines for comparison (up to 8 retained)</p>
           <button id="btn-clear-ghosts" class="btn-secondary btn-clear-ghosts">Clear runs</button>
 
         </div>

@@ -65,7 +65,7 @@
 
         <div class="controls-divider"></div>
 
-        <details class="controls-advanced">
+        <details class="controls-advanced" open>
           <summary class="controls-advanced-summary">Complications</summary>
           <div class="controls-section controls-advanced-body">
 
@@ -78,6 +78,7 @@
                 <option value="acoustic">Acoustic detector</option>
               </select>
             </div>
+            <p class="control-hint">loads a preset combination of g₀, σ, N, and τ for a named detector scenario; overwrites current slider values</p>
 
             <div class="slider-row">
               <span class="control-label slider-label">g₀</span>
@@ -86,6 +87,7 @@
                      aria-label="Maximum detection probability g₀" />
               <span class="slider-value" id="val-g0">0.20</span>
             </div>
+            <p class="control-hint">maximum detection probability: an animal sitting on a detector is captured with probability g₀; updates live</p>
 
             <div class="slider-row">
               <span class="control-label slider-label">σ</span>
@@ -94,6 +96,7 @@
                      aria-label="Home range / detection scale σ (km)" />
               <span class="slider-value" id="val-sigma">0.15 km</span>
             </div>
+            <p class="control-hint">detection scale (km): governs both the home range size and how detection probability falls off with distance from the activity centre; updates live</p>
 
             <div class="slider-row">
               <span class="control-label slider-label">N</span>
@@ -102,6 +105,7 @@
                      aria-label="Number of animals" />
               <span class="slider-value" id="val-n">10</span>
             </div>
+            <p class="control-hint">true number of animals in the arena; takes effect on Reset</p>
 
             <div class="slider-row">
               <span class="control-label slider-label">K</span>
@@ -110,6 +114,7 @@
                      aria-label="Occasions per run (K)" />
               <span class="slider-value" id="val-k">10</span>
             </div>
+            <p class="control-hint">number of capture occasions per run: more occasions increase data volume and improve D̂ precision; takes effect on Reset</p>
 
             <div class="select-row">
               <span class="control-label">Movement</span>
@@ -120,6 +125,7 @@
                 <option value="nomad">Nomad</option>
               </select>
             </div>
+            <p class="control-hint">named movement scenario: overwrites τ; use to quickly set realistic animal mobility</p>
 
             <div class="slider-row">
               <span class="control-label slider-label">τ (mobility)</span>
@@ -128,6 +134,7 @@
                      aria-label="Home range crossing time τ (occasions): low = fast, high = slow" />
               <span class="slider-value" id="val-tau">5.0 occ</span>
             </div>
+            <p class="control-hint">home range crossing time (occasions): low τ = restless animals covering the range quickly, high τ = sedentary; updates immediately</p>
 
             <div class="slider-row">
               <span class="control-label slider-label">f (fidelity)</span>
@@ -136,6 +143,7 @@
                      aria-label="Site fidelity: higher values tighten the home range" />
               <span class="slider-value" id="val-fidelity">1.0×</span>
             </div>
+            <p class="control-hint">site fidelity multiplier: values above 1 shrink the effective home range, tightening movements around the activity centre; takes effect on Reset</p>
 
             <div class="select-row">
               <span class="control-label">Detectors</span>
@@ -145,6 +153,7 @@
                 <option value="custom">Click to place</option>
               </select>
             </div>
+            <p class="control-hint">spatial layout of the detector array: Grid = regular lattice, Random = random placement, Click to place = manual; takes effect on Reset</p>
 
             <div class="slider-row" id="row-grid-n">
               <span class="control-label slider-label">n_grid</span>
@@ -153,6 +162,7 @@
                      aria-label="Detector grid dimension (N×N)" />
               <span class="slider-value" id="val-grid-n">4×4</span>
             </div>
+            <p class="control-hint">grid dimension: places n_grid × n_grid detectors on a regular lattice; takes effect on Reset</p>
 
             <div id="row-remove-all" style="display:none">
               <button id="btn-remove-all-detectors" class="btn-secondary btn-reset-defaults">✕ Remove all detectors</button>

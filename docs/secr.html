@@ -411,12 +411,12 @@ window.Quarto = {
 <td>True density = <span class="math inline">\(N / \text{arena area}\)</span>.</td>
 </tr>
 <tr class="odd">
-<td>Home range (<span class="math inline">\(\pi\sigma^2\)</span>)</td>
-<td>Area of a circle with radius <span class="math inline">\(\sigma\)</span>: approximate home range size (km²).</td>
+<td>Home range (<span class="math inline">\(\pi\sigma_{\rm eff}^2\)</span>)</td>
+<td>Area of a circle with radius <span class="math inline">\(\sigma_{\rm eff} = \sigma / \sqrt{f}\)</span>: approximate home range size (km²).</td>
 </tr>
 <tr class="even">
 <td>Recapture rate</td>
-<td>Proportion of capture events involving a previously-detected individual.</td>
+<td>Total capture events divided by (<span class="math inline">\(M \times k\)</span>): average captures per individual per occasion.</td>
 </tr>
 <tr class="odd">
 <td>Coverage (<span class="math inline">\(M/N\)</span>)</td>
@@ -528,14 +528,14 @@ window.Quarto = {
 <pre><code>cx = rng() * arenaW
 cy = rng() * arenaH</code></pre>
 <p>The animal starts exactly at its activity centre: <code>x = cx</code>, <code>y = cy</code>. Velocity is initialised to zero: <code>vx = 0</code>, <code>vy = 0</code>.</p>
-<p>Activity centres span the <strong>full</strong> arena (inner + buffer), not just the inner study area. This is correct: real populations extend beyond any detector array, and some of those individuals can still be detected.</p>
+<p>Activity centres span the <em>full</em> arena (inner + buffer), not just the inner study area. This is correct: real populations extend beyond any detector array, and some of those individuals can still be detected.</p>
 <p>The true density is <code>trueD = N / (ARENA_KM²) = N / 4.0</code> animals/km².</p>
 <hr>
 </section>
 <section id="detector-placement" class="level2">
 <h2 class="anchored" data-anchor-id="detector-placement">Detector placement</h2>
 <p><code>placeDetectors(layout, innerW, innerH, innerX0, innerY0, rng, gridN, nRandom)</code> in <code>src/secr-engine.js</code>.</p>
-<p>All detectors are placed <strong>within the inner study area</strong> only.</p>
+<p>All detectors are placed <em>within the inner study area</em> only.</p>
 <section id="grid-layout" class="level3">
 <h3 class="anchored" data-anchor-id="grid-layout">Grid layout</h3>
 <p><code>gridN × gridN</code> detectors on a regular grid. Cell size <code>dx = innerW / gridN</code>, <code>dy = innerH / gridN</code>. Each detector at:</p>
@@ -722,7 +722,7 @@ dy_new = dy + 0.15 * (y - dy)</code></pre>
 <p>One occasion = one call to <code>tryDetectsOnOccasion(animals, detectors, g0, sigmaEff, rng)</code>.</p>
 <p>For every (animal <span class="math inline">\(i\)</span>, detector <span class="math inline">\(j\)</span>) pair:</p>
 <ol type="1">
-<li><p>Distance from the animal’s <strong>activity centre</strong> to the detector:</p>
+<li><p>Distance from the animal’s <em>activity centre</em> to the detector:</p>
 <pre><code>d_ij = hypot(animal.cx - detector.x, animal.cy - detector.y)</code></pre></li>
 <li><p>Detection probability:</p>
 <pre><code>g_ij = g0 * halfNormal(d_ij, sigmaEff)
@@ -730,7 +730,7 @@ dy_new = dy + 0.15 * (y - dy)</code></pre>
 <li><p>Bernoulli draw: <code>detected = detectionRng() &lt; g_ij</code>.</p></li>
 <li><p>If detected: record <code>{ animalId, detectorId }</code>.</p></li>
 </ol>
-<p>Each animal can be detected by <strong>multiple detectors on the same occasion</strong>. Each (animal, detector, occasion) triple produces one capture event. The capture history therefore records the detector index too, not just presence/absence.</p>
+<p>Each animal can be detected by <em>multiple detectors on the same occasion</em>. Each (animal, detector, occasion) triple produces one capture event. The capture history therefore records the detector index too, not just presence/absence.</p>
 <p>Detection is based on <code>(cx, cy)</code> (the latent activity centre), not on the display position <code>(dx, dy)</code> or the physics position <code>(x, y)</code>. This is consistent with the SECR model: the detection function <span class="math inline">\(g(d)\)</span> is a marginalised home-range detection function, integrating over all locations within the home range that a centre at <span class="math inline">\((c_x, c_y)\)</span> implies.</p>
 <section id="effective-detection-σ" class="level3">
 <h3 class="anchored" data-anchor-id="effective-detection-σ">Effective detection σ</h3>
@@ -800,7 +800,7 @@ p_1(c_x, c_y) = 1 - \prod_{j=1}^{J} \bigl(1 - g_0 \cdot g(d_j)\bigr)
 </section>
 <section id="k-occasion-esa" class="level3">
 <h3 class="anchored" data-anchor-id="k-occasion-esa"><span class="math inline">\(K\)</span>-occasion ESA</h3>
-<p>The probability of being caught <strong>at least once</strong> across <span class="math inline">\(k\)</span> independent occasions:</p>
+<p>The probability of being caught <em>at least once</em> across <span class="math inline">\(k\)</span> independent occasions:</p>
 <p><span class="math display">\[
 p_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k
 \]</span></p>
@@ -808,7 +808,7 @@ p_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k
 <p><span class="math display">\[
 \mathrm{ESA}(k) = \sum_{\rm cells} \bigl[1 - (1 - p_1)^k\bigr] \cdot \Delta A
 \]</span></p>
-<p>The arena is discretised into <strong>60 × 60 = 3600 cells</strong> for ESA computation (both in the analytics D̂ historical series and in the estimates strip). <code>cellArea = arenaW * arenaH / (60 * 60)</code>.</p>
+<p>The arena is discretised into <em>60 × 60 = 3600 cells</em> for ESA computation (both in the analytics D̂ historical series and in the estimates strip). <code>cellArea = arenaW * arenaH / (60 * 60)</code>.</p>
 <p>For the D̂ convergence chart, the detection surface (<code>p_1</code> for each cell) is computed once and reused for all <span class="math inline">\(k = 1, 2, \ldots, k_{\rm current}\)</span>, by applying the <span class="math inline">\(k\)</span>-exponent formula cell-by-cell. This avoids recomputing the surface <span class="math inline">\(k\)</span> times.</p>
 <p>The estimates strip uses <code>computeESA_K</code> from <code>src/secr-engine.js</code>, which is equivalent: a grid reduction over the surface.</p>
 <hr>
@@ -821,7 +821,7 @@ p_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k
 \]</span></p>
 <p>where:</p>
 <ul>
-<li><span class="math inline">\(M(k)\)</span> = number of <strong>unique</strong> animal IDs in captures with occasion <span class="math inline">\(\leq k\)</span>.</li>
+<li><span class="math inline">\(M(k)\)</span> = number of <em>unique</em> animal IDs in captures with occasion <span class="math inline">\(\leq k\)</span>.</li>
 <li><span class="math inline">\(\mathrm{ESA}(k)\)</span> = <span class="math inline">\(K\)</span>-occasion ESA using <code>sigmaEff</code> and the current detector layout.</li>
 </ul>
 <p><span class="math inline">\(\hat{D}\)</span> is plotted at each completed occasion as a convergence trace. True density is <code>N / ARENA_KM²</code>.</p>
@@ -924,7 +924,7 @@ p_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k
 </tr>
 </tbody>
 </table>
-<p>“Run again” (pressed when complete) adds another <code>K</code> occasions to <code>targetK</code> and continues on the same population; it does <strong>not</strong> reset the animals or detectors.</p>
+<p>“Run again” (pressed when complete) adds another <code>K</code> occasions to <code>targetK</code> and continues on the same population; it does <em>not</em> reset the animals or detectors.</p>
 <hr>
 </section>
 <section id="control-taxonomy" class="level2">
@@ -956,14 +956,18 @@ p_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k
 <td>Updates <code>sigmaEff</code> (via <code>sigma / √f</code>) and surface</td>
 </tr>
 <tr class="even">
+<td><span class="math inline">\(\tau\)</span> slider</td>
+<td>Updates spring strength and noise scale for movement immediately</td>
+</tr>
+<tr class="odd">
 <td>Detector type preset</td>
 <td>Sets <span class="math inline">\(g_0\)</span> and <span class="math inline">\(\sigma\)</span>; same as moving those two sliders</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Show detection surface checkbox</td>
 <td>Toggles heatmap visibility; triggers redraw</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Show activity centres checkbox</td>
 <td>Toggles centroid overlay</td>
 </tr>
@@ -993,18 +997,14 @@ p_k(c_x, c_y) = 1 - (1 - p_1(c_x, c_y))^k
 <td>Occasions per run</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(\tau\)</span> slider</td>
-<td>Movement timescale (affects movement physics)</td>
-</tr>
-<tr class="even">
 <td>Distribution layout</td>
 <td>Grid / random / custom</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Grid size <span class="math inline">\(n_{\rm grid}\)</span></td>
 <td>Only applicable in grid mode</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Seed</td>
 <td>Entirely new placement</td>
 </tr>

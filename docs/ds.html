@@ -346,11 +346,11 @@ window.Quarto = {
 </tr>
 <tr class="odd">
 <td>Field truth</td>
-<td>Detection function used to simulate detections: half-normal or hazard-rate. Takes effect on Reset (if mid-run, affects future detections only).</td>
+<td>Detection function used to simulate detections: half-normal or hazard-rate. Updates live; affects future detection draws only (existing stored detections are not changed).</td>
 </tr>
 <tr class="even">
 <td>Model</td>
-<td>Detection function used for MLE fitting. Mismatching Field truth and Model produces biased D̂ (warning shown). Takes effect on Reset.</td>
+<td>Detection function used for MLE fitting. Mismatching Field truth and Model produces biased D̂ (warning shown). Updates live.</td>
 </tr>
 <tr class="odd">
 <td>σ</td>
@@ -499,11 +499,11 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="arena-geometry">Arena geometry</h2>
 <p>The simulation canvas maps directly to a rectangle in kilometre coordinates. All positions used by the engine are stored and computed in km; pixel positions are computed only for rendering.</p>
 <ul>
-<li><strong>Transect length</strong> (<span class="math inline">\(L\)</span>, km) is set by the transect slider. This is the x-dimension of the arena: <code>arenaWKm = sliderValue</code>.</li>
-<li><strong>Arena height</strong> (<span class="math inline">\(H\)</span>, km) is derived from the canvas dimensions so that one pixel represents the same distance in both axes: <code>arenaH = canvasHeight / (canvasWidth / arenaWKm)</code>.</li>
-<li><strong>Transect</strong> runs horizontally along the centreline of the canvas: <span class="math inline">\(y = H/2\)</span> in km coordinates. It is a fixed line; the observer moves along it.</li>
-<li><strong>Pixel scale</strong>: <code>PX_PER_KM = canvasWidth / arenaWKm</code>. Recomputed on every reset (canvas width is fixed; a different transect length changes the scale).</li>
-<li><strong>Observer x-position</strong> (<code>boatX</code>) runs from 0 to <code>arenaWKm</code> in km. The observer icon is drawn at <code>boatX * PX_PER_KM</code> pixels from the left edge.</li>
+<li><em>Transect length</em> (<span class="math inline">\(L\)</span>, km) is set by the transect slider. This is the x-dimension of the arena: <code>arenaWKm = sliderValue</code>.</li>
+<li><em>Arena height</em> (<span class="math inline">\(H\)</span>, km) is derived from the canvas dimensions so that one pixel represents the same distance in both axes: <code>arenaH = canvasHeight / (canvasWidth / arenaWKm)</code>.</li>
+<li><em>Transect</em> runs horizontally along the centreline of the canvas: <span class="math inline">\(y = H/2\)</span> in km coordinates. It is a fixed line; the observer moves along it.</li>
+<li><em>Pixel scale</em>: <code>PX_PER_KM = canvasWidth / arenaWKm</code>. Recomputed on every reset (canvas width is fixed; a different transect length changes the scale).</li>
+<li><em>Observer x-position</em> (<code>boatX</code>) runs from 0 to <code>arenaWKm</code> in km. The observer icon is drawn at <code>boatX * PX_PER_KM</code> pixels from the left edge.</li>
 </ul>
 <hr>
 </section>
@@ -528,15 +528,15 @@ y = rng() * arenaH</code></pre>
 <h3 class="anchored" data-anchor-id="clustered-distribution-placeanimalsclumped">Clustered distribution (<code>placeAnimalsClumped</code>)</h3>
 <p>A two-level process. Parameters: <code>clumpScale</code> (slider default 0.10).</p>
 <ol type="1">
-<li><p><strong>Number of clusters</strong>: <code>nClusters = Math.max(3, Math.round(n / 6))</code>.</p></li>
-<li><p><strong>Cluster centres</strong>: each placed at <code>(rng()*arenaW, rng()*arenaH)</code> using the seeded RNG, uniform independently in each axis.</p></li>
-<li><p><strong>Animal scatter</strong>: for each animal, a cluster is chosen uniformly at random (seeded), then a displacement is drawn using the Box–Muller transform:</p>
+<li><p><em>Number of clusters</em>: <code>nClusters = Math.max(3, Math.round(n / 6))</code>.</p></li>
+<li><p><em>Cluster centres</em>: each placed at <code>(rng()*arenaW, rng()*arenaH)</code> using the seeded RNG, uniform independently in each axis.</p></li>
+<li><p><em>Animal scatter</em>: for each animal, a cluster is chosen uniformly at random (seeded), then a displacement is drawn using the Box–Muller transform:</p>
 <pre><code>u1    = rng(),   u2 = rng()
 mag   = sigmaCluster * sqrt(-2 * log(u1))
 angle = 2π * u2
 dx    = mag * cos(angle),   dy = mag * sin(angle)</code></pre>
 <p>where <code>sigmaCluster = arenaW * clumpScale</code>. The angular direction is isotropic (circular Gaussian scatter around the cluster centre).</p></li>
-<li><p><strong>Wrap-around</strong>: animals that scatter beyond the arena edge are wrapped using modular arithmetic:</p>
+<li><p><em>Wrap-around</em>: animals that scatter beyond the arena edge are wrapped using modular arithmetic:</p>
 <pre><code>x = ((cx + dx) % arenaW + arenaW) % arenaW
 y = ((cy + dy) % arenaH + arenaH) % arenaH</code></pre>
 <p>This preserves the total count and keeps all animals inside the arena.</p></li>
@@ -547,9 +547,9 @@ y = ((cy + dy) % arenaH + arenaH) % arenaH</code></pre>
 <h3 class="anchored" data-anchor-id="regular-distribution-placeanimalsregular">Regular distribution (<code>placeAnimalsRegular</code>)</h3>
 <p>A perturbed grid. Parameters: <code>regularity</code> (slider default 0.50).</p>
 <ol type="1">
-<li><p><strong>Grid dimensions</strong>: <code>nCols = Math.round(sqrt(n * arenaW / arenaH))</code>, <code>nRows = Math.ceil(n / nCols)</code>. The aspect ratio of the grid matches the arena.</p></li>
-<li><p><strong>Cell size</strong>: <code>dx = arenaW / nCols</code>, <code>dy = arenaH / nRows</code>.</p></li>
-<li><p><strong>Animal position</strong>: for the <span class="math inline">\(i\)</span>-th animal, <code>col = i % nCols</code>, <code>row = floor(i / nCols)</code>:</p>
+<li><p><em>Grid dimensions</em>: <code>nCols = Math.round(sqrt(n * arenaW / arenaH))</code>, <code>nRows = Math.ceil(n / nCols)</code>. The aspect ratio of the grid matches the arena.</p></li>
+<li><p><em>Cell size</em>: <code>dx = arenaW / nCols</code>, <code>dy = arenaH / nRows</code>.</p></li>
+<li><p><em>Animal position</em>: for the <span class="math inline">\(i\)</span>-th animal, <code>col = i % nCols</code>, <code>row = floor(i / nCols)</code>:</p>
 <pre><code>x = (col + 0.5 + (rng() - 0.5) * regularity) * dx
 y = (row + 0.5 + (rng() - 0.5) * regularity) * dy</code></pre>
 <p>The jitter term <code>(rng() - 0.5) * regularity</code> is drawn from the seeded RNG.</p></li>
@@ -565,7 +565,7 @@ y = (row + 0.5 + (rng() - 0.5) * regularity) * dy</code></pre>
 </section>
 <section id="seed-and-rng-architecture" class="level2">
 <h2 class="anchored" data-anchor-id="seed-and-rng-architecture">Seed and RNG architecture</h2>
-<p>The simulation uses <strong>two separate random number generators</strong> with different seeding strategies. This is a deliberate design choice.</p>
+<p>The simulation uses <em>two separate random number generators</em> with different seeding strategies. This is a deliberate design choice.</p>
 <section id="placement-rng-seeded" class="level3">
 <h3 class="anchored" data-anchor-id="placement-rng-seeded">Placement RNG (seeded)</h3>
 <div class="sourceCode" id="cb7"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>placementRng <span class="op">=</span> <span class="fu">createRng</span>(seed)<span class="op">;</span> <span class="co">// src/rng.js — Alea PRNG</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -625,7 +625,7 @@ y = (row + 0.5 + (rng() - 0.5) * regularity) * dy</code></pre>
 <p>All detection logic is in <code>src/ds-engine.js</code> (<code>tryDetect</code>). The key properties are:</p>
 <section id="one-shot-rule" class="level3">
 <h3 class="anchored" data-anchor-id="one-shot-rule">One-shot rule</h3>
-<p>Detection is attempted <strong>exactly once</strong> per animal per run. The trigger condition is:</p>
+<p>Detection is attempted <em>exactly once</em> per animal per run. The trigger condition is:</p>
 <pre><code>boatX - animal.x ∈ [0, boatSpeed)</code></pre>
 <p>In words: the observer’s current x-position has just crossed the animal’s x-position this frame. If <code>boatX - animal.x &lt; 0</code> (not yet reached) or <code>&gt;= boatSpeed</code> (already passed), the function returns false immediately and no draw is made. This ensures each animal gets precisely one Bernoulli trial per traversal, regardless of playback speed.</p>
 </section>
@@ -674,7 +674,7 @@ g(x,\sigma,b) = 1 - \exp\!\left[-\left(\frac{\sigma}{x}\right)^b\right]
 <p>When a detection fires, <code>recordDetection(perpDist, boatX)</code> is called:</p>
 <ul>
 <li><code>perpDist</code>: perpendicular distance in km (raw, not yet filtered by W).</li>
-<li><code>boatX</code>: observer x-position in km <strong>at the moment of detection</strong>.</li>
+<li><code>boatX</code>: observer x-position in km <em>at the moment of detection</em>.</li>
 </ul>
 <p>Both values are appended to parallel arrays in the shared state singleton (<code>ds/state.js</code>):</p>
 <pre><code>state.detectedDistances[]   // perpendicular distances, all raw detections
@@ -686,8 +686,8 @@ state.detectedEfforts[]     // boatX at each detection</code></pre>
 <h2 class="anchored" data-anchor-id="truncation-and-w-post-hoc-filtering">Truncation and W post-hoc filtering</h2>
 <p>The truncation distance <span class="math inline">\(W\)</span> has two roles:</p>
 <ol type="1">
-<li><p><strong>Hard truncation during detection</strong>: <code>tryDetect</code> returns false when <code>perpDist &gt; W</code>. No draw is made; the animal is never recorded.</p></li>
-<li><p><strong>Post-hoc filtering in analytics</strong>: the analytics layer refilters stored distances on every state change:</p>
+<li><p><em>Hard truncation during detection</em>: <code>tryDetect</code> returns false when <code>perpDist &gt; W</code>. No draw is made; the animal is never recorded.</p></li>
+<li><p><em>Post-hoc filtering in analytics</em>: the analytics layer refilters stored distances on every state change:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>filteredDists <span class="op">=</span> detectedDistances<span class="op">.</span><span class="fu">filter</span>((d) <span class="kw">=&gt;</span> d <span class="op">&lt;=</span> W)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>This means if <span class="math inline">\(W\)</span> is decreased after some detections have been stored, those beyond-W distances are excluded from the histogram, MLE, and D̂ history, even though they were recorded. If <span class="math inline">\(W\)</span> is increased, detections from earlier in the run that were beyond the old W (but within the new W) will not appear, because they were never recorded in the first place.</p></li>
 </ol>
@@ -715,8 +715,8 @@ state.detectedEfforts[]     // boatX at each detection</code></pre>
 </section>
 <section id="mle-fitting" class="level2">
 <h2 class="anchored" data-anchor-id="mle-fitting">MLE fitting</h2>
-<p><code>fitSigmaMLE</code> in <code>src/stats.js</code> finds the <span class="math inline">\(\hat{\sigma}\)</span> that minimises the negative log-likelihood. The analytics layer calls it when there are <strong>at least 3</strong> within-W detections; fewer returns <code>null</code> and <code>σ̂</code> is shown as “—”.</p>
-<p>The search uses <strong>golden-section</strong> over a fixed interval <span class="math inline">\([\sigma_{\min}, \sigma_{\max}]\)</span>. The shape parameter <span class="math inline">\(b\)</span> is <strong>not optimised</strong>; it is held at the current slider value throughout.</p>
+<p><code>fitSigmaMLE</code> in <code>src/stats.js</code> finds the <span class="math inline">\(\hat{\sigma}\)</span> that minimises the negative log-likelihood. The analytics layer calls it when there are <em>at least 3</em> within-W detections; fewer returns <code>null</code> and <code>σ̂</code> is shown as “—”.</p>
+<p>The search uses <em>golden-section</em> over a fixed interval <span class="math inline">\([\sigma_{\min}, \sigma_{\max}]\)</span>. The shape parameter <span class="math inline">\(b\)</span> is <em>not optimised</em>; it is held at the current slider value throughout.</p>
 <section id="nll-for-half-normal" class="level3">
 <h3 class="anchored" data-anchor-id="nll-for-half-normal">NLL for half-normal</h3>
 <p><span class="math display">\[
@@ -741,7 +741,7 @@ state.detectedEfforts[]     // boatX at each detection</code></pre>
 <p>where <span class="math inline">\(L\)</span> is effort in km, <span class="math inline">\(n\)</span> is the count of within-W detections, and ESW uses <span class="math inline">\(\hat\sigma\)</span> if fitted, or the true <span class="math inline">\(\sigma\)</span> slider value if fewer than 3 detections are available.</p>
 <section id="per-detection-effort-in-the-convergence-chart" class="level3">
 <h3 class="anchored" data-anchor-id="per-detection-effort-in-the-convergence-chart">Per-detection effort in the convergence chart</h3>
-<p>The D̂ convergence chart does <strong>not</strong> use the final transect length as effort. Instead, for each successive within-W detection, the chart plots the density estimate using effort = <code>boatX</code> at the moment that detection was made. For the <span class="math inline">\(k\)</span>-th within-W detection, <span class="math inline">\(L_k\)</span> = observer x-position (km) when the <span class="math inline">\(k\)</span>-th animal was detected.</p>
+<p>The D̂ convergence chart does <em>not</em> use the final transect length as effort. Instead, for each successive within-W detection, the chart plots the density estimate using effort = <code>boatX</code> at the moment that detection was made. For the <span class="math inline">\(k\)</span>-th within-W detection, <span class="math inline">\(L_k\)</span> = observer x-position (km) when the <span class="math inline">\(k\)</span>-th animal was detected.</p>
 <p>This means the convergence trace shows how <span class="math inline">\(\hat{D}\)</span> evolves as data accumulates during the survey, including the effect of early noise when <span class="math inline">\(n\)</span> is small.</p>
 <p>The full D̂ history array is rebuilt from scratch on every state-change event (each detection, and whenever W, σ, b, or model function changes).</p>
 <hr>
@@ -753,13 +753,13 @@ state.detectedEfforts[]     // boatX at each detection</code></pre>
 <section id="detection-function-chart" class="level3">
 <h3 class="anchored" data-anchor-id="detection-function-chart">1. Detection function chart</h3>
 <ul>
-<li><p><strong>Blue solid curve</strong>: the field truth detection function <span class="math inline">\(g(x, \sigma_{\rm true})\)</span>, drawn with the currently selected field truth function and the true <span class="math inline">\(\sigma\)</span> value.</p></li>
-<li><p><strong>Pink dashed curve</strong>: the MLE-fitted function <span class="math inline">\(g(x, \hat\sigma)\)</span>, drawn with the model function when <span class="math inline">\(\hat\sigma\)</span> is available (<span class="math inline">\(n \geq 3\)</span>).</p></li>
-<li><p><strong>Histogram bars</strong> (light blue, 10 equal bins over <span class="math inline">\([0, W]\)</span>): observed within-W distances. Bar heights are normalised to the <span class="math inline">\(g(x)\)</span> scale using the formula:</p>
+<li><p><em>Blue solid curve</em>: the field truth detection function <span class="math inline">\(g(x, \sigma_{\rm true})\)</span>, drawn with the currently selected field truth function and the true <span class="math inline">\(\sigma\)</span> value.</p></li>
+<li><p><em>Pink dashed curve</em>: the MLE-fitted function <span class="math inline">\(g(x, \hat\sigma)\)</span>, drawn with the model function when <span class="math inline">\(\hat\sigma\)</span> is available (<span class="math inline">\(n \geq 3\)</span>).</p></li>
+<li><p><em>Histogram bars</em> (light blue, 10 equal bins over <span class="math inline">\([0, W]\)</span>): observed within-W distances. Bar heights are normalised to the <span class="math inline">\(g(x)\)</span> scale using the formula:</p>
 <pre><code>scale = n * binWidth / ESW_truth
 barHeight[i] = binCount[i] / scale</code></pre>
 <p>so that a perfect half-normal detection function would make the histogram lie on the true curve.</p></li>
-<li><p><strong>Ghost fitted curves</strong>: if “Keep previous runs” is checked, past fitted curves are shown as progressively more transparent pink dashed lines (up to 8 past runs retained, oldest most faded).</p></li>
+<li><p><em>Ghost fitted curves</em>: if “Keep previous runs” is checked, past fitted curves are shown as progressively more transparent pink dashed lines (up to 8 past runs retained, oldest most faded).</p></li>
 <li><p>The x-axis domain updates to the current W value; the y-axis domain expands if bar heights exceed 1.1.</p></li>
 </ul>
 </section>
@@ -813,9 +813,9 @@ barHeight[i] = binCount[i] / scale</code></pre>
 <section id="d-convergence-chart" class="level3">
 <h3 class="anchored" data-anchor-id="d-convergence-chart">3. D̂ convergence chart</h3>
 <ul>
-<li><strong>Green line</strong>: D̂ vs cumulative within-W detections for the current run.</li>
-<li><strong>Red dashed horizontal line</strong>: true D.</li>
-<li><strong>Ghost traces</strong>: previous runs overlaid as faded green lines (same cap and fade logic as detection function ghosts).</li>
+<li><em>Green line</em>: D̂ vs cumulative within-W detections for the current run.</li>
+<li><em>Red dashed horizontal line</em>: true D.</li>
+<li><em>Ghost traces</em>: previous runs overlaid as faded green lines (same cap and fade logic as detection function ghosts).</li>
 <li>Axes use expand-only domain tracking; they grow when data goes outside the current range but never contract mid-run. On hard reset (no data, no ghosts) the axes snap back to their initial defaults.</li>
 </ul>
 <hr>
@@ -827,7 +827,7 @@ barHeight[i] = binCount[i] / scale</code></pre>
 <p>When a reset is detected (state goes from <span class="math inline">\(n &gt; 0\)</span> to <span class="math inline">\(n = 0\)</span>):</p>
 <ul>
 <li>If the checkbox is checked, the current run’s D̂ history and fitted <span class="math inline">\(\hat\sigma\)</span> are saved as a ghost object: <code>{ dhatHistory, sigmaHat, trueD, modelFn, b }</code>.</li>
-<li>The ghost list is capped at <strong>8 entries</strong> (oldest removed when limit is exceeded).</li>
+<li>The ghost list is capped at <em>8 entries</em> (oldest removed when limit is exceeded).</li>
 <li>Ghost curves on the detection function chart record the model function active at the time of that run, so a run fitted with hazard-rate is always displayed with hazard-rate even if the model is later changed.</li>
 </ul>
 <p>“Clear runs” empties the ghost list immediately and forces a redraw.</p>
@@ -921,7 +921,7 @@ barHeight[i] = binCount[i] / scale</code></pre>
 </section>
 <section id="reset-defaults" class="level3">
 <h3 class="anchored" data-anchor-id="reset-defaults">Reset Defaults</h3>
-<p>Resets <strong>all</strong> controls to their factory defaults, then calls Reset:</p>
+<p>Resets <em>all</em> controls to their factory defaults, then calls Reset:</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -978,13 +978,13 @@ barHeight[i] = binCount[i] / scale</code></pre>
 <section id="assumptions-and-limitations" class="level2">
 <h2 class="anchored" data-anchor-id="assumptions-and-limitations">Assumptions and limitations</h2>
 <ul>
-<li>Animals are <strong>static</strong> throughout a run. There is no movement model.</li>
-<li>The transect is a <strong>fixed straight line</strong> through the centre of the arena.</li>
-<li>Each animal receives <strong>exactly one Bernoulli trial</strong> per traversal. Multiple passes are not modelled.</li>
+<li>Animals are <em>static</em> throughout a run. There is no movement model.</li>
+<li>The transect is a <em>fixed straight line</em> through the centre of the arena.</li>
+<li>Each animal receives <em>exactly one Bernoulli trial</em> per traversal. Multiple passes are not modelled.</li>
 <li><span class="math inline">\(g(0) = 1\)</span> holds in both half-normal and hazard-rate modes.</li>
 <li>The MLE holds <span class="math inline">\(b\)</span> fixed; joint optimisation of <span class="math inline">\((\sigma, b)\)</span> is not implemented.</li>
 <li>The hazard-rate ESW uses a fixed 200-step numerical integration; for very small <span class="math inline">\(b\)</span> or extreme parameter combinations, this approximation may be imprecise.</li>
-<li>The detector sees <strong>perpendicular distance only</strong>: no forward detection angle or acoustic range model.</li>
+<li>The detector sees <em>perpendicular distance only</em>: no forward detection angle or acoustic range model.</li>
 <li>There is no measurement error; recorded distances are exact.</li>
 </ul>
 

@@ -277,9 +277,9 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
 <p>Three two-species dynamical systems integrated via RK4, displayed as a live time series and phase-plane trajectory. The three modes are:</p>
 <ul>
-<li><strong>Classic predator-prey</strong>: the standard Lotka-Volterra system with no density dependence.</li>
-<li><strong>Dynamic predator-prey</strong>: adds logistic prey growth and predator self-limitation.</li>
-<li><strong>Competition</strong>: two-species Lotka-Volterra competition with carrying capacities and interaction coefficients.</li>
+<li><em>Classic predator-prey</em>: the standard Lotka-Volterra system with no density dependence.</li>
+<li><em>Dynamic predator-prey</em>: adds logistic prey growth and predator self-limitation.</li>
+<li><em>Competition</em>: two-species Lotka-Volterra competition with carrying capacities and interaction coefficients.</li>
 </ul>
 <p>The visualisation shows both how populations change over time and how they trace paths through state space (the phase plane).</p>
 <hr>
@@ -505,7 +505,7 @@ window.Quarto = {
 </section>
 <section id="numerical-integration" class="level2">
 <h2 class="anchored" data-anchor-id="numerical-integration">Numerical integration</h2>
-<p>All three modes are integrated using <strong>RK4</strong> (classical fourth-order Runge-Kutta). The integration is in <code>src/lv-engine.js</code>.</p>
+<p>All three modes are integrated using <em>RK4</em> (classical fourth-order Runge-Kutta). The integration is in <code>src/lv-engine.js</code>.</p>
 <section id="rk4-step" class="level3">
 <h3 class="anchored" data-anchor-id="rk4-step">RK4 step</h3>
 <p>For a state vector <span class="math inline">\((N, P)\)</span> at time <span class="math inline">\(t\)</span> with step size <span class="math inline">\(\Delta t\)</span>:</p>
@@ -971,7 +971,8 @@ N_1^* = \frac{K_1 - \alpha_{12} K_2}{1 - \alpha_{12}\alpha_{21}}, \quad N_2^* = 
 <h2 class="anchored" data-anchor-id="state-and-time-series">State and time series</h2>
 <p>The state singleton (<code>lv/state.js</code>) holds current population values, the full integration parameters, and a rolling series buffer.</p>
 <ul>
-<li><code>series</code>: array of <code>{ t, prey, predator }</code> records, capped at <strong>1600 points</strong> by <code>state.series.shift()</code> when the cap is exceeded. The oldest point is removed first (FIFO). At Normal speed and default <span class="math inline">\(\Delta t\)</span>, 1600 points corresponds to approximately 48 model-time units of history.</li>
+<li><code>series</code>: array of <code>{ t, prey, predator }</code> records, capped at <em>1600 points</em> by <code>state.series.shift()</code> when the cap is exceeded. The oldest point is removed first (FIFO). At Normal speed and default <span class="math inline">\(\Delta t\)</span>, 1600 points corresponds to approximately 48 model-time units of history. Used by the time-series chart.</li>
+<li><code>phaseSeries</code>: separate array of <code>{ prey, predator }</code> records for the phase-plane chart, capped at 200,000 points. Because the cap is much higher, the phase plane retains the full trajectory of long runs where the time-series chart would have already scrolled.</li>
 <li><code>t</code>: current simulation time. Cumulative across runs until a Reset.</li>
 <li><code>running</code>: boolean.</li>
 </ul>
@@ -984,7 +985,7 @@ N_1^* = \frac{K_1 - \alpha_{12} K_2}{1 - \alpha_{12}\alpha_{21}}, \quad N_2^* = 
 <li><code>pauseInterval = 50</code> (fixed).</li>
 <li><code>nextPauseAt</code> is advanced by <code>pauseInterval</code> each time a pause triggers.</li>
 <li>When paused by checkpoint, <code>autoPausedAt</code> is set and the play button changes to “▶ Resume”.</li>
-<li><strong>Unbounded time</strong> checkbox disables the checkpoint: <code>setUnboundedTime(true)</code> clears <code>autoPausedAt</code> and prevents the pause check.</li>
+<li><em>Unbounded time</em> checkbox disables the checkpoint: <code>setUnboundedTime(true)</code> clears <code>autoPausedAt</code> and prevents the pause check.</li>
 <li>Toggling unbounded time off during a run advances <code>nextPauseAt</code> to the next 50-boundary above the current <code>t</code>.</li>
 </ul>
 <p>The exact pause logic in <code>advanceSimulation</code>:</p>
@@ -1005,7 +1006,7 @@ N_1^* = \frac{K_1 - \alpha_{12} K_2}{1 - \alpha_{12}\alpha_{21}}, \quad N_2^* = 
 <li><code>input</code> event: updates the parameter value and display label immediately (live preview of the number).</li>
 <li><code>change</code> event (fires when slider drag ends): sets <code>running = false</code> and calls <code>resetState()</code>.</li>
 </ul>
-<p>This means moving a slider <strong>always resets the simulation</strong> when you release it. There is no live-update mode for parameters in LV.</p>
+<p>This means moving a slider <em>always resets the simulation</em> when you release it. There is no live-update mode for parameters in LV.</p>
 </section>
 <section id="model-type" class="level3">
 <h3 class="anchored" data-anchor-id="model-type">Model type</h3>
@@ -1014,8 +1015,8 @@ N_1^* = \frac{K_1 - \alpha_{12} K_2}{1 - \alpha_{12}\alpha_{21}}, \quad N_2^* = 
 <section id="reset-vs-reset-defaults" class="level3">
 <h3 class="anchored" data-anchor-id="reset-vs-reset-defaults">Reset vs Reset Defaults</h3>
 <ul>
-<li><strong>Reset</strong>: resets simulation time and populations to current initial conditions (<code>prey0</code>, <code>predator0</code>) without changing any parameters.</li>
-<li><strong>Reset Defaults</strong>: restores all parameters to the default preset for the active mode, then resets. For classic PP this is the “Balanced” preset; for dynamic PP the “Damped oscillations” preset; for competition the “Coexistence” preset.</li>
+<li><em>Reset</em>: resets simulation time and populations to current initial conditions (<code>prey0</code>, <code>predator0</code>) without changing any parameters.</li>
+<li><em>Reset Defaults</em>: restores all parameters to the default preset for the active mode, then resets. For classic PP this is the “Balanced” preset; for dynamic PP the “Damped oscillations” preset; for competition the “Coexistence” preset.</li>
 </ul>
 </section>
 <section id="speed-buttons" class="level3">
@@ -1034,7 +1035,7 @@ N_1^* = \frac{K_1 - \alpha_{12} K_2}{1 - \alpha_{12}\alpha_{21}}, \quad N_2^* = 
 </section>
 <section id="phase-plane-chart" class="level3">
 <h3 class="anchored" data-anchor-id="phase-plane-chart">Phase-plane chart</h3>
-<p>X-axis: prey (or species 1). Y-axis: predators (or species 2). The trajectory is drawn as a single path through all points in the current <code>series</code> buffer. A filled black dot marks the current position (last point). The chart is also rebuilt from scratch each frame. Axes expand to fit the current trajectory extent with 5% headroom.</p>
+<p>X-axis: prey (or species 1). Y-axis: predators (or species 2). The trajectory is drawn as a single path through all points in the <code>phaseSeries</code> buffer (up to 200,000 points). A filled black dot marks the current position (last point). The chart is also rebuilt from scratch each frame. Axes expand to fit the current trajectory extent with 5% headroom.</p>
 </section>
 <section id="estimates-strip" class="level3">
 <h3 class="anchored" data-anchor-id="estimates-strip">Estimates strip</h3>
@@ -1048,7 +1049,7 @@ N_1^* = \frac{K_1 - \alpha_{12} K_2}{1 - \alpha_{12}\alpha_{21}}, \quad N_2^* = 
 <li>The model is deterministic; there is no demographic stochasticity. Populations can reach fractional values.</li>
 <li>Non-negativity is enforced by clamping, not by the ODEs. In particular, classic LV has no built-in carrying capacity on prey; prey grows without bound if predator density is very low.</li>
 <li>In classic LV, the interior equilibrium is a centre (neutral stability). Integration with finite <span class="math inline">\(\Delta t\)</span> can produce slow orbital drift. Smaller <span class="math inline">\(\Delta t\)</span> reduces but does not eliminate this.</li>
-<li>The 1600-point series cap means long runs lose early history. The phase plane shows only the retained window.</li>
+<li>The 1600-point <code>series</code> cap means long runs lose early history in the time-series chart. The phase plane uses a separate <code>phaseSeries</code> buffer (200,000 points) and retains the full trajectory of typical runs.</li>
 <li>Parameters update live in the display but always trigger a full reset when the slider is released.</li>
 </ul>
 
