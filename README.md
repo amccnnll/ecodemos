@@ -37,7 +37,7 @@ ecodemos/
 
 ## Running locally
 
-ES modules require a local server; opening `index.html` directly does not work.
+Simulations in browser at https://amccnnll.github.io/ecodemos/ to run offline it requires a local server; opening `index.html` directly does not work.
 
 ```bash
 python3 -m http.server 8000
