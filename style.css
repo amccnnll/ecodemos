@@ -391,13 +391,15 @@ a {
 
 /* ─── BNE module ─────────────────────────────────────────────────────────────── */
 
-/* BNE scrolls freely — no forced viewport height */
+/* BNE scrolls freely — no forced viewport height.
+   Row 1 is pinned to 540px so the spanning controls column
+   cannot push the metrics and scatter panels down on large screens. */
 .module-layout--bne {
   height: auto;
   min-height: 0;
   align-content: start;
   grid-template-columns: 1fr 290px;
-  grid-template-rows: auto 48px auto;
+  grid-template-rows: 540px 48px auto;
   grid-template-areas:
     "sim         controls"
     "bne-metrics controls"
