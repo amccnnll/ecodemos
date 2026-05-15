@@ -108,6 +108,7 @@
           <span class="slider-value" id="val-overlap">0.30</span>
         </div>
         <p class="control-hint">Dispersion of each latent cluster in preference space; 0 = tight clusters (near-discrete, easy to separate), 0.9 = widely dispersed Gaussians with heavy cross-cluster overlap</p>
+        <p class="control-warn" id="warn-overlap" hidden>High overlap: guild communities may not be recoverable by Louvain — expect low ARI.</p>
 
         <div class="slider-row">
           <span class="control-label slider-label">Specialist</span>
@@ -156,6 +157,7 @@
           <span class="slider-value" id="val-T">6</span>
         </div>
         <p class="control-hint">Survey years; each year draws 60 independent sample points from the radial effort field, so more years increase both total detections and spatial coverage</p>
+        <p class="control-warn" id="warn-T" hidden>High T: sightings counts may become unrealistically large at the default encounter rate.</p>
 
         <div class="slider-row">
           <span class="control-label slider-label">Effort bias</span>

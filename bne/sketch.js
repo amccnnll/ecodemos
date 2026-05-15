@@ -286,10 +286,16 @@ function updateHexColours() {
     const ph = sim.portHex;
     const cx = offX2 + (ph.x - xMin)*sc2;
     const cy = offY2 + (ph.y - yMin)*sc2;
+    const r = Math.max(hs * sc2 * 0.52, 7);
+    portG.append('circle')
+      .attr('cx', cx).attr('cy', cy).attr('r', r)
+      .attr('fill', 'white')
+      .attr('stroke', '#e0509a').attr('stroke-width', Math.max(r * 0.18, 1.5))
+      .attr('pointer-events', 'none');
     portG.append('text')
       .attr('x', cx).attr('y', cy)
       .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
-      .attr('font-size', `${hs * sc2 * 0.72}px`)
+      .attr('font-size', `${r * 1.15}px`)
       .attr('font-weight', 'bold')
       .attr('fill', '#e0509a')
       .attr('pointer-events', 'none')
@@ -314,12 +320,24 @@ function wireSlider(id, key, fmt, onEnd) {
 
 const reg = state.regenerate, rean = state.reanalyse;
 
+function updateParamWarnings() {
+  const wT = document.getElementById('warn-T');
+  const wOv = document.getElementById('warn-overlap');
+  if (wT)  wT.hidden  = state.params.T <= 7;
+  if (wOv) wOv.hidden = state.params.guildOverlap < 0.6;
+}
+
 wireSlider('sl-N',            'N',                  v => String(v | 0),    reg);
 wireSlider('sl-G',            'G',                  v => String(v | 0),    reg);
 wireSlider('sl-overlap',      'guildOverlap',        v => v.toFixed(2),     reg);
 wireSlider('sl-specialist',   'specialistFraction',  v => v.toFixed(2),     reg);
 wireSlider('sl-nTransients',  'nTransients',         v => String(v | 0),    reg);
 wireSlider('sl-T',            'T',                  v => String(v | 0),    reg);
+
+// Update warnings whenever T or overlap changes.
+document.getElementById('sl-T').addEventListener('input', updateParamWarnings);
+document.getElementById('sl-overlap').addEventListener('input', updateParamWarnings);
+updateParamWarnings(); // initialise on load
 wireSlider('sl-effortBias',   'effortBias',          v => v.toFixed(2),     reg);
 wireSlider('sl-detectionProb','detectionProb',       v => v.toFixed(2),     reg);
 wireSlider('sl-hexSize',      'hexSize',             v => String(v | 0),    reg);
