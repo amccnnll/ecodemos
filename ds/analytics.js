@@ -259,17 +259,10 @@ function initDhatChart(containerId) {
   const dhatPath = g.append('path')
     .attr('fill', 'none').attr('stroke', '#2a7a2a').attr('stroke-width', 2);
 
-  // Expand-only domain tracking — prevents jitter from micro-rescales
-  let committedYHi  = 0;
-  let committedXMax = 10;
-
   function update(history, trueD, ghosts = []) {
     const hasData = history.length > 0 || ghosts.some(g => g.dhatHistory.length > 0);
 
     if (!hasData) {
-      // Hard reset — snap axes back immediately
-      committedYHi  = 0;
-      committedXMax = 10;
       xScale.domain([1, 10]);
       yScale.domain([0, 100]);
       xAxis.call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.format('d')));
@@ -280,25 +273,19 @@ function initDhatChart(containerId) {
       return;
     }
 
-    // Compute desired extents with 25% headroom on y
+    // Compute extents from all visible data; always fit axes to the current picture
     const allValues = [...history, ...ghosts.flatMap(g => g.dhatHistory)].filter(isFinite);
     const allTrueDs = [trueD, ...ghosts.map(g => g.trueD)].filter(v => v != null);
     const maxLen    = Math.max(history.length, ...ghosts.map(g => g.dhatHistory.length), 10);
-    const rawHi     = Math.max(...allValues, ...allTrueDs);
+    const rawHi     = Math.max(...allValues, ...allTrueDs, 1);
     const desiredHi = rawHi * 1.1;
 
-    // Only expand domains, never contract mid-run
-    const yExpanded = desiredHi > committedYHi;
-    const xExpanded = maxLen    > committedXMax;
-    if (yExpanded) committedYHi  = desiredHi;
-    if (xExpanded) committedXMax = maxLen;
+    xScale.domain([1, maxLen]);
+    yScale.domain([0, desiredHi]);
 
-    xScale.domain([1, committedXMax]);
-    yScale.domain([0, committedYHi]);
-
-    // Animate axis only when domain actually grows; otherwise skip transition
-    if (yExpanded) yAxis.transition().duration(250).call(d3.axisLeft(yScale).ticks(4).tickFormat(d3.format('.0f')));
-    if (xExpanded) xAxis.transition().duration(250).call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.format('d')));
+    // Animate axis rescales so parameter changes don't jar
+    yAxis.transition().duration(250).call(d3.axisLeft(yScale).ticks(4).tickFormat(d3.format('.0f')));
+    xAxis.transition().duration(250).call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.format('d')));
 
     // Ghost lines — faded, older = more transparent
     const nG = ghosts.length;
