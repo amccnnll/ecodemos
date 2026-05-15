@@ -271,7 +271,7 @@ function updateHexColours() {
 
   hexG.selectAll('path.hex').attr('fill', d => d.isLand ? LAND_FILL : seaColour(d));
 
-  // Port hex: blue outline drawn on top of the hex fill layer.
+  // Port hex: pink "P" label centred on the port hex, scales with hex size.
   // Redrawn each colour update so it survives layer switches.
   portG.selectAll('*').remove();
   if (sim?.portHex && state.hexGrid) {
@@ -284,11 +284,16 @@ function updateHexColours() {
     const offX2 = pad2 + (cW2 - 2*pad2 - (xMax - xMin)*sc2) / 2;
     const offY2 = pad2;
     const ph = sim.portHex;
-    portG.append('path')
-      .attr('d', hexPathString(offX2 + (ph.x - xMin)*sc2, offY2 + (ph.y - yMin)*sc2, hs * sc2 * 0.98))
-      .attr('fill', 'none')
-      .attr('stroke', '#1a6faf')
-      .attr('stroke-width', 2.5);
+    const cx = offX2 + (ph.x - xMin)*sc2;
+    const cy = offY2 + (ph.y - yMin)*sc2;
+    portG.append('text')
+      .attr('x', cx).attr('y', cy)
+      .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
+      .attr('font-size', `${hs * sc2 * 0.72}px`)
+      .attr('font-weight', 'bold')
+      .attr('fill', '#e0509a')
+      .attr('pointer-events', 'none')
+      .text('P');
   }
 
   updateHexLegend();
