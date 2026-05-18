@@ -19,52 +19,52 @@ The simulation shows two concurrent views of the same scene:
 
 ### Controls
 
-| Control | Description |
-|---|---|
-| Speed | Playback speed: Slow / Normal / Fast. Affects only how fast the observer traverses the transect; does not change what gets detected. |
-| Seed | RNG seed for animal placement (0–99999). Reset with the same seed reproduces the exact same population. |
-| 🎲 New | Draws a new random seed and regenerates the population. |
-| Preset | Named parameter set. Two groups: Cetacean scenarios (harbour porpoise, bottlenose dolphin, common dolphin, minke whale, bowhead whale) and Terrestrial surveys (songbird, shorebird, raptor, bird nest survey, snake). Applying a preset overwrites all Complications sliders and selectors. |
-| Field truth | Detection function used to simulate detections: half-normal or hazard-rate. Updates live; affects future detection draws only (existing stored detections are not changed). |
-| Model | Detection function used for MLE fitting. Mismatching Field truth and Model produces biased D̂ (warning shown). Updates live. |
-| σ | Detection scale (km). For half-normal: distance at which detection probability = $e^{-1/2} \approx 0.607$. For hazard-rate: scale of the decay. Updates live. Default: 0.25 km. |
-| W | Truncation distance (km). Animals beyond W are never detected; stored detections beyond W are excluded from analysis if W is later reduced. Updates live. Default: 0.50 km. |
-| b (shape) | Hazard-rate shape parameter. Visible only when hazard-rate is selected. Higher b = wider flat shoulder near the transect before a sharper falloff. Default: 2.5. |
-| Het. σ | Toggle: assign each animal its own $\sigma_i$ drawn from $\text{LogNormal}(\sigma, \mathrm{CV}_\sigma)$. Updates live (mixture curve redrawn immediately); per-animal values are fixed at Reset. Off by default. |
-| CV_σ | Coefficient of variation for $\sigma_i$. Visible only when Het. σ is checked. Range: 0.05–1.00, step 0.05, default 0.30. Updates live. |
-| D | True animal density (animals per km²). Takes effect on Reset. Default: 50 /km². |
-| L | Transect length (km). Sets the width of the arena. Takes effect on Reset. Default: 4.0 km. |
-| Distribution | Spatial distribution of animals: Uniform, Clustered, or Regular. Takes effect on Reset. |
-| s_clump | Cluster spread as a fraction of transect length. Visible when Distribution = Clustered. Default: 0.10. |
-| ρ (regularity) | Grid jitter: 0 = perfect grid, 1 = maximum jitter. Visible when Distribution = Regular. Default: 0.50. |
-| Keep previous runs | Overlays the previous runs' fitted curves and D̂ traces as faded ghost lines (up to 8 retained). |
+| Control            | Description                                                                                                                                                                                                                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Speed              | Playback speed: Slow / Normal / Fast. Affects only how fast the observer traverses the transect; does not change what gets detected.                                                                                                                                                         |
+| Seed               | RNG seed for animal placement (0–99999). Reset with the same seed reproduces the exact same population.                                                                                                                                                                                      |
+| 🎲 New             | Draws a new random seed and regenerates the population.                                                                                                                                                                                                                                      |
+| Preset             | Named parameter set. Two groups: Cetacean scenarios (harbour porpoise, bottlenose dolphin, common dolphin, minke whale, bowhead whale) and Terrestrial surveys (songbird, shorebird, raptor, bird nest survey, snake). Applying a preset overwrites all Complications sliders and selectors. |
+| Field truth        | Detection function used to simulate detections: half-normal or hazard-rate. Updates live; affects future detection draws only (existing stored detections are not changed).                                                                                                                  |
+| Model              | Detection function used for MLE fitting. Mismatching Field truth and Model produces biased D̂ (warning shown). Updates live.                                                                                                                                                                  |
+| σ                  | Detection scale (km). For half-normal: distance at which detection probability = $e^{-1/2} \approx 0.607$. For hazard-rate: scale of the decay. Updates live. Default: 0.25 km.                                                                                                              |
+| W                  | Truncation distance (km). Animals beyond W are never detected; stored detections beyond W are excluded from analysis if W is later reduced. Updates live. Default: 0.50 km.                                                                                                                  |
+| b (shape)          | Hazard-rate shape parameter. Visible only when hazard-rate is selected. Higher b = wider flat shoulder near the transect before a sharper falloff. Default: 2.5.                                                                                                                             |
+| Het. σ             | Toggle: assign each animal its own $\sigma_i$ drawn from $\text{LogNormal}(\sigma, \mathrm{CV}_\sigma)$. Updates live (mixture curve redrawn immediately); per-animal values are fixed at Reset. Off by default.                                                                             |
+| CV_σ               | Coefficient of variation for $\sigma_i$. Visible only when Het. σ is checked. Range: 0.05–1.00, step 0.05, default 0.30. Updates live.                                                                                                                                                       |
+| D                  | True animal density (animals per km²). Takes effect on Reset. Default: 50 /km².                                                                                                                                                                                                              |
+| L                  | Transect length (km). Sets the width of the arena. Takes effect on Reset. Default: 4.0 km.                                                                                                                                                                                                   |
+| Distribution       | Spatial distribution of animals: Uniform, Clustered, or Regular. Takes effect on Reset.                                                                                                                                                                                                      |
+| s_clump            | Cluster spread as a fraction of transect length. Visible when Distribution = Clustered. Default: 0.10.                                                                                                                                                                                       |
+| ρ (regularity)     | Grid jitter: 0 = perfect grid, 1 = maximum jitter. Visible when Distribution = Regular. Default: 0.50.                                                                                                                                                                                       |
+| Keep previous runs | Overlays the previous runs' fitted curves and D̂ traces as faded ghost lines (up to 8 retained).                                                                                                                                                                                              |
 
 ### Estimates readout
 
-| Symbol | Meaning |
-|---|---|
-| $n$ | Count of within-$W$ detections in the current run. |
-| Effort ($L$) | Observer x-position (km) at the time of the most recent detection. |
-| ESW | Effective strip width (km): $\int_0^W g(x)\,dx$. Computed from $\hat\sigma$ (or true $\sigma$ if fewer than 3 detections). |
-| $\hat\sigma$ | MLE estimate of $\sigma$ (requires $n \geq 3$; shown as — otherwise). |
-| True $\sigma$ | Current slider value of $\sigma$. |
-| $\hat{D}$ | Estimated density: $n / (2L \cdot \mathrm{ESW})$. |
-| True $D$ | Realised density $= \text{areaN} / (L \times H)$, which may differ slightly from the slider due to rounding. |
+| Symbol        | Meaning                                                                                                                    |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| $n$           | Count of within-$W$ detections in the current run.                                                                         |
+| Effort ($L$)  | Observer x-position (km) at the time of the most recent detection.                                                         |
+| ESW           | Effective strip width (km): $\int_0^W g(x)\,dx$. Computed from $\hat\sigma$ (or true $\sigma$ if fewer than 3 detections). |
+| $\hat\sigma$  | MLE estimate of $\sigma$ (requires $n \geq 3$; shown as — otherwise).                                                      |
+| True $\sigma$ | Current slider value of $\sigma$.                                                                                          |
+| $\hat{D}$     | Estimated density: $n / (2L \cdot \mathrm{ESW})$.                                                                          |
+| True $D$      | Realised density $= \text{areaN} / (L \times H)$, which may differ slightly from the slider due to rounding.               |
 
 ### Key symbols
 
-| Symbol | Meaning |
-|---|---|
-| $g(x)$ | Detection function: probability of detecting an animal at perpendicular distance $x$ from the transect. |
-| $\sigma$ | Detection scale parameter (km). |
-| $W$ | Truncation distance (km). |
-| $\mathrm{ESW}$ | Effective strip width (km). |
-| $\hat\sigma$ | MLE estimate of $\sigma$. |
-| $\hat{D}$ | Estimated density (animals per km²). |
-| $D$ | True density (animals per km²). |
-| $L$ | Transect length / effort (km). |
-| $n$ | Number of within-$W$ detections. |
-| $b$ | Hazard-rate shape parameter (dimensionless). |
+| Symbol         | Meaning                                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------- |
+| $g(x)$         | Detection function: probability of detecting an animal at perpendicular distance $x$ from the transect. |
+| $\sigma$       | Detection scale parameter (km).                                                                         |
+| $W$            | Truncation distance (km).                                                                               |
+| $\mathrm{ESW}$ | Effective strip width (km).                                                                             |
+| $\hat\sigma$   | MLE estimate of $\sigma$.                                                                               |
+| $\hat{D}$      | Estimated density (animals per km²).                                                                    |
+| $D$            | True density (animals per km²).                                                                         |
+| $L$            | Transect length / effort (km).                                                                          |
+| $n$            | Number of within-$W$ detections.                                                                        |
+| $b$            | Hazard-rate shape parameter (dimensionless).                                                            |
 
 ---
 
@@ -72,11 +72,11 @@ The simulation shows two concurrent views of the same scene:
 
 The simulation canvas maps directly to a rectangle in kilometre coordinates. All positions used by the engine are stored and computed in km; pixel positions are computed only for rendering.
 
-- *Transect length* ($L$, km) is set by the transect slider. This is the x-dimension of the arena: `arenaWKm = sliderValue`.
-- *Arena height* ($H$, km) is derived from the canvas dimensions so that one pixel represents the same distance in both axes: `arenaH = canvasHeight / (canvasWidth / arenaWKm)`.
-- *Transect* runs horizontally along the centreline of the canvas: $y = H/2$ in km coordinates. It is a fixed line; the observer moves along it.
-- *Pixel scale*: `PX_PER_KM = canvasWidth / arenaWKm`. Recomputed on every reset (canvas width is fixed; a different transect length changes the scale).
-- *Observer x-position* (`boatX`) runs from 0 to `arenaWKm` in km. The observer icon is drawn at `boatX * PX_PER_KM` pixels from the left edge.
+- _Transect length_ ($L$, km) is set by the transect slider. This is the x-dimension of the arena: `arenaWKm = sliderValue`.
+- _Arena height_ ($H$, km) is derived from the canvas dimensions so that one pixel represents the same distance in both axes: `arenaH = canvasHeight / (canvasWidth / arenaWKm)`.
+- _Transect_ runs horizontally along the centreline of the canvas: $y = H/2$ in km coordinates. It is a fixed line; the observer moves along it.
+- _Pixel scale_: `PX_PER_KM = canvasWidth / arenaWKm`. Recomputed on every reset (canvas width is fixed; a different transect length changes the scale).
+- _Observer x-position_ (`boatX`) runs from 0 to `arenaWKm` in km. The observer icon is drawn at `boatX * PX_PER_KM` pixels from the left edge.
 
 ---
 
@@ -113,9 +113,9 @@ where `rng()` returns a value in $[0, 1)$ from the seeded placement RNG. The res
 
 A two-level process. Parameters: `clumpScale` (slider default 0.10).
 
-1. *Number of clusters*: `nClusters = Math.max(3, Math.round(n / 6))`.
-2. *Cluster centres*: each placed at `(rng()*arenaW, rng()*arenaH)` using the seeded RNG, uniform independently in each axis.
-3. *Animal scatter*: for each animal, a cluster is chosen uniformly at random (seeded), then a displacement is drawn using the Box–Muller transform:
+1. _Number of clusters_: `nClusters = Math.max(3, Math.round(n / 6))`.
+2. _Cluster centres_: each placed at `(rng()*arenaW, rng()*arenaH)` using the seeded RNG, uniform independently in each axis.
+3. _Animal scatter_: for each animal, a cluster is chosen uniformly at random (seeded), then a displacement is drawn using the Box–Muller transform:
    ```
    u1    = rng(),   u2 = rng()
    mag   = sigmaCluster * sqrt(-2 * log(u1))
@@ -123,7 +123,7 @@ A two-level process. Parameters: `clumpScale` (slider default 0.10).
    dx    = mag * cos(angle),   dy = mag * sin(angle)
    ```
    where `sigmaCluster = arenaW * clumpScale`. The angular direction is isotropic (circular Gaussian scatter around the cluster centre).
-4. *Wrap-around*: animals that scatter beyond the arena edge are wrapped using modular arithmetic:
+4. _Wrap-around_: animals that scatter beyond the arena edge are wrapped using modular arithmetic:
    ```
    x = ((cx + dx) % arenaW + arenaW) % arenaW
    y = ((cy + dy) % arenaH + arenaH) % arenaH
@@ -136,9 +136,9 @@ The `clumpScale` slider controls `sigmaCluster` as a fraction of transect length
 
 A perturbed grid. Parameters: `regularity` (slider default 0.50).
 
-1. *Grid dimensions*: `nCols = Math.round(sqrt(n * arenaW / arenaH))`, `nRows = Math.ceil(n / nCols)`. The aspect ratio of the grid matches the arena.
-2. *Cell size*: `dx = arenaW / nCols`, `dy = arenaH / nRows`.
-3. *Animal position*: for the $i$-th animal, `col = i % nCols`, `row = floor(i / nCols)`:
+1. _Grid dimensions_: `nCols = Math.round(sqrt(n * arenaW / arenaH))`, `nRows = Math.ceil(n / nCols)`. The aspect ratio of the grid matches the arena.
+2. _Cell size_: `dx = arenaW / nCols`, `dy = arenaH / nRows`.
+3. _Animal position_: for the $i$-th animal, `col = i % nCols`, `row = floor(i / nCols)`:
    ```
    x = (col + 0.5 + (rng() - 0.5) * regularity) * dx
    y = (row + 0.5 + (rng() - 0.5) * regularity) * dy
@@ -156,7 +156,7 @@ Values in between produce intermediate over-dispersion relative to a Poisson pro
 
 ## Seed and RNG architecture
 
-The simulation uses *two separate random number generators* with different seeding strategies. This is a deliberate design choice.
+The simulation uses _two separate random number generators_ with different seeding strategies. This is a deliberate design choice.
 
 ### Placement RNG (seeded)
 
@@ -208,7 +208,7 @@ All detection logic is in `src/ds-engine.js` (`tryDetect`). The key properties a
 
 ### One-shot rule
 
-Detection is attempted *exactly once* per animal per run. The trigger condition is:
+Detection is attempted _exactly once_ per animal per run. The trigger condition is:
 
 ```
 boatX - animal.x ∈ [0, boatSpeed)
@@ -286,7 +286,7 @@ where `muLog = log(σ) - τ²/2`. Per-animal values are fixed for the lifetime o
 
 ### Mixture detection function
 
-With heterogeneous $\sigma_i$, the *population-level* detection function is a mixture:
+With heterogeneous $\sigma_i$, the _population-level_ detection function is a mixture:
 
 $$
 g_{\rm mix}(x) = \mathbb{E}_{\sigma_i}\bigl[g(x,\sigma_i)\bigr] = \int_0^{\infty} g(x,s)\, p_{\rm LN}(s;\sigma,\mathrm{CV}_\sigma)\, ds
@@ -303,7 +303,7 @@ where $\Phi^{-1}$ is the standard normal quantile function (Abramowitz & Stegun 
 
 ### Pedagogical effect
 
-The MLE fits a *single* $\hat\sigma$ to distances drawn from the mixture distribution. Because the mixture $g_{\rm mix}(x)$ has a wider effective strip than $g(x, \sigma)$, the MLE overestimates $\sigma$: the pink fitted curve will be shifted right relative to the true (mixture) mean curve. This is an instance of the identifiability problem in mixture detection functions.
+The MLE fits a _single_ $\hat\sigma$ to distances drawn from the mixture distribution. Because the mixture $g_{\rm mix}(x)$ has a wider effective strip than $g(x, \sigma)$, the MLE overestimates $\sigma$: the pink fitted curve will be shifted right relative to the true (mixture) mean curve. This is an instance of the identifiability problem in mixture detection functions.
 
 The magnitude of overestimation grows with $\mathrm{CV}_\sigma$. At $\mathrm{CV}_\sigma = 0.30$ the bias is moderate; at $\mathrm{CV}_\sigma \geq 0.70$ the fitted curve may visibly exceed the mixture curve across the full strip.
 
@@ -314,7 +314,7 @@ The magnitude of overestimation grows with $\mathrm{CV}_\sigma$. At $\mathrm{CV}
 When a detection fires, `recordDetection(perpDist, boatX)` is called:
 
 - `perpDist`: perpendicular distance in km (raw, not yet filtered by W).
-- `boatX`: observer x-position in km *at the moment of detection*.
+- `boatX`: observer x-position in km _at the moment of detection_.
 
 Both values are appended to parallel arrays in the shared state singleton (`ds/state.js`):
 
@@ -331,8 +331,8 @@ These arrays grow monotonically during a run. They are cleared on reset (`resetS
 
 The truncation distance $W$ has two roles:
 
-1. *Hard truncation during detection*: `tryDetect` returns false when `perpDist > W`. No draw is made; the animal is never recorded.
-2. *Post-hoc filtering in analytics*: the analytics layer refilters stored distances on every state change:
+1. _Hard truncation during detection_: `tryDetect` returns false when `perpDist > W`. No draw is made; the animal is never recorded.
+2. _Post-hoc filtering in analytics_: the analytics layer refilters stored distances on every state change:
    ```js
    filteredDists = detectedDistances.filter((d) => d <= W);
    ```
@@ -366,9 +366,9 @@ where $g$ is `hazardRate(x, sigma, b)`.
 
 ## MLE fitting
 
-`fitSigmaMLE` in `src/stats.js` finds the $\hat{\sigma}$ that minimises the negative log-likelihood. The analytics layer calls it when there are *at least 3* within-W detections; fewer returns `null` and `σ̂` is shown as "—".
+`fitSigmaMLE` in `src/stats.js` finds the $\hat{\sigma}$ that minimises the negative log-likelihood. The analytics layer calls it when there are _at least 3_ within-W detections; fewer returns `null` and `σ̂` is shown as "—".
 
-The search uses *golden-section* over a fixed interval $[\sigma_{\min}, \sigma_{\max}]$. The shape parameter $b$ is *not optimised*; it is held at the current slider value throughout.
+The search uses _golden-section_ over a fixed interval $[\sigma_{\min}, \sigma_{\max}]$. The shape parameter $b$ is _not optimised_; it is held at the current slider value throughout.
 
 ### NLL for half-normal
 
@@ -398,7 +398,7 @@ where $L$ is effort in km, $n$ is the count of within-W detections, and ESW uses
 
 ### Per-detection effort in the convergence chart
 
-The D̂ convergence chart does *not* use the final transect length as effort. Instead, for each successive within-W detection, the chart plots the density estimate using effort = `boatX` at the moment that detection was made. For the $k$-th within-W detection, $L_k$ = observer x-position (km) when the $k$-th animal was detected.
+The D̂ convergence chart does _not_ use the final transect length as effort. Instead, for each successive within-W detection, the chart plots the density estimate using effort = `boatX` at the moment that detection was made. For the $k$-th within-W detection, $L_k$ = observer x-position (km) when the $k$-th animal was detected.
 
 This means the convergence trace shows how $\hat{D}$ evolves as data accumulates during the survey, including the effect of early noise when $n$ is small.
 
@@ -412,15 +412,15 @@ Three panels are drawn by `ds/analytics.js` using D3. They subscribe to state an
 
 ### 1. Detection function chart
 
-- *Blue solid curve*: when Het. σ is off, the field truth detection function $g(x, \sigma_{\rm true})$; when Het. σ is on, the mixture expectation $g_{\rm mix}(x)$ computed from 100 lognormal quantile points (see §Heterogeneous detection scale).
-- *Blue faint dashed curve*: visible only when Het. σ is on; shows the single-$\sigma$ reference $g(x, \sigma)$ so the broadening effect of heterogeneity is apparent.
-- *Pink dashed curve*: the MLE-fitted function $g(x, \hat\sigma)$, drawn with the model function when $\hat\sigma$ is available ($n \geq 3$).
-- *Histogram bars* (light blue, 10 equal bins over $[0, W]$): observed within-W distances. Bar heights are normalised to the $g(x)$ scale. When Het. σ is off:
+- _Blue solid curve_: when Het. σ is off, the field truth detection function $g(x, \sigma_{\rm true})$; when Het. σ is on, the mixture expectation $g_{\rm mix}(x)$ computed from 100 lognormal quantile points (see §Heterogeneous detection scale).
+- _Blue faint dashed curve_: visible only when Het. σ is on; shows the single-$\sigma$ reference $g(x, \sigma)$ so the broadening effect of heterogeneity is apparent.
+- _Pink dashed curve_: the MLE-fitted function $g(x, \hat\sigma)$, drawn with the model function when $\hat\sigma$ is available ($n \geq 3$).
+- _Histogram bars_ (light blue, 10 equal bins over $[0, W]$): observed within-W distances. Bar heights are normalised to the $g(x)$ scale. When Het. σ is off:
   ```
   scale = n * binWidth / ESW_truth
   ```
   When Het. σ is on, the normalising ESW is the mixture ESW $= \mathbb{E}[\mathrm{ESW}(\sigma_i, W)]$, averaged over the same 100 quantile points.
-- *Ghost fitted curves*: if "Keep previous runs" is checked, past fitted curves are shown as progressively more transparent pink dashed lines (up to 8 past runs retained, oldest most faded).
+- _Ghost fitted curves_: if "Keep previous runs" is checked, past fitted curves are shown as progressively more transparent pink dashed lines (up to 8 past runs retained, oldest most faded).
 - The x-axis domain updates to the current W value; the y-axis domain expands if bar heights exceed 1.1.
 
 ### 2. Running estimates strip
@@ -441,9 +441,9 @@ The "Effort" readout is the boatX at the time of the last detection, not the tot
 
 ### 3. D̂ convergence chart
 
-- *Green line*: D̂ vs cumulative within-W detections for the current run.
-- *Red dashed horizontal line*: true D.
-- *Ghost traces*: previous runs overlaid as faded green lines (same cap and fade logic as detection function ghosts).
+- _Green line_: D̂ vs cumulative within-W detections for the current run.
+- _Red dashed horizontal line_: true D.
+- _Ghost traces_: previous runs overlaid as faded green lines (same cap and fade logic as detection function ghosts).
 - Axes use expand-only domain tracking; they grow when data goes outside the current range but never contract mid-run. On hard reset (no data, no ghosts) the axes snap back to their initial defaults.
 
 ---
@@ -455,7 +455,7 @@ The "Keep previous runs" checkbox controls ghost retention. Ghosts are managed e
 When a reset is detected (state goes from $n > 0$ to $n = 0$):
 
 - If the checkbox is checked, the current run's D̂ history and fitted $\hat\sigma$ are saved as a ghost object: `{ dhatHistory, sigmaHat, trueD, modelFn, b }`.
-- The ghost list is capped at *8 entries* (oldest removed when limit is exceeded).
+- The ghost list is capped at _8 entries_ (oldest removed when limit is exceeded).
 - Ghost curves on the detection function chart record the model function active at the time of that run, so a run fitted with hazard-rate is always displayed with hazard-rate even if the model is later changed.
 
 "Clear runs" empties the ghost list immediately and forces a redraw.
@@ -468,15 +468,15 @@ When a reset is detected (state goes from $n > 0$ to $n = 0$):
 
 These controls change simulation parameters immediately. Analytics are rebuilt from stored detections on the next state notification.
 
-| Control              | Variable  | Effect                                                                                  |
-| -------------------- | --------- | --------------------------------------------------------------------------------------- |
-| $\sigma$ slider      | `sigma`   | Changes both the truth curve and MLE fitting                                            |
-| $W$ slider           | `W`       | Restricts or expands the truncation strip; all stored detections are refiltered         |
-| Field truth function | `truthFn` | Changes which $g(x)$ governs future detection draws and the blue truth curve            |
-| Model function       | `modelFn` | Changes which $g(x)$ is fitted by MLE and shown as the pink curve                       |
-| Shape $b$            | `b`       | Affects hazard-rate detection and MLE (only visible when truth or model is hazard-rate) |
-| Het. σ toggle        | `sigmaHet`| Switches between homogeneous and mixture detection curves; redraws analytics immediately |
-| CV_σ slider          | `sigmaCV` | Adjusts mixture spread; per-animal $\sigma_i$ values are fixed at Reset               |
+| Control              | Variable   | Effect                                                                                   |
+| -------------------- | ---------- | ---------------------------------------------------------------------------------------- |
+| $\sigma$ slider      | `sigma`    | Changes both the truth curve and MLE fitting                                             |
+| $W$ slider           | `W`        | Restricts or expands the truncation strip; all stored detections are refiltered          |
+| Field truth function | `truthFn`  | Changes which $g(x)$ governs future detection draws and the blue truth curve             |
+| Model function       | `modelFn`  | Changes which $g(x)$ is fitted by MLE and shown as the pink curve                        |
+| Shape $b$            | `b`        | Affects hazard-rate detection and MLE (only visible when truth or model is hazard-rate)  |
+| Het. σ toggle        | `sigmaHet` | Switches between homogeneous and mixture detection curves; redraws analytics immediately |
+| CV_σ slider          | `sigmaCV`  | Adjusts mixture spread; per-animal $\sigma_i$ values are fixed at Reset                  |
 
 Note: changing `sigma` or `truthFn` live affects future detections for the current run (if still in progress), not past ones that are already stored.
 
@@ -495,7 +495,7 @@ Changing these updates the displayed readout immediately but the population is o
 
 ### Reset Defaults
 
-Resets *all* controls to their factory defaults, then calls Reset:
+Resets _all_ controls to their factory defaults, then calls Reset:
 
 | Parameter            | Default     |
 | -------------------- | ----------- |
@@ -514,11 +514,11 @@ Resets *all* controls to their factory defaults, then calls Reset:
 
 ## Assumptions and limitations
 
-- Animals are *static* throughout a run. There is no movement model.
-- The transect is a *fixed straight line* through the centre of the arena.
-- Each animal receives *exactly one Bernoulli trial* per traversal. Multiple passes are not modelled.
+- Animals are _static_ throughout a run. There is no movement model.
+- The transect is a _fixed straight line_ through the centre of the arena.
+- Each animal receives _exactly one Bernoulli trial_ per traversal. Multiple passes are not modelled.
 - $g(0) = 1$ holds in both half-normal and hazard-rate modes.
 - The MLE holds $b$ fixed; joint optimisation of $(\sigma, b)$ is not implemented.
 - The hazard-rate ESW uses a fixed 200-step numerical integration; for very small $b$ or extreme parameter combinations, this approximation may be imprecise.
-- The detector sees *perpendicular distance only*: no forward detection angle or acoustic range model.
+- The detector sees _perpendicular distance only_: no forward detection angle or acoustic range model.
 - There is no measurement error; recorded distances are exact.
