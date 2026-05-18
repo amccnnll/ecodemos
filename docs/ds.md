@@ -30,6 +30,8 @@ The simulation shows two concurrent views of the same scene:
 | σ | Detection scale (km). For half-normal: distance at which detection probability = $e^{-1/2} \approx 0.607$. For hazard-rate: scale of the decay. Updates live. Default: 0.25 km. |
 | W | Truncation distance (km). Animals beyond W are never detected; stored detections beyond W are excluded from analysis if W is later reduced. Updates live. Default: 0.50 km. |
 | b (shape) | Hazard-rate shape parameter. Visible only when hazard-rate is selected. Higher b = wider flat shoulder near the transect before a sharper falloff. Default: 2.5. |
+| Het. σ | Toggle: assign each animal its own $\sigma_i$ drawn from $\text{LogNormal}(\sigma, \mathrm{CV}_\sigma)$. Updates live (mixture curve redrawn immediately); per-animal values are fixed at Reset. Off by default. |
+| CV_σ | Coefficient of variation for $\sigma_i$. Visible only when Het. σ is checked. Range: 0.05–1.00, step 0.05, default 0.30. Updates live. |
 | D | True animal density (animals per km²). Takes effect on Reset. Default: 50 /km². |
 | L | Transect length (km). Sets the width of the arena. Takes effect on Reset. Default: 4.0 km. |
 | Distribution | Spatial distribution of animals: Uniform, Clustered, or Regular. Takes effect on Reset. |
@@ -260,6 +262,53 @@ $$
 
 ---
 
+## Heterogeneous detection scale
+
+The **Het. σ** toggle activates per-animal detection scales. Each animal $i$ is assigned:
+
+$$
+\sigma_i \sim \text{LogNormal}\!\left(\log\sigma - \tfrac{\tau^2}{2},\; \tau\right), \qquad \tau = \sqrt{\log(1 + \mathrm{CV}_\sigma^2)}
+$$
+
+The parameterisation ensures $\mathbb{E}[\sigma_i] = \sigma$ regardless of $\mathrm{CV}_\sigma$: the slider value remains the mean detection scale.
+
+### Per-animal sigma assignment
+
+Sigma values are drawn using the seeded placement RNG immediately after animal positions are assigned. The Box–Muller transform is applied in log-space:
+
+```
+u1  = placementRng(),   u2 = placementRng()
+z   = sqrt(-2 * log(u1)) * cos(2π * u2)     // standard normal
+σᵢ  = exp(muLog + τ * z)
+```
+
+where `muLog = log(σ) - τ²/2`. Per-animal values are fixed for the lifetime of the current population; they change only on Reset.
+
+### Mixture detection function
+
+With heterogeneous $\sigma_i$, the *population-level* detection function is a mixture:
+
+$$
+g_{\rm mix}(x) = \mathbb{E}_{\sigma_i}\bigl[g(x,\sigma_i)\bigr] = \int_0^{\infty} g(x,s)\, p_{\rm LN}(s;\sigma,\mathrm{CV}_\sigma)\, ds
+$$
+
+This integral has no closed form. The analytics panel approximates it using 100 Gauss-quantile points of the lognormal:
+
+```
+σ̃ₖ  = exp(muLog + τ * Φ⁻¹((k − 0.5) / 100)),   k = 1, …, 100
+g_mix(x) ≈ (1/100) Σₖ g(x, σ̃ₖ)
+```
+
+where $\Phi^{-1}$ is the standard normal quantile function (Abramowitz & Stegun rational approximation). The result is a broader, shallower curve compared to the single-$\sigma$ half-normal.
+
+### Pedagogical effect
+
+The MLE fits a *single* $\hat\sigma$ to distances drawn from the mixture distribution. Because the mixture $g_{\rm mix}(x)$ has a wider effective strip than $g(x, \sigma)$, the MLE overestimates $\sigma$: the pink fitted curve will be shifted right relative to the true (mixture) mean curve. This is an instance of the identifiability problem in mixture detection functions.
+
+The magnitude of overestimation grows with $\mathrm{CV}_\sigma$. At $\mathrm{CV}_\sigma = 0.30$ the bias is moderate; at $\mathrm{CV}_\sigma \geq 0.70$ the fitted curve may visibly exceed the mixture curve across the full strip.
+
+---
+
 ## State recording
 
 When a detection fires, `recordDetection(perpDist, boatX)` is called:
@@ -363,14 +412,14 @@ Three panels are drawn by `ds/analytics.js` using D3. They subscribe to state an
 
 ### 1. Detection function chart
 
-- *Blue solid curve*: the field truth detection function $g(x, \sigma_{\rm true})$, drawn with the currently selected field truth function and the true $\sigma$ value.
+- *Blue solid curve*: when Het. σ is off, the field truth detection function $g(x, \sigma_{\rm true})$; when Het. σ is on, the mixture expectation $g_{\rm mix}(x)$ computed from 100 lognormal quantile points (see §Heterogeneous detection scale).
+- *Blue faint dashed curve*: visible only when Het. σ is on; shows the single-$\sigma$ reference $g(x, \sigma)$ so the broadening effect of heterogeneity is apparent.
 - *Pink dashed curve*: the MLE-fitted function $g(x, \hat\sigma)$, drawn with the model function when $\hat\sigma$ is available ($n \geq 3$).
-- *Histogram bars* (light blue, 10 equal bins over $[0, W]$): observed within-W distances. Bar heights are normalised to the $g(x)$ scale using the formula:
+- *Histogram bars* (light blue, 10 equal bins over $[0, W]$): observed within-W distances. Bar heights are normalised to the $g(x)$ scale. When Het. σ is off:
   ```
   scale = n * binWidth / ESW_truth
-  barHeight[i] = binCount[i] / scale
   ```
-  so that a perfect half-normal detection function would make the histogram lie on the true curve.
+  When Het. σ is on, the normalising ESW is the mixture ESW $= \mathbb{E}[\mathrm{ESW}(\sigma_i, W)]$, averaged over the same 100 quantile points.
 - *Ghost fitted curves*: if "Keep previous runs" is checked, past fitted curves are shown as progressively more transparent pink dashed lines (up to 8 past runs retained, oldest most faded).
 - The x-axis domain updates to the current W value; the y-axis domain expands if bar heights exceed 1.1.
 
@@ -426,6 +475,8 @@ These controls change simulation parameters immediately. Analytics are rebuilt f
 | Field truth function | `truthFn` | Changes which $g(x)$ governs future detection draws and the blue truth curve            |
 | Model function       | `modelFn` | Changes which $g(x)$ is fitted by MLE and shown as the pink curve                       |
 | Shape $b$            | `b`       | Affects hazard-rate detection and MLE (only visible when truth or model is hazard-rate) |
+| Het. σ toggle        | `sigmaHet`| Switches between homogeneous and mixture detection curves; redraws analytics immediately |
+| CV_σ slider          | `sigmaCV` | Adjusts mixture spread; per-animal $\sigma_i$ values are fixed at Reset               |
 
 Note: changing `sigma` or `truthFn` live affects future detections for the current run (if still in progress), not past ones that are already stored.
 

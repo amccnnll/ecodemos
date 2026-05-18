@@ -230,6 +230,12 @@ window.Quarto = {
   <li><a href="#half-normal" id="toc-half-normal" class="nav-link" data-scroll-target="#half-normal">Half-normal</a></li>
   <li><a href="#hazard-rate" id="toc-hazard-rate" class="nav-link" data-scroll-target="#hazard-rate">Hazard-rate</a></li>
   </ul></li>
+  <li><a href="#heterogeneous-detection-scale" id="toc-heterogeneous-detection-scale" class="nav-link" data-scroll-target="#heterogeneous-detection-scale">Heterogeneous detection scale</a>
+  <ul class="collapse">
+  <li><a href="#per-animal-sigma-assignment" id="toc-per-animal-sigma-assignment" class="nav-link" data-scroll-target="#per-animal-sigma-assignment">Per-animal sigma assignment</a></li>
+  <li><a href="#mixture-detection-function" id="toc-mixture-detection-function" class="nav-link" data-scroll-target="#mixture-detection-function">Mixture detection function</a></li>
+  <li><a href="#pedagogical-effect" id="toc-pedagogical-effect" class="nav-link" data-scroll-target="#pedagogical-effect">Pedagogical effect</a></li>
+  </ul></li>
   <li><a href="#state-recording" id="toc-state-recording" class="nav-link" data-scroll-target="#state-recording">State recording</a></li>
   <li><a href="#truncation-and-w-post-hoc-filtering" id="toc-truncation-and-w-post-hoc-filtering" class="nav-link" data-scroll-target="#truncation-and-w-post-hoc-filtering">Truncation and W post-hoc filtering</a></li>
   <li><a href="#esw-computation" id="toc-esw-computation" class="nav-link" data-scroll-target="#esw-computation">ESW computation</a>
@@ -347,6 +353,14 @@ window.Quarto = {
 <tr class="odd">
 <td>b (shape)</td>
 <td>Hazard-rate shape parameter. Visible only when hazard-rate is selected. Higher b = wider flat shoulder near the transect before a sharper falloff. Default: 2.5.</td>
+</tr>
+<tr class="even">
+<td>Het. σ</td>
+<td>Toggle: assign each animal its own <span class="math inline">\(\sigma_i\)</span> drawn from <span class="math inline">\(\text{LogNormal}(\sigma, \mathrm{CV}_\sigma)\)</span>. Updates live (mixture curve redrawn immediately); per-animal values are fixed at Reset. Off by default.</td>
+</tr>
+<tr class="odd">
+<td>CV_σ</td>
+<td>Coefficient of variation for <span class="math inline">\(\sigma_i\)</span>. Visible only when Het. σ is checked. Range: 0.05–1.00, step 0.05, default 0.30. Updates live.</td>
 </tr>
 <tr class="even">
 <td>D</td>
@@ -653,6 +667,39 @@ g(x,\sigma,b) = 1 - \exp\!\left[-\left(\frac{\sigma}{x}\right)^b\right]
 <hr>
 </section>
 </section>
+<section id="heterogeneous-detection-scale" class="level2">
+<h2 class="anchored" data-anchor-id="heterogeneous-detection-scale">Heterogeneous detection scale</h2>
+<p>The <strong>Het. σ</strong> toggle activates per-animal detection scales. Each animal <span class="math inline">\(i\)</span> is assigned:</p>
+<p><span class="math display">\[
+\sigma_i \sim \text{LogNormal}\!\left(\log\sigma - \tfrac{\tau^2}{2},\; \tau\right), \qquad \tau = \sqrt{\log(1 + \mathrm{CV}_\sigma^2)}
+\]</span></p>
+<p>The parameterisation ensures <span class="math inline">\(\mathbb{E}[\sigma_i] = \sigma\)</span> regardless of <span class="math inline">\(\mathrm{CV}_\sigma\)</span>: the slider value remains the mean detection scale.</p>
+<section id="per-animal-sigma-assignment" class="level3">
+<h3 class="anchored" data-anchor-id="per-animal-sigma-assignment">Per-animal sigma assignment</h3>
+<p>Sigma values are drawn using the seeded placement RNG immediately after animal positions are assigned. The Box–Muller transform is applied in log-space:</p>
+<pre><code>u1  = placementRng(),   u2 = placementRng()
+z   = sqrt(-2 * log(u1)) * cos(2π * u2)     // standard normal
+σᵢ  = exp(muLog + τ * z)</code></pre>
+<p>where <code>muLog = log(σ) - τ²/2</code>. Per-animal values are fixed for the lifetime of the current population; they change only on Reset.</p>
+</section>
+<section id="mixture-detection-function" class="level3">
+<h3 class="anchored" data-anchor-id="mixture-detection-function">Mixture detection function</h3>
+<p>With heterogeneous <span class="math inline">\(\sigma_i\)</span>, the <em>population-level</em> detection function is a mixture:</p>
+<p><span class="math display">\[
+g_{\rm mix}(x) = \mathbb{E}_{\sigma_i}\bigl[g(x,\sigma_i)\bigr] = \int_0^{\infty} g(x,s)\, p_{\rm LN}(s;\sigma,\mathrm{CV}_\sigma)\, ds
+\]</span></p>
+<p>This integral has no closed form. The analytics panel approximates it using 100 Gauss-quantile points of the lognormal:</p>
+<pre><code>σ̃ₖ  = exp(muLog + τ * Φ⁻¹((k − 0.5) / 100)),   k = 1, …, 100
+g_mix(x) ≈ (1/100) Σₖ g(x, σ̃ₖ)</code></pre>
+<p>where <span class="math inline">\(\Phi^{-1}\)</span> is the standard normal quantile function (Abramowitz &amp; Stegun rational approximation). The result is a broader, shallower curve compared to the single-<span class="math inline">\(\sigma\)</span> half-normal.</p>
+</section>
+<section id="pedagogical-effect" class="level3">
+<h3 class="anchored" data-anchor-id="pedagogical-effect">Pedagogical effect</h3>
+<p>The MLE fits a <em>single</em> <span class="math inline">\(\hat\sigma\)</span> to distances drawn from the mixture distribution. Because the mixture <span class="math inline">\(g_{\rm mix}(x)\)</span> has a wider effective strip than <span class="math inline">\(g(x, \sigma)\)</span>, the MLE overestimates <span class="math inline">\(\sigma\)</span>: the pink fitted curve will be shifted right relative to the true (mixture) mean curve. This is an instance of the identifiability problem in mixture detection functions.</p>
+<p>The magnitude of overestimation grows with <span class="math inline">\(\mathrm{CV}_\sigma\)</span>. At <span class="math inline">\(\mathrm{CV}_\sigma = 0.30\)</span> the bias is moderate; at <span class="math inline">\(\mathrm{CV}_\sigma \geq 0.70\)</span> the fitted curve may visibly exceed the mixture curve across the full strip.</p>
+<hr>
+</section>
+</section>
 <section id="state-recording" class="level2">
 <h2 class="anchored" data-anchor-id="state-recording">State recording</h2>
 <p>When a detection fires, <code>recordDetection(perpDist, boatX)</code> is called:</p>
@@ -672,7 +719,7 @@ state.detectedEfforts[]     // boatX at each detection</code></pre>
 <ol type="1">
 <li><p><em>Hard truncation during detection</em>: <code>tryDetect</code> returns false when <code>perpDist &gt; W</code>. No draw is made; the animal is never recorded.</p></li>
 <li><p><em>Post-hoc filtering in analytics</em>: the analytics layer refilters stored distances on every state change:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>filteredDists <span class="op">=</span> detectedDistances<span class="op">.</span><span class="fu">filter</span>((d) <span class="kw">=&gt;</span> d <span class="op">&lt;=</span> W)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>filteredDists <span class="op">=</span> detectedDistances<span class="op">.</span><span class="fu">filter</span>((d) <span class="kw">=&gt;</span> d <span class="op">&lt;=</span> W)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>This means if <span class="math inline">\(W\)</span> is decreased after some detections have been stored, those beyond-W distances are excluded from the histogram, MLE, and D̂ history, even though they were recorded. If <span class="math inline">\(W\)</span> is increased, detections from earlier in the run that were beyond the old W (but within the new W) will not appear, because they were never recorded in the first place.</p></li>
 </ol>
 <p>The consequence is asymmetric: lowering <span class="math inline">\(W\)</span> live re-analyses with a smaller sample; raising <span class="math inline">\(W\)</span> live has no effect on data already collected.</p>
@@ -737,12 +784,12 @@ state.detectedEfforts[]     // boatX at each detection</code></pre>
 <section id="detection-function-chart" class="level3">
 <h3 class="anchored" data-anchor-id="detection-function-chart">1. Detection function chart</h3>
 <ul>
-<li><p><em>Blue solid curve</em>: the field truth detection function <span class="math inline">\(g(x, \sigma_{\rm true})\)</span>, drawn with the currently selected field truth function and the true <span class="math inline">\(\sigma\)</span> value.</p></li>
+<li><p><em>Blue solid curve</em>: when Het. σ is off, the field truth detection function <span class="math inline">\(g(x, \sigma_{\rm true})\)</span>; when Het. σ is on, the mixture expectation <span class="math inline">\(g_{\rm mix}(x)\)</span> computed from 100 lognormal quantile points (see §Heterogeneous detection scale).</p></li>
+<li><p><em>Blue faint dashed curve</em>: visible only when Het. σ is on; shows the single-<span class="math inline">\(\sigma\)</span> reference <span class="math inline">\(g(x, \sigma)\)</span> so the broadening effect of heterogeneity is apparent.</p></li>
 <li><p><em>Pink dashed curve</em>: the MLE-fitted function <span class="math inline">\(g(x, \hat\sigma)\)</span>, drawn with the model function when <span class="math inline">\(\hat\sigma\)</span> is available (<span class="math inline">\(n \geq 3\)</span>).</p></li>
-<li><p><em>Histogram bars</em> (light blue, 10 equal bins over <span class="math inline">\([0, W]\)</span>): observed within-W distances. Bar heights are normalised to the <span class="math inline">\(g(x)\)</span> scale using the formula:</p>
-<pre><code>scale = n * binWidth / ESW_truth
-barHeight[i] = binCount[i] / scale</code></pre>
-<p>so that a perfect half-normal detection function would make the histogram lie on the true curve.</p></li>
+<li><p><em>Histogram bars</em> (light blue, 10 equal bins over <span class="math inline">\([0, W]\)</span>): observed within-W distances. Bar heights are normalised to the <span class="math inline">\(g(x)\)</span> scale. When Het. σ is off:</p>
+<pre><code>scale = n * binWidth / ESW_truth</code></pre>
+<p>When Het. σ is on, the normalising ESW is the mixture ESW <span class="math inline">\(= \mathbb{E}[\mathrm{ESW}(\sigma_i, W)]\)</span>, averaged over the same 100 quantile points.</p></li>
 <li><p><em>Ghost fitted curves</em>: if “Keep previous runs” is checked, past fitted curves are shown as progressively more transparent pink dashed lines (up to 8 past runs retained, oldest most faded).</p></li>
 <li><p>The x-axis domain updates to the current W value; the y-axis domain expands if bar heights exceed 1.1.</p></li>
 </ul>
@@ -860,6 +907,16 @@ barHeight[i] = binCount[i] / scale</code></pre>
 <td>Shape <span class="math inline">\(b\)</span></td>
 <td><code>b</code></td>
 <td>Affects hazard-rate detection and MLE (only visible when truth or model is hazard-rate)</td>
+</tr>
+<tr class="even">
+<td>Het. σ toggle</td>
+<td><code>sigmaHet</code></td>
+<td>Switches between homogeneous and mixture detection curves; redraws analytics immediately</td>
+</tr>
+<tr class="odd">
+<td>CV_σ slider</td>
+<td><code>sigmaCV</code></td>
+<td>Adjusts mixture spread; per-animal <span class="math inline">\(\sigma_i\)</span> values are fixed at Reset</td>
 </tr>
 </tbody>
 </table>
