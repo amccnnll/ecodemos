@@ -80,3 +80,16 @@ export function tryDetect(animal, boatX, boatSpeed, transectY, sigma, W, rng, de
     : halfNormal(perpDist, sigma);
   return rng() < p;
 }
+
+// Draw a single sigma_i from LogNormal(mean=mu, CV=cv) using one rng() call pair.
+// Used to assign per-animal detection scales when heterogeneous sigma is active.
+// The parameterisation ensures E[sigma_i] = mu regardless of cv.
+export function drawLognormal(mu, cv, rng) {
+  const tau    = Math.sqrt(Math.log(1 + cv * cv));  // log-SD
+  const muLog  = Math.log(mu) - tau * tau / 2;      // log-mean (bias correction)
+  // Box-Muller normal variate
+  const u1 = Math.max(rng(), 1e-10);
+  const u2 = rng();
+  const z  = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  return Math.exp(muLog + tau * z);
+}

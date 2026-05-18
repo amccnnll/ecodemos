@@ -14,6 +14,30 @@ import { halfNormal, hazardRate, computeESW, computeESW_HR, estimateDensity, fit
 
 const M = { top: 18, right: 18, bottom: 42, left: 50 }; // shared chart margins
 
+// Standard normal quantile (Abramowitz & Stegun rational approximation, max err ~5e-4).
+// Used to evaluate the lognormal mixture g(x) via quantile averaging.
+function normQuantile(p) {
+  if (p <= 0) return -Infinity;
+  if (p >= 1) return  Infinity;
+  const t = p < 0.5
+    ? Math.sqrt(-2 * Math.log(p))
+    : Math.sqrt(-2 * Math.log(1 - p));
+  const a = [2.515517, 0.802853, 0.010328];
+  const b = [1.432788, 0.189269, 0.001308];
+  const z = t - (a[0] + a[1]*t + a[2]*t*t) / (1 + b[0]*t + b[1]*t*t + b[2]*t*t*t);
+  return p < 0.5 ? -z : z;
+}
+
+// Pre-compute 100 lognormal quantile values for a given (mu, cv) pair.
+// Reused across all x-points in the mixture curve computation.
+function lognormalQuantiles(mu, cv, n = 100) {
+  const tau    = Math.sqrt(Math.log(1 + cv * cv));
+  const muLog  = Math.log(mu) - tau * tau / 2;
+  return Array.from({ length: n }, (_, i) =>
+    Math.exp(muLog + tau * normQuantile((i + 0.5) / n))
+  );
+}
+
 // ─── Initialise all panels ───────────────────────────────────────────────────
 
 export function initAnalytics() {
@@ -29,8 +53,8 @@ export function initAnalytics() {
   document.getElementById('btn-clear-ghosts')?.addEventListener('click', () => {
     ghosts = [];
     if (lastRender) {
-      const { filteredDists, sigma, W, sigmaHat, dhatHistory, trueD, truthFn, modelFn, b } = lastRender;
-      updateDetFn(filteredDists, sigma, W, sigmaHat, [], truthFn, modelFn, b);
+      const { filteredDists, sigma, W, sigmaHat, dhatHistory, trueD, truthFn, modelFn, b, sigmaHet, sigmaCV } = lastRender;
+      updateDetFn(filteredDists, sigma, W, sigmaHat, [], truthFn, modelFn, b, sigmaHet, sigmaCV);
       updateDhat(dhatHistory, trueD, []);
     }
   });
@@ -73,9 +97,10 @@ export function initAnalytics() {
     prevGhostData = { sigmaHat, trueD: s.trueD, modelFn: s.modelFn, b: s.b };
     lastRender    = { filteredDists: [...filteredDists], sigma: s.sigma, W: s.W,
                       sigmaHat, dhatHistory: [...s.dhatHistory], trueD: s.trueD,
-                      truthFn: s.truthFn, modelFn: s.modelFn, b: s.b };
+                      truthFn: s.truthFn, modelFn: s.modelFn, b: s.b,
+                      sigmaHet: s.sigmaHet, sigmaCV: s.sigmaCV };
 
-    updateDetFn(filteredDists, s.sigma, s.W, sigmaHat, ghosts, s.truthFn, s.modelFn, s.b);
+    updateDetFn(filteredDists, s.sigma, s.W, sigmaHat, ghosts, s.truthFn, s.modelFn, s.b, s.sigmaHet, s.sigmaCV);
     updateEstimates(n, s.transectLength, esw, dhat, s.trueD, sigmaHat, s.sigma);
     updateDhat(s.dhatHistory, s.trueD, ghosts);
   });
@@ -118,6 +143,11 @@ function initDetectionFnChart(containerId) {
 
   const lineGen = d3.line().x(d => xScale(d.x)).y(d => yScale(d.y)).curve(d3.curveBasis);
 
+  // Mixture envelope path (shown when sigmaHet is active, drawn behind theoretical curve)
+  const mixturePath = g.append('path')
+    .attr('fill', 'none').attr('stroke', '#2255cc').attr('stroke-width', 1.5)
+    .attr('stroke-dasharray', '4 3').attr('opacity', 0);
+
   // Theoretical curve — solid blue
   const curvePath = g.append('path')
     .attr('fill', 'none').attr('stroke', '#2255cc').attr('stroke-width', 2);
@@ -132,14 +162,29 @@ function initDetectionFnChart(containerId) {
     .attr('x1', iW).attr('x2', iW).attr('y1', 0).attr('y2', iH)
     .attr('stroke', '#ccc').attr('stroke-width', 1).attr('stroke-dasharray', '4 3');
 
-  function update(distances, sigma, W, sigmaHat, ghosts = [], truthFn = 'halfNormal', modelFn = 'halfNormal', b = 2.5) {
+  function update(distances, sigma, W, sigmaHat, ghosts = [], truthFn = 'halfNormal', modelFn = 'halfNormal', b = 2.5, sigmaHet = false, sigmaCV = 0.30) {
     xScale.domain([0, W]);
     xAxis.call(d3.axisBottom(xScale).ticks(5).tickFormat(d => `${d.toFixed(2)}`));
 
     const evalFn = (fn, x, s) => fn === 'hazardRate' ? hazardRate(x, s, b) : halfNormal(x, s);
     const pts    = d3.range(0, W * 1.001, W / 120);
 
-    // Ghost fitted curves — draw using the model fn active at time of that run
+    // When sigmaHet is on: swap the solid theoretical curve for the mixture g(x),
+    // and show the single-sigma g(x) as a faint dashed reference.
+    if (sigmaHet && sigmaCV > 0) {
+      const sigmas = lognormalQuantiles(sigma, sigmaCV);
+      // Mixture mean curve (solid blue)
+      curvePath.datum(pts.map(x => ({
+        x,
+        y: sigmas.reduce((sum, si) => sum + evalFn(truthFn, x, si), 0) / sigmas.length,
+      }))).attr('d', lineGen);
+      // Single-sigma reference (faint dashed)
+      mixturePath.datum(pts.map(x => ({ x, y: evalFn(truthFn, x, sigma) })))
+        .attr('d', lineGen).attr('opacity', 0.35);
+    } else {
+      curvePath.datum(pts.map(x => ({ x, y: evalFn(truthFn, x, sigma) }))).attr('d', lineGen);
+      mixturePath.attr('opacity', 0);
+    }
     const ghostsWithFit = ghosts.filter(g => g.sigmaHat != null);
     const nGF = ghostsWithFit.length;
     ghostCurvesG.selectAll('path')
@@ -154,9 +199,6 @@ function initDetectionFnChart(containerId) {
         pts.map(x => ({ x, y: d.modelFn === 'hazardRate' ? hazardRate(x, d.sigmaHat, d.b ?? 2.5) : halfNormal(x, d.sigmaHat) }))
       ));
 
-    // Theoretical curve — drawn with field truth function
-    curvePath.datum(pts.map(x => ({ x, y: evalFn(truthFn, x, sigma) }))).attr('d', lineGen);
-
     // MLE fitted curve — drawn with model function
     if (sigmaHat != null) {
       fittedCurvePath
@@ -170,8 +212,17 @@ function initDetectionFnChart(containerId) {
 
     const n        = distances.length;
     const binWidth = W / 10;
-    // Normalise bars against truth-function ESW so they sit on the g(x) scale
-    const eswNorm  = truthFn === 'hazardRate' ? computeESW_HR(sigma, b, W) : computeESW(sigma, W);
+    // Normalise bars against truth-function ESW so they sit on the g(x) scale.
+    // When sigmaHet is on, use the mixture ESW = E[ESW(sigma_i)].
+    let eswNorm;
+    if (sigmaHet && sigmaCV > 0) {
+      const sigmas = lognormalQuantiles(sigma, sigmaCV);
+      eswNorm = sigmas.reduce((sum, si) =>
+        sum + (truthFn === 'hazardRate' ? computeESW_HR(si, b, W) : computeESW(si, W)), 0
+      ) / sigmas.length;
+    } else {
+      eswNorm = truthFn === 'hazardRate' ? computeESW_HR(sigma, b, W) : computeESW(sigma, W);
+    }
     const scale    = n * binWidth / eswNorm;
 
     const bins = d3.histogram()
@@ -193,7 +244,7 @@ function initDetectionFnChart(containerId) {
       .attr('fill', '#7aaee8').attr('opacity', 0.55);
   }
 
-  update([], state.sigma, state.W, null, [], state.truthFn, state.modelFn, state.b);
+  update([], state.sigma, state.W, null, [], state.truthFn, state.modelFn, state.b, state.sigmaHet, state.sigmaCV);
   return update;
 }
 

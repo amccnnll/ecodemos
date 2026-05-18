@@ -21,16 +21,20 @@ export const state = {
   truthFn:            'halfNormal', // 'halfNormal' | 'hazardRate' — governs actual detections
   modelFn:            'halfNormal', // 'halfNormal' | 'hazardRate' — governs MLE + ESW
   b:                  2.5,         // hazard-rate shape parameter (used when either fn = hazardRate)
+  sigmaHet:           false,       // per-animal sigma heterogeneity toggle
+  sigmaCV:            0.30,        // coefficient of variation for sigma_i ~ LogNormal
 };
 
 const _listeners = new Set();
 
 // Called by sketch.js when the simulation resets
-export function resetState({ sigma, W, transectLength, trueD }) {
+export function resetState({ sigma, W, transectLength, trueD, sigmaHet, sigmaCV }) {
   state.sigma          = sigma;
   state.W              = W;
   state.transectLength = transectLength;
   state.trueD          = trueD;
+  if (sigmaHet !== undefined) state.sigmaHet = sigmaHet;
+  if (sigmaCV  !== undefined) state.sigmaCV  = sigmaCV;
   state.detectedDistances = [];
   state.detectedEfforts   = [];
   state.dhatHistory       = [];
@@ -46,12 +50,14 @@ export function recordDetection(perpDistKm, effortKm) {
 }
 
 // Called by sketch.js when parameters change live (without a full population reset)
-export function updateParams({ sigma, W, truthFn, modelFn, b } = {}) {
-  if (sigma   !== undefined) state.sigma   = sigma;
-  if (W       !== undefined) state.W       = W;
-  if (truthFn !== undefined) state.truthFn = truthFn;
-  if (modelFn !== undefined) state.modelFn = modelFn;
-  if (b       !== undefined) state.b       = b;
+export function updateParams({ sigma, W, truthFn, modelFn, b, sigmaHet, sigmaCV } = {}) {
+  if (sigma    !== undefined) state.sigma    = sigma;
+  if (W        !== undefined) state.W        = W;
+  if (truthFn  !== undefined) state.truthFn  = truthFn;
+  if (modelFn  !== undefined) state.modelFn  = modelFn;
+  if (b        !== undefined) state.b        = b;
+  if (sigmaHet !== undefined) state.sigmaHet = sigmaHet;
+  if (sigmaCV  !== undefined) state.sigmaCV  = sigmaCV;
   _notify();
 }
 

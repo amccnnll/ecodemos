@@ -8,7 +8,7 @@
  */
 
 import { createRng } from '../src/rng.js';
-import { placeAnimals, placeAnimalsClumped, placeAnimalsRegular, tryDetect } from '../src/ds-engine.js';
+import { placeAnimals, placeAnimalsClumped, placeAnimalsRegular, tryDetect, drawLognormal } from '../src/ds-engine.js';
 import { resetState, recordDetection, updateParams, state } from './state.js';
 
 // --- Config constants ---
@@ -31,6 +31,8 @@ let b            = 2.5;
 let distribution = 'uniform';
 let clumpScale   = 0.10;
 let regularity   = 0.50;
+let sigmaHet     = false;
+let sigmaCV      = 0.30;
 
 new p5(function (p) {
 
@@ -87,6 +89,9 @@ new p5(function (p) {
     regularity   = parseFloat(document.getElementById('slider-regularity')?.value)  || 0.50;
     const density = parseFloat(document.getElementById('slider-density')?.value)    || DENSITY;
 
+    sigmaHet     = document.getElementById('checkbox-sigma-het')?.checked ?? false;
+    sigmaCV      = parseFloat(document.getElementById('slider-sigma-cv')?.value) || 0.30;
+
     // Recalculate scale — depends on transect length
     PX_PER_KM = p.width / arenaWKm;
     arenaH    = p.height / PX_PER_KM;
@@ -108,8 +113,15 @@ new p5(function (p) {
       animals = placeAnimals(areaN, arenaWKm, arenaH, placementRng);
     }
 
+    // Assign per-animal detection scale when heterogeneous sigma is on
+    if (sigmaHet) {
+      for (const animal of animals) {
+        animal.sigmaI = drawLognormal(sigma, sigmaCV, placementRng);
+      }
+    }
+
     const trueD = areaN / (arenaWKm * arenaH);
-    resetState({ sigma, W, transectLength: arenaWKm, trueD });
+    resetState({ sigma, W, transectLength: arenaWKm, trueD, sigmaHet, sigmaCV });
 
     syncPlayBtn();
   }
@@ -324,8 +336,9 @@ new p5(function (p) {
   function detectAnimals() {
     const speed = BOAT_SPEEDS[state.speed] || BOAT_SPEEDS.normal;
     for (const animal of animals) {
-      const perpDist = Math.abs(animal.y - arenaH / 2);
-      if (tryDetect(animal, boatX, speed, arenaH / 2, sigma, W, detectionRng, truthFn, b)) {
+      const perpDist     = Math.abs(animal.y - arenaH / 2);
+      const effectiveSig = sigmaHet ? (animal.sigmaI ?? sigma) : sigma;
+      if (tryDetect(animal, boatX, speed, arenaH / 2, effectiveSig, W, detectionRng, truthFn, b)) {
         animal.detected = true;
         flashes.push({
           animalPx: animal.x * PX_PER_KM,
@@ -427,6 +440,26 @@ document.getElementById('slider-regularity').addEventListener('input', (e) => {
   regularity = parseFloat(e.target.value);
   document.getElementById('val-regularity').textContent = regularity.toFixed(2);
 });
+
+// Heterogeneous sigma toggle and CV slider — update live (analytics re-renders);
+// per-animal sigmaI values only change on Reset.
+function syncSigmaHetControls() {
+  const row  = document.getElementById('row-sigma-cv');
+  const hint = document.getElementById('hint-sigma-cv');
+  if (row)  row.style.display  = sigmaHet ? 'flex'  : 'none';
+  if (hint) hint.style.display = sigmaHet ? 'block' : 'none';
+}
+document.getElementById('checkbox-sigma-het').addEventListener('change', (e) => {
+  sigmaHet = e.target.checked;
+  syncSigmaHetControls();
+  updateParams({ sigmaHet, sigmaCV });
+});
+document.getElementById('slider-sigma-cv').addEventListener('input', (e) => {
+  sigmaCV = parseFloat(e.target.value);
+  document.getElementById('val-sigma-cv').textContent = sigmaCV.toFixed(2);
+  updateParams({ sigmaCV });
+});
+syncSigmaHetControls(); // initial state
 
 // Presets — set sliders to a named scenario and reset
 const DS_PRESETS = {
